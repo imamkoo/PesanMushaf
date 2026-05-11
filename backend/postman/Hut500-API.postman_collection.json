@@ -1,0 +1,344 @@
+{
+  "info": {
+    "_postman_id": "9a9965d8-14df-4fd5-8bb6-bf304113f741",
+    "name": "Hut500 API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection untuk endpoint API Hut500."
+  },
+  "item": [
+    {
+      "name": "Master Data",
+      "item": [
+        {
+          "name": "Get Districts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/districts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "districts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get District Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/districts/{{district_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "districts",
+                "{{district_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Universities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/universities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "universities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get University Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/universities/{{university_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "universities",
+                "{{university_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Batches",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/batches?district_id={{district_id}}&education_level={{education_level}}&only_available=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "batches"
+              ],
+              "query": [
+                {
+                  "key": "district_id",
+                  "value": "{{district_id}}"
+                },
+                {
+                  "key": "education_level",
+                  "value": "{{education_level}}"
+                },
+                {
+                  "key": "only_available",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Batch Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/batches/{{batch_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "batches",
+                "{{batch_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Registration",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"district_id\": {{district_id}},\n  \"education_level\": \"{{education_level}}\",\n  \"edition\": \"{{edition}}\",\n  \"name\": \"{{registrant_name}}\",\n  \"phone_number\": \"{{phone_number}}\",\n  \"school_name\": \"{{school_name}}\",\n  \"email\": \"{{email}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "if (jsonData?.data?.registration_code) {",
+                  "  pm.collectionVariables.set('registration_code', jsonData.data.registration_code);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Check Registration Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{api_key}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/registrations/{{registration_code}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "registrations",
+                "{{registration_code}}",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "api_key",
+      "value": "test-api-key"
+    },
+    {
+      "key": "district_id",
+      "value": "1"
+    },
+    {
+      "key": "university_id",
+      "value": "1"
+    },
+    {
+      "key": "batch_id",
+      "value": "1"
+    },
+    {
+      "key": "education_level",
+      "value": "SMP"
+    },
+    {
+      "key": "edition",
+      "value": "reguler"
+    },
+    {
+      "key": "registrant_name",
+      "value": "Ahmad Fauzi"
+    },
+    {
+      "key": "phone_number",
+      "value": "081234567890"
+    },
+    {
+      "key": "school_name",
+      "value": "SMPN 5 Jakarta"
+    },
+    {
+      "key": "email",
+      "value": "ahmad@example.com"
+    },
+    {
+      "key": "registration_code",
+      "value": "replace-after-register"
+    }
+  ]
+}
