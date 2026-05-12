@@ -12,6 +12,8 @@ class Registration extends Model
 {
     use HasFactory, SoftDeletes;
 
+    private ?int $originalBatchIdBeforeSave = null;
+
     /**
      * @return array<string, string>
      */
@@ -37,8 +39,8 @@ class Registration extends Model
         'school_name',
         'school_name_normalized',
         'exclude_from_school_suggestions',
-        'registration_code', 
-        'page_number', 
+        'registration_code',
+        'page_number',
         'base_price',
         'total_payment',
         'payment_status',
@@ -53,16 +55,74 @@ class Registration extends Model
                 $registration->school_name_normalized = SchoolNameNormalizer::normalize($registration->school_name);
             }
         });
+
+        static::updating(function (self $registration): void {
+            if ($registration->isDirty('batch_id')) {
+                $registration->originalBatchIdBeforeSave = $registration->getOriginal('batch_id');
+            }
+        });
+
+        static::saved(function (self $registration): void {
+            $registration->syncTouchedBatchFullness();
+        });
+
+        static::deleted(function (self $registration): void {
+            $registration->syncCurrentBatchFullness();
+        });
+
+        static::restored(function (self $registration): void {
+            $registration->syncCurrentBatchFullness();
+        });
+
+        static::forceDeleted(function (self $registration): void {
+            $registration->syncCurrentBatchFullness();
+        });
     }
 
     public function batch(): BelongsTo
     {
         return $this->belongsTo(Batch::class);
     }
-    
+
     // Jika Anda ingin memastikan district juga terhubung
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class);
+    }
+
+    private function syncTouchedBatchFullness(): void
+    {
+        $batchIds = collect([
+            $this->batch_id,
+            $this->originalBatchIdBeforeSave,
+        ])
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($batchIds->isEmpty()) {
+            $this->originalBatchIdBeforeSave = null;
+
+            return;
+        }
+
+        Batch::query()
+            ->whereIn('id', $batchIds)
+            ->get()
+            ->each(fn (Batch $batch) => $batch->syncFullness());
+
+        $this->originalBatchIdBeforeSave = null;
+    }
+
+    private function syncCurrentBatchFullness(): void
+    {
+        if ($this->batch_id === null) {
+            return;
+        }
+
+        Batch::query()
+            ->whereKey($this->batch_id)
+            ->get()
+            ->each(fn (Batch $batch) => $batch->syncFullness());
     }
 }

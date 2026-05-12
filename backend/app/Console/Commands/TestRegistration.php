@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Services\RegistrationService;
 use App\Models\Batch;
+use App\Services\RegistrationService;
+use Illuminate\Console\Command;
 
 class TestRegistration extends Command
 {
@@ -16,12 +16,13 @@ class TestRegistration extends Command
     public function handle(RegistrationService $service)
     {
         $this->info('Mencari data Batch yang tersedia...');
-        
-        // Cari batch pertama yang belum penuh
-        $batch = Batch::where('is_full', false)->first();
 
-        if (!$batch) {
+        // Cari batch pertama yang belum penuh
+        $batch = Batch::query()->whereFullByOccupancy(false)->first();
+
+        if (! $batch) {
             $this->error('Gagal: Anda belum membuat Batch di Dashboard, atau semua Batch sudah penuh!');
+
             return;
         }
 
@@ -54,9 +55,9 @@ class TestRegistration extends Command
 
         // Tampilkan hasil di terminal
         if ($result['status'] === 'success') {
-            $this->info('SUKSES: ' . $result['message']);
+            $this->info('SUKSES: '.$result['message']);
         } else {
-            $this->error('GAGAL: ' . $result['message']);
+            $this->error('GAGAL: '.$result['message']);
         }
     }
 }

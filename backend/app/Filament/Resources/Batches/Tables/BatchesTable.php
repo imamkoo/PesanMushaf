@@ -24,7 +24,7 @@ class BatchesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->withCount('registrations'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->withActiveRegistrationsCount())
             ->defaultSort('batch_number', 'asc')
             ->columns([
                 TextColumn::make('batch_number')
@@ -86,6 +86,7 @@ class BatchesTable
                     }),
                 IconColumn::make('is_full')
                     ->label('Penuh')
+                    ->state(fn (Batch $record): bool => $record->isFullByOccupancy((int) ($record->registrations_count ?? 0)))
                     ->boolean()
                     ->trueIcon('heroicon-o-lock-closed')
                     ->falseIcon('heroicon-o-lock-open')
@@ -126,7 +127,12 @@ class BatchesTable
                     ->label('Status Kuota')
                     ->placeholder('Semua')
                     ->trueLabel('Sudah penuh')
-                    ->falseLabel('Masih terbuka'),
+                    ->falseLabel('Masih terbuka')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereFullByOccupancy(true),
+                        false: fn (Builder $query): Builder => $query->whereFullByOccupancy(false),
+                        blank: fn (Builder $query): Builder => $query,
+                    ),
                 Filter::make('vip_global')
                     ->label('VIP Jakarta (global)')
                     ->query(fn (Builder $query): Builder => $query->whereNull('district_id')->whereNull('education_level'))

@@ -9,8 +9,8 @@ use App\Models\Registration;
 use App\Services\RegistrationService;
 use App\Support\IndonesianPhone;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -29,21 +29,22 @@ class RegistrationController extends Controller
         $requiresPersonalDocs = $request->input('education_level') === 'UMUM';
 
         $validator = Validator::make($request->all(), [
-            'district_id'     => 'required|exists:districts,id',
+            'district_id' => 'required|exists:districts,id',
             'education_level' => 'required|in:SD,SMP,SMA,UMUM',
-            'edition'         => ['required', 'string', 'max:32', Rule::exists('price_categories', 'slug')->where('is_active', true)],
-            'name'            => 'required|string|max:255',
-            'phone_number'    => 'required|string|max:20',
-            'school_name'     => 'required|string|max:255',
-            'email'           => 'nullable|email|max:255',
-            'nik'             => [$requiresPersonalDocs ? 'required' : 'nullable', 'string', 'digits:16'],
-            'address'         => [$requiresPersonalDocs ? 'required' : 'nullable', 'string', 'max:500'],
+            'edition' => ['required', 'string', 'max:32', Rule::exists('price_categories', 'slug')->where('is_active', true)],
+            'university_id' => ['nullable', 'integer', Rule::exists('universities', 'id')],
+            'name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'school_name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'nik' => [$requiresPersonalDocs ? 'required' : 'nullable', 'string', 'digits:16'],
+            'address' => [$requiresPersonalDocs ? 'required' : 'nullable', 'string', 'max:500'],
             'exclude_from_school_suggestions' => 'sometimes|boolean',
         ], [
-            'nik.required'  => 'NIK wajib diisi untuk peserta jenjang UMUM.',
-            'nik.digits'    => 'NIK harus 16 digit angka sesuai KTP.',
+            'nik.required' => 'NIK wajib diisi untuk peserta jenjang UMUM.',
+            'nik.digits' => 'NIK harus 16 digit angka sesuai KTP.',
             'address.required' => 'Alamat wajib diisi untuk peserta jenjang UMUM.',
-            'address.max'   => 'Alamat maksimal 500 karakter.',
+            'address.max' => 'Alamat maksimal 500 karakter.',
         ]);
 
         // Jika validasi gagal, kirim pesan error yang detail
@@ -51,7 +52,7 @@ class RegistrationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Data pendaftaran tidak valid.',
-                'errors'  => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -68,7 +69,7 @@ class RegistrationController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Pendaftaran berhasil disimpan ke Mushaf!',
-                'data'    => RegistrationResource::make($registration),
+                'data' => RegistrationResource::make($registration),
             ], 201);
 
         } catch (\InvalidArgumentException $e) {

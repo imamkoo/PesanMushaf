@@ -91,10 +91,8 @@ class RegistrationService
                 'payment_status' => 'pending',
             ]);
 
-            // 7. Tutup batch jika kapasitas tercapai
-            if ($pageNumber >= self::BATCH_CAPACITY) {
-                $batch->update(['is_full' => true]);
-            }
+            // 7. Sinkronkan flag penuh dengan okupansi aktif batch.
+            $batch->syncFullness($pageNumber);
 
             return $registration;
         });
@@ -107,7 +105,7 @@ class RegistrationService
     private static function resolveVipGlobalBatch(): Batch
     {
         $batch = Batch::query()
-            ->where('is_full', false)
+            ->whereFullByOccupancy(false)
             ->where('name', 'like', 'Mushaf VIP Jakarta%')
             ->orderBy('id')
             ->lockForUpdate()
@@ -146,7 +144,7 @@ class RegistrationService
         $kotaCode = substr((string) $registrantDistrict->code, 0, 4);
 
         $baseQuery = fn () => Batch::query()
-            ->where('is_full', false)
+            ->whereFullByOccupancy(false)
             ->where('education_level', $level)
             ->where('name', 'not like', '%(GOR)%');
 

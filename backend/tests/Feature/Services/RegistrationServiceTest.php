@@ -23,6 +23,39 @@ function makeNikDigits(): string
     return $nik;
 }
 
+function fillBatchWithRegistrations(
+    Batch $batch,
+    District $district,
+    int $count,
+    string $level,
+    string $edition,
+    string $schoolName,
+): void {
+    $rows = [];
+    $now = now();
+
+    for ($i = 0; $i < $count; $i++) {
+        $rows[] = [
+            'batch_id' => $batch->id,
+            'district_id' => $district->id,
+            'education_level' => $level,
+            'name' => 'Filler '.$i,
+            'phone_number' => '628400000'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+            'edition' => $edition,
+            'school_name' => $schoolName,
+            'registration_code' => 'FILL-'.$batch->id.'-'.$i.'-'.random_int(1000, 9999),
+            'page_number' => $i + 1,
+            'base_price' => 10000,
+            'total_payment' => 10000,
+            'payment_status' => 'pending',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
+    }
+
+    Registration::query()->insert($rows);
+}
+
 it('places same-school Reguler registrations in the same batch', function () {
     $district = makeServiceDistrict('Cilandak', '3171030');
 
@@ -164,11 +197,11 @@ it('marks the batch as full once capacity is reached', function () {
             'batch_id' => $batchId,
             'district_id' => $district->id,
             'education_level' => 'SMP',
-            'name' => 'Filler ' . $i,
-            'phone_number' => '628400000' . str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+            'name' => 'Filler '.$i,
+            'phone_number' => '628400000'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
             'edition' => 'reguler',
             'school_name' => 'SMPN 1 Cilandak',
-            'registration_code' => 'FILL-' . $i . '-' . random_int(1000, 9999),
+            'registration_code' => 'FILL-'.$i.'-'.random_int(1000, 9999),
             'page_number' => 2 + $i,
             'base_price' => 10000,
             'total_payment' => 10000,
@@ -192,4 +225,35 @@ it('marks the batch as full once capacity is reached', function () {
     expect($closer->batch_id)->toBe($batchId)
         ->and($closer->page_number)->toBe(RegistrationService::BATCH_CAPACITY)
         ->and(Batch::find($batchId)->is_full)->toBeTrue();
+});
+
+it('syncs batch fullness when a registration is deleted and restored', function () {
+    $district = makeServiceDistrict('Cilandak', '3171030');
+
+    $batch = Batch::query()->create([
+        'name' => 'Mushaf Reguler SMP Cilandak 1',
+        'district_id' => $district->id,
+        'batch_number' => '1',
+        'education_level' => 'SMP',
+        'max_capacity' => RegistrationService::BATCH_CAPACITY,
+        'is_full' => true,
+    ]);
+
+    fillBatchWithRegistrations(
+        batch: $batch,
+        district: $district,
+        count: RegistrationService::BATCH_CAPACITY,
+        level: 'SMP',
+        edition: 'reguler',
+        schoolName: 'SMPN 1 Cilandak',
+    );
+
+    $registration = Registration::query()->where('batch_id', $batch->id)->firstOrFail();
+    $registration->delete();
+
+    expect($batch->fresh()->is_full)->toBeFalse();
+
+    $registration->restore();
+
+    expect($batch->fresh()->is_full)->toBeTrue();
 });

@@ -33,7 +33,7 @@ function postReg(District $district, string $level, string $school, ?string $pho
         'education_level' => $level,
         'edition' => 'reguler',
         'name' => 'Tester Reg',
-        'phone_number' => $phone ?? '628' . random_int(1_000_000_000, 9_999_999_999),
+        'phone_number' => $phone ?? '628'.random_int(1_000_000_000, 9_999_999_999),
         'school_name' => $school,
     ], $extra);
 
@@ -47,7 +47,7 @@ function postVipWithDocs(District $district, string $level, ?string $phone = nul
         'education_level' => $level,
         'edition' => 'vip',
         'name' => 'Tester VIP',
-        'phone_number' => $phone ?? '628' . random_int(1_000_000_000, 9_999_999_999),
+        'phone_number' => $phone ?? '628'.random_int(1_000_000_000, 9_999_999_999),
         'school_name' => 'X-Inst',
     ];
 
@@ -59,6 +59,45 @@ function postVipWithDocs(District $district, string $level, ?string $phone = nul
     }
 
     return test()->postJson('/api/register', array_merge($base, $extra));
+}
+
+function fillBatchToOneRemaining(
+    Batch $batch,
+    District $district,
+    string $level,
+    string $edition,
+    string $schoolName,
+): void {
+    $existing = Registration::query()->where('batch_id', $batch->id)->count();
+    $needed = RegistrationService::BATCH_CAPACITY - 1 - $existing;
+
+    if ($needed <= 0) {
+        return;
+    }
+
+    $rows = [];
+    $now = now();
+
+    for ($i = 0; $i < $needed; $i++) {
+        $rows[] = [
+            'batch_id' => $batch->id,
+            'district_id' => $district->id,
+            'education_level' => $level,
+            'name' => 'PreFill '.$batch->id.'-'.$i,
+            'phone_number' => '628200000'.str_pad((string) ($batch->id * 1000 + $i), 5, '0', STR_PAD_LEFT),
+            'edition' => $edition,
+            'school_name' => $schoolName,
+            'registration_code' => 'PREFILL-'.$batch->id.'-'.Str::random(10).'-'.$i,
+            'page_number' => $existing + 1 + $i,
+            'base_price' => $edition === 'vip' ? 20000 : 10000,
+            'total_payment' => $edition === 'vip' ? 20000 : 10000,
+            'payment_status' => 'pending',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
+    }
+
+    Registration::query()->insert($rows);
 }
 
 it('allows the public status endpoint without an api key', function () {
@@ -610,11 +649,11 @@ it('rolls over to a new Reguler batch when capacity is reached', function () {
                 'batch_id' => $batchId,
                 'district_id' => $district->id,
                 'education_level' => 'SMP',
-                'name' => 'PreFill ' . $i,
-                'phone_number' => '628200000' . str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'name' => 'PreFill '.$i,
+                'phone_number' => '628200000'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
                 'edition' => 'reguler',
                 'school_name' => 'SMPN 1 Cilandak',
-                'registration_code' => 'PREFILL-' . Str::random(10) . '-' . $i,
+                'registration_code' => 'PREFILL-'.Str::random(10).'-'.$i,
                 'page_number' => $existing + 1 + $i,
                 'base_price' => 10000,
                 'total_payment' => 10000,
@@ -654,11 +693,11 @@ it('rolls over to a new global VIP batch when capacity is reached', function () 
             'batch_id' => $batchId,
             'district_id' => $district->id,
             'education_level' => 'SMA',
-            'name' => 'VIP Filler ' . $i,
-            'phone_number' => '628300000' . str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+            'name' => 'VIP Filler '.$i,
+            'phone_number' => '628300000'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
             'edition' => 'vip',
             'school_name' => 'X',
-            'registration_code' => 'VIPFILL-' . Str::random(10) . '-' . $i,
+            'registration_code' => 'VIPFILL-'.Str::random(10).'-'.$i,
             'page_number' => 2 + $i,
             'base_price' => 20000,
             'total_payment' => 20000,
@@ -676,4 +715,99 @@ it('rolls over to a new global VIP batch when capacity is reached', function () 
     expect($next->json('data.batch.id'))->not->toBe($batchId)
         ->and($next->json('data.batch.name'))->toStartWith('Mushaf VIP Jakarta')
         ->and($next->json('data.batch.batch_number'))->toBe('V2');
+});
+
+it('can fill two VIP global batches and then open V3', function () {
+    $district = makeDistrict('Cilandak', '3171030');
+
+    $vipOne = Batch::query()->create([
+        'name' => 'Mushaf VIP Jakarta 1 (GOR)',
+        'district_id' => null,
+        'batch_number' => 'V1',
+        'education_level' => null,
+        'max_capacity' => RegistrationService::BATCH_CAPACITY,
+        'is_full' => false,
+    ]);
+
+    $vipTwo = Batch::query()->create([
+        'name' => 'Mushaf VIP Jakarta 2 (GOR)',
+        'district_id' => null,
+        'batch_number' => 'V2',
+        'education_level' => null,
+        'max_capacity' => RegistrationService::BATCH_CAPACITY,
+        'is_full' => false,
+    ]);
+
+    fillBatchToOneRemaining($vipOne, $district, 'SMA', 'vip', 'SMAN 1 Stress');
+    fillBatchToOneRemaining($vipTwo, $district, 'SMA', 'vip', 'SMAN 1 Stress');
+
+    $firstCloser = postVipWithDocs($district, 'SMA', '6281000000301')->assertCreated();
+    $secondCloser = postVipWithDocs($district, 'UMUM', '6281000000302')->assertCreated();
+    $next = postVipWithDocs($district, 'SMA', '6281000000303')->assertCreated();
+
+    expect($firstCloser->json('data.batch.batch_number'))->toBe('V1')
+        ->and($secondCloser->json('data.batch.batch_number'))->toBe('V2')
+        ->and($next->json('data.batch.batch_number'))->toBe('V3')
+        ->and(Batch::query()->whereFullByOccupancy(true)->count())->toBe(2);
+});
+
+it('returns only live available batches even when is_full is stale', function () {
+    $district = makeDistrict('Kebayoran Baru', '3171010');
+
+    $actuallyFull = Batch::query()->create([
+        'name' => 'Mushaf Reguler SMA Kebayoran Baru 1',
+        'district_id' => $district->id,
+        'batch_number' => '1',
+        'education_level' => 'SMA',
+        'max_capacity' => RegistrationService::BATCH_CAPACITY,
+        'is_full' => false,
+    ]);
+
+    $staleOpen = Batch::query()->create([
+        'name' => 'Mushaf Reguler SMA Kebayoran Baru 2',
+        'district_id' => $district->id,
+        'batch_number' => '2',
+        'education_level' => 'SMA',
+        'max_capacity' => RegistrationService::BATCH_CAPACITY,
+        'is_full' => true,
+    ]);
+
+    fillBatchToOneRemaining($actuallyFull, $district, 'SMA', 'reguler', 'SMAN 70 Jakarta');
+    Registration::query()->create([
+        'batch_id' => $actuallyFull->id,
+        'district_id' => $district->id,
+        'education_level' => 'SMA',
+        'edition' => 'reguler',
+        'name' => 'Closer',
+        'phone_number' => '6281999990001',
+        'school_name' => 'SMAN 70 Jakarta',
+        'registration_code' => 'FULL-CLOSER-001',
+        'page_number' => RegistrationService::BATCH_CAPACITY,
+        'base_price' => 10000,
+        'total_payment' => 10000,
+        'payment_status' => 'pending',
+    ]);
+
+    Registration::query()->create([
+        'batch_id' => $staleOpen->id,
+        'district_id' => $district->id,
+        'education_level' => 'SMA',
+        'edition' => 'reguler',
+        'name' => 'Available',
+        'phone_number' => '6281999990002',
+        'school_name' => 'SMAN 6 Jakarta',
+        'registration_code' => 'OPEN-BATCH-001',
+        'page_number' => 1,
+        'base_price' => 10000,
+        'total_payment' => 10000,
+        'payment_status' => 'pending',
+    ]);
+
+    $response = $this->getJson('/api/batches?district_id='.$district->id.'&education_level=SMA&only_available=1')
+        ->assertSuccessful();
+
+    expect(collect($response->json('data'))->pluck('batch_number')->all())
+        ->toBe(['2']);
+
+    expect($response->json('data.0.is_full'))->toBeFalse();
 });

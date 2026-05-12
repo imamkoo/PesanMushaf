@@ -14,6 +14,10 @@ class BatchResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $isFull = $this->registrations_count !== null
+            ? $this->resource->isFullByOccupancy((int) $this->registrations_count)
+            : ($this->resource->exists ? $this->resource->isFullByOccupancy() : (bool) $this->is_full);
+
         return [
             'id' => $this->id,
             'district_id' => $this->district_id,
@@ -22,7 +26,7 @@ class BatchResource extends JsonResource
             'batch_number' => $this->batch_number,
             'education_level' => $this->education_level,
             'max_capacity' => $this->max_capacity,
-            'is_full' => (bool) $this->is_full,
+            'is_full' => $isFull,
             'district' => DistrictResource::make($this->whenLoaded('district')),
             'registrations_count' => $this->whenCounted('registrations'),
             'created_at' => $this->created_at?->toDateTimeString(),

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Batches\Schemas;
 
-use Filament\Schemas\Schema;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
 class BatchInfolist
@@ -73,9 +73,10 @@ class BatchInfolist
                 TextEntry::make('is_full')
                     ->label('Status Kapasitas')
                     ->badge()
-                    ->formatStateUsing(fn ($state): string => (bool) $state ? 'SUDAH PENUH (Siap Cetak)' : 'MASIH TERBUKA')
-                    ->color(fn ($state): string => (bool) $state ? 'danger' : 'success')
-                    ->icon(fn ($state): string => (bool) $state ? 'heroicon-m-check-circle' : 'heroicon-m-x-circle'),
+                    ->state(fn ($record): bool => $record->isFullByOccupancy())
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'SUDAH PENUH (Siap Cetak)' : 'MASIH TERBUKA')
+                    ->color(fn (bool $state): string => $state ? 'danger' : 'success')
+                    ->icon(fn (bool $state): string => $state ? 'heroicon-m-check-circle' : 'heroicon-m-x-circle'),
             ]);
     }
 }

@@ -17,7 +17,7 @@ class BatchController extends Controller
     {
         $batches = Batch::query()
             ->with('district')
-            ->withCount('registrations')
+            ->withActiveRegistrationsCount()
             ->when(
                 $request->filled('district_id'),
                 fn ($query) => $query->where('district_id', $request->integer('district_id'))
@@ -28,7 +28,7 @@ class BatchController extends Controller
             )
             ->when(
                 $request->boolean('only_available'),
-                fn ($query) => $query->where('is_full', false)
+                fn ($query) => $query->whereFullByOccupancy(false)
             )
             ->latest('id')
             ->get();

@@ -20,7 +20,7 @@ class RegistrationsStatsOverview extends StatsOverviewWidget
         $success = Registration::query()->where('payment_status', 'success')->count();
         $pending = Registration::query()->where('payment_status', 'pending')->count();
         $failed = Registration::query()->where('payment_status', 'failed')->count();
-        $batchFull = Batch::query()->where('is_full', true)->count();
+        $batchFull = Batch::query()->whereFullByOccupancy(true)->count();
 
         $successPct = $total > 0 ? round(($success / $total) * 100) : 0;
 
