@@ -4,24 +4,7 @@ import { AppNavbar } from '../components/AppNavbar'
 import { MidtransPayButton } from '../components/MidtransPayButton'
 import { getLastRegistration, getRegistrationStatus, saveLastRegistration, type PaymentUiStatus, type Registration } from '../lib/api'
 import { formatRupiah } from '../lib/payment'
-
-const statusLabels: Record<Registration['status'], string> = {
-  pending: 'Menunggu pembayaran',
-  success: 'Lunas',
-  failed: 'Batal',
-}
-
-const paymentAsideStyles: Record<Registration['status'], string> = {
-  pending: 'bg-[#ed3833] shadow-[0_24px_90px_rgba(237,56,51,0.22)]',
-  success: 'bg-emerald-600 shadow-[0_24px_90px_rgba(5,150,105,0.28)]',
-  failed: 'bg-zinc-600 shadow-[0_24px_90px_rgba(63,63,70,0.22)]',
-}
-
-const heroIconStyles: Record<Registration['status'], string> = {
-  pending: 'bg-[#ed3833]',
-  success: 'bg-emerald-600',
-  failed: 'bg-zinc-600',
-}
+import { paymentStatusUi } from '../lib/paymentStatusUi'
 
 const POLL_INTERVAL_MS = 15_000
 const POLL_MAX_ATTEMPTS = 20
@@ -127,14 +110,20 @@ export function BookingFinishedPage() {
   const batchLabel = registration?.batch?.name
   const districtLabel = registration?.district?.name
   const pageLabel = registration?.page_number ? `Halaman ${registration.page_number}` : null
+  const statusUi = registration ? paymentStatusUi[registration.status] : null
+  const primaryActionClass = registration?.status === 'success'
+    ? 'bg-emerald-600 shadow-[0_18px_48px_rgba(5,150,105,0.18)] hover:bg-emerald-700'
+    : registration?.status === 'failed'
+      ? 'bg-[#111111] shadow-[0_18px_48px_rgba(17,17,17,0.16)] hover:bg-black'
+      : 'bg-[#ed3833] shadow-[0_18px_48px_rgba(237,56,51,0.2)] hover:bg-[#d92f2a]'
 
   return (
     <>
       <AppNavbar />
       <main className="min-h-[calc(100vh-73px)] bg-[#f4f0ea] px-5 py-8">
-        <section className="mx-auto grid w-full max-w-[980px] gap-6 rounded-[38px] bg-white p-6 shadow-[0_24px_90px_rgba(0,0,0,0.06)] sm:p-8 lg:p-10">
+        <section className="mx-auto grid w-full max-w-[1040px] gap-6 rounded-[36px] border border-black/6 bg-white/96 p-6 shadow-[0_24px_80px_rgba(17,17,17,0.07)] sm:p-8 lg:p-10">
           <div
-            className={`flex h-16 w-16 items-center justify-center rounded-full text-3xl font-black text-white ${registration ? heroIconStyles[registration.status] : 'bg-[#ed3833]'}`}
+            className={`flex h-14 w-14 items-center justify-center rounded-full text-2xl font-black text-white ${registration ? statusUi?.iconClass : 'bg-[#ed3833]'}`}
           >
             ✓
           </div>
@@ -149,13 +138,18 @@ export function BookingFinishedPage() {
           </div>
 
           {registration ? (
-            <div className="grid gap-5 lg:grid-cols-[1fr_0.78fr]">
-              <div className="rounded-[30px] bg-[#f7f7fd] p-5 sm:p-6">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[#111111]/40">Kode Pendaftaran</p>
-                <p className="mt-3 break-words text-2xl font-black leading-8 tracking-[-0.03em] text-[#111111]">{registration.registration_code}</p>
+            <div className="grid gap-5 lg:grid-cols-[1.04fr_0.82fr]">
+              <div className="rounded-[30px] border border-black/6 bg-[#faf8f4] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] sm:p-6">
+                <div className="flex flex-col gap-3 border-b border-black/8 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-[#111111]/38">Kode Pendaftaran</p>
+                    <p className="mt-3 break-words text-2xl font-black leading-8 tracking-[-0.03em] text-[#111111]">{registration.registration_code}</p>
+                  </div>
+                  <p className={`w-fit rounded-full px-4 py-2 text-sm font-black ${statusUi?.badgeClass}`}>{statusUi?.label}</p>
+                </div>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   <Info label="Nama" value={registration.name} />
-                  <Info label="Status" value={statusLabels[registration.status]} />
+                  <Info label="Status" value={statusUi?.label ?? registration.status} />
                   <Info label="Jenjang" value={registration.education_level} />
                   <Info label="Kategori" value={registration.edition} />
                   {districtLabel ? <Info label="Kecamatan" value={districtLabel} /> : null}
@@ -165,44 +159,54 @@ export function BookingFinishedPage() {
                   {registration.address ? <Info label="Alamat" value={registration.address} /> : null}
                 </div>
               </div>
-              <div className={`rounded-[30px] p-5 text-white sm:p-6 ${paymentAsideStyles[registration.status]}`}>
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-white/60">Total tagihan</p>
+              <div className={`rounded-[30px] p-5 text-white sm:p-6 ${statusUi?.asideClass}`}>
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-white/60">{statusUi?.eyebrow}</p>
                 <p className="mt-3 text-[38px] font-black tracking-[-0.06em]">{formatRupiah(registration.financial.total_payment)}</p>
-                <p className="mt-4 text-sm font-semibold leading-6 text-white/70">
-                  {registration.status === 'success'
-                    ? 'Pembayaran tercatat. Terima kasih — nominal di atas sesuai kategori pendaftaran Anda.'
-                    : registration.status === 'failed'
-                      ? 'Transaksi dibatalkan atau gagal. Hubungi panitia jika Anda sudah mentransfer dana.'
-                      : 'Nominal ini wajib dibayar sesuai kategori. Gunakan tombol di bawah untuk bayar secara online, atau ikuti instruksi transfer manual dari panitia bila tersedia.'}
+                <p className="mt-2 text-lg font-black text-white">{statusUi?.label}</p>
+                <p className="mt-4 text-sm font-semibold leading-6 text-white/72">
+                  {statusUi?.bodyText}
                 </p>
-                {registration.status === 'pending' ? (
-                  <div className="mt-6 border-t border-white/20 pt-6">
-                    <p className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-white/60">Pembayaran</p>
+                <div className="mt-6 grid gap-3">
+                  <PaymentMeta label="Kategori" value={registration.edition.toUpperCase()} />
+                  <PaymentMeta label="Nomor Halaman" value={pageLabel ?? '-'} />
+                </div>
+                <div className="mt-6 border-t border-white/15 pt-6">
+                  <p className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-white/60">Pembayaran</p>
+                  {registration.status === 'pending' ? (
                     <MidtransPayButton
                       registrationCode={registration.registration_code}
                       onSyncedPaymentStatus={applyPaymentStatusToSession}
                       onFlowEnd={() => void refreshRegistrationStatus()}
                       label="Bayar sekarang"
+                      variant="onDark"
                     />
-                    <p className="mt-3 text-xs font-semibold leading-5 text-white/60">
-                      Status akan diperiksa otomatis setiap 15 detik selama halaman ini terbuka.
-                    </p>
-                  </div>
-                ) : null}
+                  ) : (
+                    <StatusAction status={registration.status} label={statusUi?.actionLabel ?? statusUi?.label ?? ''} />
+                  )}
+                  <p className="mt-3 text-xs font-semibold leading-5 text-white/65">
+                    {statusUi?.actionNote}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="rounded-[30px] bg-[#fff7f7] p-6 text-[#111111]">
+            <div className="rounded-[28px] border border-[#ed3833]/10 bg-[#fff7f7] p-6 text-[#111111]">
               <p className="font-black">Belum ada data registrasi terbaru di browser ini.</p>
               <p className="mt-2 text-sm font-medium text-[#111111]/60">Silakan daftar terlebih dahulu agar kode backend bisa ditampilkan di sini.</p>
             </div>
           )}
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link to={registration ? `/booking/details?code=${encodeURIComponent(registration.registration_code)}` : '/booking/details'} className="rounded-full bg-[#ed3833] px-7 py-4 text-base font-black text-white shadow-[0_22px_70px_rgba(237,56,51,0.35)] transition duration-300 hover:!text-white hover:bg-[#ed3833]">
+            <Link
+              to={registration ? `/booking/details?code=${encodeURIComponent(registration.registration_code)}` : '/booking/details'}
+              className={`rounded-full px-7 py-4 text-base font-black !text-white transition duration-300 hover:!text-white ${primaryActionClass}`}
+            >
               Lacak Kode
             </Link>
-            <Link to="/" className="rounded-full border border-black/10 bg-white px-6 py-4 shadow-[0_22px_70px_rgba(237,56,51,0.35)] text-center font-black text-[#111111] transition hover:border-[#ed3833] hover:text-[#ed3833]">
+            <Link
+              to="/"
+              className="rounded-full border border-black/10 bg-white px-6 py-4 text-center font-black text-[#111111] shadow-[0_16px_42px_rgba(17,17,17,0.06)] transition hover:border-[#ed3833] hover:text-[#ed3833]"
+            >
               Kembali Home
             </Link>
           </div>
@@ -219,9 +223,38 @@ type InfoProps = {
 
 function Info({ label, value }: InfoProps) {
   return (
-    <div className="rounded-2xl bg-white p-4">
+    <div className="rounded-[20px] border border-black/6 bg-white/92 p-4 shadow-[0_10px_24px_rgba(17,17,17,0.04)]">
       <p className="text-xs font-black uppercase tracking-[0.12em] text-[#111111]/40">{label}</p>
       <p className="mt-2 break-words font-black text-[#111111]">{value}</p>
     </div>
   )
+}
+
+type PaymentMetaProps = {
+  label: string
+  value: string
+}
+
+function PaymentMeta({ label, value }: PaymentMetaProps) {
+  return (
+    <div className="rounded-[18px] border border-white/14 bg-white/10 p-4 backdrop-blur-sm">
+      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-white/55">{label}</p>
+      <p className="mt-2 font-black text-white">{value}</p>
+    </div>
+  )
+}
+
+type StatusActionProps = {
+  label: string
+  status: Registration['status']
+}
+
+function StatusAction({ label, status }: StatusActionProps) {
+  const actionClass = paymentStatusUi[status].staticActionClass
+
+  if (! actionClass) {
+    return null
+  }
+
+  return <div className={`${actionClass} !text-white`}>{label}</div>
 }

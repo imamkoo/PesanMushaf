@@ -16,7 +16,7 @@ export function DistrictDetailsPage() {
             <header className="rounded-[38px] bg-[#111111] p-6 text-white sm:p-8 lg:p-10">
               <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Semua Kecamatan</p>
               <h1 className="mt-4 max-w-[820px] text-[48px] font-black leading-[0.94] tracking-[-0.06em] sm:text-[76px]">
-                {isLoading ? 'Memuat kecamatan dari backend.' : 'Pilih kecamatan sebelum melihat batch.'}
+                {isLoading ? 'Memuat kecamatan...' : 'Pilih kecamatan sebelum melihat batch.'}
               </h1>
             </header>
             {error ? (

@@ -5,24 +5,7 @@ import { AppNavbar } from '../components/AppNavbar'
 import { MidtransPayButton } from '../components/MidtransPayButton'
 import { getLastRegistration, getRegistrationStatus, type RegistrationStatus } from '../lib/api'
 import { formatRupiah } from '../lib/payment'
-
-const statusStyles: Record<RegistrationStatus['status'], string> = {
-  pending: 'bg-[#fff7f7] text-[#ed3833]',
-  success: 'bg-emerald-50 text-emerald-700',
-  failed: 'bg-zinc-100 text-zinc-700',
-}
-
-const statusLabels: Record<RegistrationStatus['status'], string> = {
-  pending: 'Menunggu Pembayaran',
-  success: 'Lunas',
-  failed: 'Batal',
-}
-
-const paymentAsideStyles: Record<RegistrationStatus['status'], string> = {
-  pending: 'bg-[#ed3833] shadow-[0_24px_90px_rgba(237,56,51,0.22)]',
-  success: 'bg-emerald-600 shadow-[0_24px_90px_rgba(5,150,105,0.28)]',
-  failed: 'bg-zinc-600 shadow-[0_24px_90px_rgba(63,63,70,0.22)]',
-}
+import { paymentStatusUi } from '../lib/paymentStatusUi'
 
 function normalizeLookup(value: string): string {
   return value.replace(/\s+/g, '').toUpperCase()
@@ -114,7 +97,7 @@ type LookupFormProps = {
 
 function LookupHero() {
   return (
-    <header className="rounded-[30px] bg-[#111111] p-5 text-white shadow-[0_24px_90px_rgba(0,0,0,0.12)] sm:p-7">
+    <header className="rounded-[28px] border border-black/8 bg-[#111111] p-5 text-white shadow-[0_18px_60px_rgba(0,0,0,0.16)] sm:p-7">
       <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
         <p>Lacak Pendaftaran</p>
         <p>HUT500</p>
@@ -140,7 +123,7 @@ function LookupForm({ isLoading, lookup, message, onChange, onSubmit }: LookupFo
   return (
     <form
       onSubmit={onSubmit}
-      className="mx-auto mt-5 max-w-[1200px] rounded-[30px] border border-black/10 bg-white p-5 shadow-[0_24px_90px_rgba(0,0,0,0.06)] sm:p-7"
+      className="mx-auto mt-5 max-w-[1200px] rounded-[28px] border border-black/8 bg-white/95 p-5 shadow-[0_18px_60px_rgba(17,17,17,0.06)] sm:p-7"
     >
       <label className="flex flex-col gap-3 font-black text-[#111111]">
         Kode Pendaftaran atau Nomor WhatsApp
@@ -173,10 +156,10 @@ function StatusModal({ statuses, onClose, onAfterPayment }: StatusModalProps) {
   const primaryName = statuses[0]?.name ?? ''
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#111111]/70 px-4 py-6 backdrop-blur-md">
-      <section role="dialog" aria-modal="true" aria-label="Hasil lacak pendaftaran" className="max-h-[92vh] w-full max-w-[960px] overflow-y-auto rounded-[30px] bg-[#f4f0ea] p-3 shadow-[0_34px_120px_rgba(0,0,0,0.28)] sm:p-4">
-        <div className="overflow-hidden rounded-[26px] bg-white">
-          <div className="flex flex-col gap-4 bg-[#111111] p-5 text-white sm:flex-row sm:items-start sm:justify-between sm:p-6">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#111111]/62 px-4 py-6 backdrop-blur-md">
+      <section role="dialog" aria-modal="true" aria-label="Hasil lacak pendaftaran" className="max-h-[92vh] w-full max-w-[960px] overflow-y-auto rounded-[30px] bg-white/95 p-3 shadow-[0_34px_120px_rgba(0,0,0,0.24)] sm:p-4">
+        <div className="overflow-hidden rounded-[26px] border border-black/6 bg-white">
+          <div className="flex flex-col gap-4 border-b border-white/10 bg-[#111111] p-5 text-white sm:flex-row sm:items-start sm:justify-between sm:p-6">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-white/42">Hasil Pelacakan</p>
               <h2 className="mt-4 max-w-[600px] text-[30px] font-black leading-[1] tracking-[-0.055em] sm:text-[44px]">
@@ -199,7 +182,10 @@ function StatusModal({ statuses, onClose, onAfterPayment }: StatusModalProps) {
           </div>
 
           <div className="grid gap-6 p-4 lg:p-5">
-            {statuses.map((status, index) => (
+            {statuses.map((status, index) => {
+              const statusUi = paymentStatusUi[status.status]
+
+              return (
               <div
                 key={`${status.registration_code}-${status.id}`}
                 className="grid gap-3 border-b border-black/10 pb-6 last:border-b-0 last:pb-0 lg:grid-cols-[1fr_320px]"
@@ -209,14 +195,14 @@ function StatusModal({ statuses, onClose, onAfterPayment }: StatusModalProps) {
                     Pendaftaran {index + 1} dari {statuses.length}
                   </p>
                 ) : null}
-                <article className="rounded-[24px] border border-black/10 bg-white p-4 sm:p-5">
+                <article className="rounded-[24px] border border-black/8 bg-[#faf8f4] p-4 sm:p-5">
                   <div className="flex flex-col gap-3 border-b border-black/10 pb-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ed3833]">Status Pendaftaran</p>
                       <p className="mt-2 text-sm font-semibold leading-6 text-[#111111]/58">Data ditemukan. Cek kembali detail peserta dan nominal transfer di bawah ini.</p>
                     </div>
-                    <p className={`w-fit shrink-0 rounded-full px-4 py-2 text-sm font-black ${statusStyles[status.status]}`}>
-                      {statusLabels[status.status]}
+                    <p className={`w-fit shrink-0 rounded-full px-4 py-2 text-sm font-black ${statusUi.badgeClass}`}>
+                      {statusUi.label}
                     </p>
                   </div>
 
@@ -230,33 +216,42 @@ function StatusModal({ statuses, onClose, onAfterPayment }: StatusModalProps) {
                   </div>
                 </article>
 
-                <aside className={`rounded-[24px] p-5 text-white ${paymentAsideStyles[status.status]}`}>
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-white/65">Total tagihan</p>
+                <aside className={`rounded-[24px] p-5 text-white ${statusUi.asideClass}`}>
+                  <p className="text-xs font-black uppercase tracking-[0.16em] text-white/65">{statusUi.eyebrow}</p>
                   <p className="mt-4 text-[34px] font-black leading-none tracking-[-0.06em] sm:text-[42px]">{formatRupiah(status.total_payment)}</p>
+                  <p className="mt-2 text-lg font-black text-white">{statusUi.label}</p>
                   <p className="mt-4 text-sm font-semibold leading-6 text-white/70">
-                    Nominal tagihan untuk pembayaran (gateway atau transfer manual).
+                    {statusUi.bodyText}
                   </p>
                   <div className="mt-7 grid gap-3">
                     <PaymentInfo label="Nomor Halaman" value={String(status.page_number)} />
-                    <PaymentInfo label="Status" value={statusLabels[status.status]} />
+                    <PaymentInfo label="Kategori" value={status.edition.toUpperCase()} />
                     <PaymentInfo label="Update Terakhir" value={status.updated_at ?? status.created_at ?? '-'} />
                   </div>
-                  {status.status === 'pending' ? (
-                    <div className="mt-5 border-t border-white/20 pt-5">
+                  <div className="mt-5 border-t border-white/15 pt-5">
+                    {status.status === 'pending' ? (
+                      <>
                       <p className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-white/60">Pembayaran</p>
                       <MidtransPayButton
                         registrationCode={status.registration_code}
                         onFlowEnd={onAfterPayment}
                         label="Bayar sekarang"
+                        variant="onDark"
                       />
-                      <p className="mt-3 text-xs font-semibold leading-5 text-white/55">
-                        Setelah menyelesaikan pembayaran di jendela yang terbuka, status &quot;Lunas&quot; biasanya muncul dalam beberapa detik. Tutup jendela bila sudah selesai, lalu segarkan halaman atau lacak ulang.
-                      </p>
-                    </div>
-                  ) : null}
+                      </>
+                    ) : (
+                      <StatusAction status={status.status} label={statusUi.actionLabel ?? statusUi.label} />
+                    )}
+                    <p className="mt-3 text-xs font-semibold leading-5 text-white/60">
+                      {status.status === 'pending'
+                        ? 'Setelah menyelesaikan pembayaran di jendela yang terbuka, status "Lunas" biasanya muncul dalam beberapa detik. Tutup jendela bila sudah selesai, lalu segarkan halaman atau lacak ulang.'
+                        : statusUi.actionNote}
+                    </p>
+                  </div>
                 </aside>
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -272,7 +267,7 @@ type InfoProps = {
 
 function Info({ label, value, wide = false }: InfoProps) {
   return (
-    <div className={`rounded-2xl bg-[#f7f7fd] p-4 ${wide ? 'sm:col-span-2' : ''}`}>
+    <div className={`rounded-[20px] border border-black/6 bg-white/92 p-4 shadow-[0_10px_24px_rgba(17,17,17,0.04)] ${wide ? 'sm:col-span-2' : ''}`}>
       <p className="text-xs font-black uppercase tracking-[0.12em] text-[#111111]/40">{label}</p>
       <p className="mt-2 break-words font-black leading-6 text-[#111111]">{value}</p>
     </div>
@@ -281,9 +276,24 @@ function Info({ label, value, wide = false }: InfoProps) {
 
 function PaymentInfo({ label, value }: InfoProps) {
   return (
-    <div className="rounded-2xl border border-white/15 bg-white/10 p-4">
+    <div className="rounded-[20px] border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
       <p className="text-xs font-black uppercase tracking-[0.12em] text-white/50">{label}</p>
       <p className="mt-2 break-words font-black leading-6 text-white">{value}</p>
     </div>
   )
+}
+
+type StatusActionProps = {
+  label: string
+  status: RegistrationStatus['status']
+}
+
+function StatusAction({ label, status }: StatusActionProps) {
+  const actionClass = paymentStatusUi[status].staticActionClass
+
+  if (! actionClass) {
+    return null
+  }
+
+  return <div className={`${actionClass} !text-white`}>{label}</div>
 }

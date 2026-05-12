@@ -15,7 +15,7 @@ type MidtransPayButtonProps = {
   disabled?: boolean
   label?: string
   className?: string
-  variant?: 'primary' | 'light'
+  variant?: 'primary' | 'onDark'
 }
 
 export function MidtransPayButton({
@@ -32,10 +32,10 @@ export function MidtransPayButton({
 
   const baseClass =
     variant === 'primary'
-      ? 'rounded-full bg-white px-5 py-4 text-center font-black text-[#ed3833] transition hover:bg-[#fff7f7] disabled:cursor-not-allowed disabled:opacity-60'
-      : 'rounded-full bg-[#ed3833] px-5 py-4 text-center font-black text-white transition hover:bg-[#d92f2a] disabled:cursor-not-allowed disabled:opacity-60'
+      ? 'rounded-full bg-[#ed3833] px-5 py-4 text-center font-black !text-white shadow-[0_14px_32px_rgba(237,56,51,0.24)] transition hover:bg-[#d92f2a] hover:!text-white active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60'
+      : 'rounded-full border border-white/18 bg-white/14 px-5 py-4 text-center font-black !text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition hover:bg-white/22 hover:!text-white active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60'
 
-  const errorClass = variant === 'primary' ? 'text-[#111111]/80' : 'text-red-100'
+  const errorClass = variant === 'primary' ? 'text-[#111111]/80' : 'text-white/80'
 
   async function handlePay() {
     setError('')
