@@ -30,6 +30,12 @@ type FormValues = {
 }
 
 type FormErrors = Partial<Record<keyof FormValues, string>>
+type SchoolMatchState = {
+  query: string
+  districtId: string
+  educationLevel: EducationLevel
+  matches: SchoolNameMatch[]
+}
 
 const initialValues: FormValues = {
   name: '',
@@ -78,7 +84,12 @@ export function BookingPage() {
   const [schoolOptions, setSchoolOptions] = useState<ApiOption[]>([])
   const [isLoadingSchools, setIsLoadingSchools] = useState(false)
   const [schoolLoadError, setSchoolLoadError] = useState('')
-  const [customSchoolMatches, setCustomSchoolMatches] = useState<SchoolNameMatch[]>([])
+  const [customSchoolMatchState, setCustomSchoolMatchState] = useState<SchoolMatchState>({
+    query: '',
+    districtId: '',
+    educationLevel: initialValues.education_level,
+    matches: [],
+  })
   const [didYouMeanDismissed, setDidYouMeanDismissed] = useState(false)
 
   // PERBAIKAN: Mencegah Glitch dengan menggabungkan deskripsi
@@ -118,6 +129,18 @@ export function BookingPage() {
   const canChooseSchool = values.education_level === 'UMUM' || Boolean(values.district_id)
   const schoolCatalogHint = schoolEmptyCatalogHint(values, isLoadingSchools, schoolLoadError, schoolOptions.length)
   const needsPersonalDocs = requiresPersonalDocs(values)
+  const activeSchoolMatchQuery =
+    values.school_name === customSchoolValue && !didYouMeanDismissed
+      ? values.custom_school_name.trim()
+      : ''
+  const shouldFetchSchoolMatches = activeSchoolMatchQuery.length >= 3
+  const visibleCustomSchoolMatches =
+    shouldFetchSchoolMatches &&
+    customSchoolMatchState.query === activeSchoolMatchQuery &&
+    customSchoolMatchState.districtId === values.district_id &&
+    customSchoolMatchState.educationLevel === values.education_level
+      ? customSchoolMatchState.matches
+      : []
 
   useEffect(() => {
     let isMounted = true
@@ -163,21 +186,11 @@ export function BookingPage() {
   // Fuzzy did-you-mean: hanya aktif saat user memilih "Lainnya" dan mengetik
   // nama bebas. Endpoint backend sudah menormalisasi & threshold di server side.
   useEffect(() => {
-    if (values.school_name !== customSchoolValue) {
-      setCustomSchoolMatches([])
+    if (!shouldFetchSchoolMatches) {
       return
     }
 
-    if (didYouMeanDismissed) {
-      return
-    }
-
-    const query = values.custom_school_name.trim()
-    if (query.length < 3) {
-      setCustomSchoolMatches([])
-      return
-    }
-
+    const query = activeSchoolMatchQuery
     const controller = new AbortController()
     const timer = window.setTimeout(() => {
       void fetchSchoolNameMatches({
@@ -187,13 +200,23 @@ export function BookingPage() {
         signal: controller.signal,
       })
         .then((matches) => {
-          setCustomSchoolMatches(matches)
+          setCustomSchoolMatchState({
+            query,
+            districtId: values.district_id,
+            educationLevel: values.education_level,
+            matches,
+          })
         })
         .catch((err) => {
           if (err instanceof DOMException && err.name === 'AbortError') {
             return
           }
-          setCustomSchoolMatches([])
+          setCustomSchoolMatchState({
+            query,
+            districtId: values.district_id,
+            educationLevel: values.education_level,
+            matches: [],
+          })
         })
     }, 350)
 
@@ -202,11 +225,10 @@ export function BookingPage() {
       controller.abort()
     }
   }, [
-    values.school_name,
-    values.custom_school_name,
+    activeSchoolMatchQuery,
     values.district_id,
     values.education_level,
-    didYouMeanDismissed,
+    shouldFetchSchoolMatches,
   ])
 
   function chooseEdition(edition: string) {
@@ -265,7 +287,12 @@ export function BookingPage() {
       school_name: value,
       custom_school_name: '',
     }))
-    setCustomSchoolMatches([])
+    setCustomSchoolMatchState({
+      query: '',
+      districtId: '',
+      educationLevel: values.education_level,
+      matches: [],
+    })
     setDidYouMeanDismissed(false)
 
     if (hasSubmitted) {
@@ -381,6 +408,7 @@ export function BookingPage() {
                   <Select label="Jenjang / Kategori" name="education_level" value={values.education_level} error={errors.education_level} placeholder="Pilih jenjang pendidikan" options={['SD', 'SMP', 'SMA', 'UMUM'].map((level) => ({ label: level, value: level }))} onChange={updateValue} />
                 </div>
                 <SearchableSchoolSelect
+                  key={schoolFieldResetKey}
                   label="Instansi / Perguruan Tinggi"
                   options={canChooseSchool ? schoolSelectOptions : []}
                   value={values.school_name}
@@ -389,14 +417,13 @@ export function BookingPage() {
                   disabled={!canChooseSchool || isLoadingSchools}
                   customOptionValue={customSchoolValue}
                   onChange={(next) => updateValue('school_name', next)}
-                  resetKey={schoolFieldResetKey}
                 />
                 {schoolLoadError ? <p className="rounded-2xl bg-[#fff7f7] p-4 text-sm font-bold leading-6 text-[#ed3833]">{schoolLoadError}</p> : null}
                 {schoolCatalogHint ? <p className="rounded-2xl bg-[#f7f7fd] p-4 text-sm font-semibold leading-6 text-[#111111]/65">{schoolCatalogHint}</p> : null}
                 {values.school_name === customSchoolValue ? (
                   <div className="flex flex-col gap-3">
                     <Field label="Nama Instansi Spesifik" name="custom_school_name" value={values.custom_school_name} error={errors.custom_school_name} placeholder="Tuliskan nama instansi atau sekolah Anda" onChange={updateValue} />
-                    {customSchoolMatches.length > 0 && !didYouMeanDismissed ? (
+                    {visibleCustomSchoolMatches.length > 0 && !didYouMeanDismissed ? (
                       <div className="rounded-[20px] border border-[#ed3833]/25 bg-[#fff7f7]/70 p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div>
@@ -414,7 +441,7 @@ export function BookingPage() {
                           </button>
                         </div>
                         <div className="mt-4 flex flex-wrap gap-2">
-                          {customSchoolMatches.map((match) => (
+                          {visibleCustomSchoolMatches.map((match) => (
                             <button
                               key={`${match.value}-${match.score ?? ''}`}
                               type="button"

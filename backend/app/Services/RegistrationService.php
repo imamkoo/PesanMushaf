@@ -8,8 +8,8 @@ use App\Models\PriceCategory;
 use App\Models\Registration;
 use App\Support\IndonesianPhone;
 use App\Support\SchoolNameNormalizer;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class RegistrationService
 {
@@ -126,7 +126,7 @@ class RegistrationService
         return Batch::create([
             'district_id' => null,
             'education_level' => null,
-            'batch_number' => 'V' . $nextNumber,
+            'batch_number' => 'V'.$nextNumber,
             'name' => "Mushaf VIP Jakarta {$nextNumber} (GOR)",
             'max_capacity' => self::BATCH_CAPACITY,
             'is_full' => false,
@@ -160,7 +160,7 @@ class RegistrationService
             : null;
 
         // Priority 2: same kecamatan (district_id)
-        if (!$batch) {
+        if (! $batch) {
             $batch = (clone $baseQuery())
                 ->whereHas('registrations', fn ($q) => $q->where('district_id', $registrantDistrict->id))
                 ->orderBy('id')
@@ -169,11 +169,11 @@ class RegistrationService
         }
 
         // Priority 3: same kota (district.code prefix)
-        if (!$batch && $kotaCode !== '') {
+        if (! $batch && $kotaCode !== '') {
             $batch = (clone $baseQuery())
                 ->whereHas(
                     'registrations.district',
-                    fn ($q) => $q->where('code', 'like', $kotaCode . '%')
+                    fn ($q) => $q->where('code', 'like', $kotaCode.'%')
                 )
                 ->orderBy('id')
                 ->lockForUpdate()
@@ -190,7 +190,7 @@ class RegistrationService
         $lastNumber = (int) Batch::query()
             ->where('education_level', $level)
             ->where('name', 'not like', '%(GOR)%')
-            ->max(DB::raw('batch_number::integer'));
+            ->max(DB::raw('CAST(batch_number AS INTEGER)'));
 
         $nextNumber = $lastNumber + 1;
 

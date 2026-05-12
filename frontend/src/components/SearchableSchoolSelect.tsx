@@ -15,8 +15,6 @@ type SearchableSchoolSelectProps = {
   /** Nilai `value` untuk opsi "Lainnya" — dipisah dan ditampilkan di bawah daftar. */
   customOptionValue: string
   onChange: (value: string) => void
-  /** Ubah ketika kecamatan/jenjang/daftar sekolah berganti agar panel & pencarian direset. */
-  resetKey: string
 }
 
 /** Combobox untuk daftar panjang: ketik untuk menyaring, daftar di-scroll terbatas (bukan select bawaan browser). */
@@ -29,7 +27,6 @@ export function SearchableSchoolSelect({
   disabled,
   customOptionValue,
   onChange,
-  resetKey,
 }: SearchableSchoolSelectProps) {
   const id = useId()
   const listId = `${id}-list`
@@ -57,11 +54,6 @@ export function SearchableSchoolSelect({
   const showCustomPinned = customOption !== null
 
   const selectedLabel = useMemo(() => options.find((option) => option.value === value)?.label ?? '', [options, value])
-
-  useEffect(() => {
-    setSearchQuery('')
-    setIsOpen(false)
-  }, [resetKey])
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {

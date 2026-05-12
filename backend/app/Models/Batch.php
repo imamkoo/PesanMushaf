@@ -14,9 +14,18 @@ class Batch extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'district_id', 'name', 'slug', 'batch_number', 
-        'education_level', 'max_capacity', 'is_full'
+        'district_id', 'name', 'slug', 'batch_number',
+        'education_level', 'max_capacity', 'is_full',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'district_id' => 'integer',
+            'max_capacity' => 'integer',
+            'is_full' => 'boolean',
+        ];
+    }
 
     public function setNameAttribute($value)
     {
