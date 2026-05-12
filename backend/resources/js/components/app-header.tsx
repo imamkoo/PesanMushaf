@@ -31,6 +31,7 @@ import {
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
+import { useInteractionCleanup } from '@/hooks/use-interaction-recovery';
 import { cn, toUrl } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
@@ -68,6 +69,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+    const cleanup = useInteractionCleanup();
 
     return (
         <>
@@ -75,7 +77,13 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
-                        <Sheet>
+                        <Sheet
+                            onOpenChange={(open) => {
+                                if (!open) {
+                                    cleanup();
+                                }
+                            }}
+                        >
                             <SheetTrigger asChild>
                                 <Button
                                     variant="ghost"
@@ -102,6 +110,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 <Link
                                                     key={item.title}
                                                     href={item.href}
+                                                    onClick={() => cleanup()}
                                                     className="flex items-center space-x-2 font-medium"
                                                 >
                                                     {item.icon && (
@@ -119,6 +128,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                     href={toUrl(item.href)}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
+                                                    onClick={() => cleanup()}
                                                     className="flex items-center space-x-2 font-medium"
                                                 >
                                                     {item.icon && (
@@ -210,7 +220,13 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                 ))}
                             </div>
                         </div>
-                        <DropdownMenu>
+                        <DropdownMenu
+                            onOpenChange={(open) => {
+                                if (!open) {
+                                    cleanup();
+                                }
+                            }}
+                        >
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"

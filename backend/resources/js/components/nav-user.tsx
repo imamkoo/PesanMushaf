@@ -13,12 +13,14 @@ import {
 } from '@/components/ui/sidebar';
 import { UserInfo } from '@/components/user-info';
 import { UserMenuContent } from '@/components/user-menu-content';
+import { useInteractionCleanup } from '@/hooks/use-interaction-recovery';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function NavUser() {
     const { auth } = usePage().props;
     const { state } = useSidebar();
     const isMobile = useIsMobile();
+    const cleanup = useInteractionCleanup();
 
     if (!auth.user) {
         return null;
@@ -27,7 +29,13 @@ export function NavUser() {
     return (
         <SidebarMenu>
             <SidebarMenuItem>
-                <DropdownMenu>
+                <DropdownMenu
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            cleanup();
+                        }
+                    }}
+                >
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"

@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
         'name' => 'Admin Jakarta',
         'email' => 'admin@jakarta.go.id',
         'role' => 'admin',
-        'password' => bcrypt('password123'),
+        'password' => bcrypt('pass123'),
     ]);
 }
 }

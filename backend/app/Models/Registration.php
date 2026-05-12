@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\SchoolNameNormalizer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -88,6 +89,23 @@ class Registration extends Model
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class);
+    }
+
+    public function scopeWhereUmum(Builder $query): Builder
+    {
+        return $query->where('education_level', 'UMUM');
+    }
+
+    public function scopeWhereNonUmum(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('education_level')
+            ->where('education_level', '!=', 'UMUM');
+    }
+
+    public function scopeWhereLegacyOrUnknownLevel(Builder $query): Builder
+    {
+        return $query->whereNull('education_level');
     }
 
     private function syncTouchedBatchFullness(): void

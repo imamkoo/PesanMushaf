@@ -36,17 +36,79 @@ class Batch extends Model
     public function scopeWhereFullByOccupancy(Builder $query, bool $isFull = true): Builder
     {
         $batchTable = $query->getModel()->getTable();
-        $registrationTable = (new Registration)->getTable();
         $operator = $isFull ? '>=' : '<';
 
         return $query->whereRaw(
-            "(select count(*) from {$registrationTable} where {$registrationTable}.batch_id = {$batchTable}.id and {$registrationTable}.deleted_at is null) {$operator} {$batchTable}.max_capacity"
+            $this->getActiveRegistrationsCountSubquery($query)." {$operator} {$batchTable}.max_capacity"
         );
+    }
+
+    public function scopeWhereOccupancyBetween(
+        Builder $query,
+        ?float $minRatio = null,
+        ?float $maxRatio = null,
+    ): Builder {
+        $batchTable = $query->getModel()->getTable();
+        $activeRegistrationsCount = $this->getActiveRegistrationsCountSubquery($query);
+
+        $query->where("{$batchTable}.max_capacity", '>', 0);
+
+        if ($minRatio !== null) {
+            $query->whereRaw("{$activeRegistrationsCount} >= {$batchTable}.max_capacity * ?", [$minRatio]);
+        }
+
+        if ($maxRatio !== null) {
+            $query->whereRaw("{$activeRegistrationsCount} < {$batchTable}.max_capacity * ?", [$maxRatio]);
+        }
+
+        return $query;
+    }
+
+    public function scopeWhereUmum(Builder $query): Builder
+    {
+        return $query->where('education_level', 'UMUM');
+    }
+
+    public function scopeWhereNonUmum(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('education_level')
+            ->where('education_level', '!=', 'UMUM');
+    }
+
+    public function scopeWhereGlobalOrNull(Builder $query): Builder
+    {
+        return $query->whereNull('education_level');
+    }
+
+    public function scopeOrderByOccupancy(Builder $query, string $direction = 'desc'): Builder
+    {
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw($this->getOccupancyRatioExpression($query)." {$direction}");
     }
 
     public function activeRegistrationsCount(): int
     {
         return $this->registrations()->count();
+    }
+
+    public function occupancyRatio(?int $registrationsCount = null): float
+    {
+        if ($this->max_capacity <= 0) {
+            return 0.0;
+        }
+
+        $registrationsCount ??= $this->registrations_count !== null
+            ? (int) $this->registrations_count
+            : $this->activeRegistrationsCount();
+
+        return $registrationsCount / $this->max_capacity;
+    }
+
+    public function fillPercentage(?int $registrationsCount = null): int
+    {
+        return (int) min(100, round($this->occupancyRatio($registrationsCount) * 100));
     }
 
     public function isFullByOccupancy(?int $registrationsCount = null): bool
@@ -90,5 +152,20 @@ class Batch extends Model
     public function isVipGlobal(): bool
     {
         return $this->district_id === null && str_contains((string) $this->name, '(GOR)');
+    }
+
+    protected function getActiveRegistrationsCountSubquery(Builder $query): string
+    {
+        $batchTable = $query->getModel()->getTable();
+        $registrationTable = (new Registration)->getTable();
+
+        return "(select count(*) from {$registrationTable} where {$registrationTable}.batch_id = {$batchTable}.id and {$registrationTable}.deleted_at is null)";
+    }
+
+    protected function getOccupancyRatioExpression(Builder $query): string
+    {
+        $batchTable = $query->getModel()->getTable();
+
+        return 'coalesce((1.0 * '.$this->getActiveRegistrationsCountSubquery($query).") / nullif({$batchTable}.max_capacity, 0), 0)";
     }
 }

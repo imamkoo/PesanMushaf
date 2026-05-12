@@ -22,21 +22,36 @@ class BatchInfolist
                     ->label('📍 Wilayah Kecamatan')
                     ->icon('heroicon-m-map-pin')
                     ->weight(FontWeight::SemiBold)
-                    ->default('VIP Jakarta (Global)')
-                    ->placeholder('VIP Jakarta (Global)'),
+                    ->default('VIP Global')
+                    ->placeholder('VIP Global'),
+
+                TextEntry::make('admin_segment')
+                    ->label('🧭 Kategori')
+                    ->badge()
+                    ->state(fn ($record): string => match (true) {
+                        $record->education_level === 'UMUM' => 'UMUM',
+                        $record->education_level === null => 'VIP Global',
+                        default => 'Non-UMUM',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'UMUM' => 'danger',
+                        'Non-UMUM' => 'primary',
+                        default => 'gray',
+                    }),
 
                 TextEntry::make('education_level')
                     ->label('🎓 Kategori Peserta')
                     ->badge()
-                    ->default('Semua jenjang')
-                    ->placeholder('Semua jenjang')
+                    ->default('VIP Global')
+                    ->placeholder('VIP Global')
                     ->color(fn (?string $state): string => match (strtoupper((string) $state)) {
                         'SD' => 'info',
                         'SMP' => 'warning',
                         'SMA' => 'success',
                         'UMUM' => 'danger',
                         default => 'gray',
-                    }),
+                    })
+                    ->formatStateUsing(fn (?string $state): string => filled($state) ? (string) $state : 'VIP Global'),
 
                 TextEntry::make('batch_number')
                     ->label('Nomor Jilid (Batch)')

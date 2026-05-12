@@ -1,10 +1,12 @@
 import { useCallback } from 'react';
+import { useInteractionCleanup } from '@/hooks/use-interaction-recovery';
 
 export type CleanupFn = () => void;
 
 export function useMobileNavigation(): CleanupFn {
+    const cleanup = useInteractionCleanup();
+
     return useCallback(() => {
-        // Remove pointer-events style from body...
-        document.body.style.removeProperty('pointer-events');
-    }, []);
+        cleanup({ removeClosedArtifacts: true });
+    }, [cleanup]);
 }

@@ -10,7 +10,7 @@ class BatchCapacityChartWidget extends ChartWidget
 {
     protected ?string $heading = 'Kapasitas Batch per Jenjang';
 
-    protected ?string $description = 'Total kapasitas vs total pendaftar yang sudah masuk batch, dikelompokkan per jenjang.';
+    protected ?string $description = 'Total kapasitas vs total pendaftar per jenjang: SD, SMP, SMA, dan UMUM.';
 
     protected ?string $pollingInterval = '60s';
 
@@ -23,27 +23,54 @@ class BatchCapacityChartWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $levels = ['SD', 'SMP', 'SMA', 'UMUM'];
+        $levels = [
+            'SD' => 'SD',
+            'SMP' => 'SMP',
+            'SMA' => 'SMA',
+            'UMUM' => 'UMUM',
+        ];
+
+        $capacityBucketExpression = "
+            CASE
+                WHEN education_level = 'SD' THEN 'SD'
+                WHEN education_level = 'SMP' THEN 'SMP'
+                WHEN education_level = 'SMA' THEN 'SMA'
+                WHEN education_level = 'UMUM' THEN 'UMUM'
+                ELSE NULL
+            END
+        ";
+
+        $filledBucketExpression = "
+            CASE
+                WHEN batches.education_level = 'SD' THEN 'SD'
+                WHEN batches.education_level = 'SMP' THEN 'SMP'
+                WHEN batches.education_level = 'SMA' THEN 'SMA'
+                WHEN batches.education_level = 'UMUM' THEN 'UMUM'
+                ELSE NULL
+            END
+        ";
 
         $capacityRows = Batch::query()
-            ->selectRaw("COALESCE(education_level, 'UMUM') as lvl, SUM(max_capacity) as total_capacity")
-            ->groupBy(DB::raw("COALESCE(education_level, 'UMUM')"))
+            ->selectRaw("{$capacityBucketExpression} as lvl, SUM(max_capacity) as total_capacity")
+            ->whereNotNull('education_level')
+            ->groupBy(DB::raw($capacityBucketExpression))
             ->pluck('total_capacity', 'lvl')
             ->toArray();
 
         $filledRows = Batch::query()
             ->leftJoin('registrations', 'registrations.batch_id', '=', 'batches.id')
+            ->whereNotNull('batches.education_level')
             ->whereNull('registrations.deleted_at')
-            ->selectRaw("COALESCE(batches.education_level, 'UMUM') as lvl, COUNT(registrations.id) as total_filled")
-            ->groupBy(DB::raw("COALESCE(batches.education_level, 'UMUM')"))
+            ->selectRaw("{$filledBucketExpression} as lvl, COUNT(registrations.id) as total_filled")
+            ->groupBy(DB::raw($filledBucketExpression))
             ->pluck('total_filled', 'lvl')
             ->toArray();
 
         $capacity = [];
         $filled = [];
-        foreach ($levels as $level) {
-            $capacity[] = (int) ($capacityRows[$level] ?? 0);
-            $filled[] = (int) ($filledRows[$level] ?? 0);
+        foreach ($levels as $bucket => $label) {
+            $capacity[] = (int) ($capacityRows[$bucket] ?? 0);
+            $filled[] = (int) ($filledRows[$bucket] ?? 0);
         }
 
         return [
@@ -63,7 +90,7 @@ class BatchCapacityChartWidget extends ChartWidget
                     'borderWidth' => 1,
                 ],
             ],
-            'labels' => $levels,
+            'labels' => array_values($levels),
         ];
     }
 }

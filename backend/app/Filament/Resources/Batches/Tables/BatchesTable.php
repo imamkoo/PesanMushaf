@@ -36,22 +36,32 @@ class BatchesTable
                     ->label('Nama Batch')
                     ->description(fn (Batch $record): string => $record->slug)
                     ->searchable(),
+                TextColumn::make('admin_segment')
+                    ->label('Kategori')
+                    ->badge()
+                    ->state(fn (Batch $record): string => self::adminSegmentLabel($record))
+                    ->color(fn (Batch $record): string => match (self::adminSegmentLabel($record)) {
+                        'UMUM' => 'danger',
+                        'Non-UMUM' => 'primary',
+                        default => 'gray',
+                    }),
                 TextColumn::make('district.name')
                     ->label('Kecamatan')
-                    ->placeholder('VIP Jakarta (Global)')
+                    ->placeholder('VIP Global')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('education_level')
                     ->label('Jenjang')
                     ->badge()
-                    ->placeholder('Semua jenjang')
+                    ->placeholder('VIP Global')
                     ->color(fn (?string $state): string => match ($state) {
                         'SD' => 'success',
                         'SMP' => 'warning',
                         'SMA' => 'danger',
                         'UMUM' => 'info',
                         default => 'gray',
-                    }),
+                    })
+                    ->formatStateUsing(fn (?string $state): string => filled($state) ? (string) $state : 'VIP Global'),
                 TextColumn::make('registrations_count')
                     ->label('Terisi / Kapasitas')
                     ->state(fn (Batch $record): string => ($record->registrations_count ?? 0).' / '.$record->max_capacity)
@@ -61,22 +71,11 @@ class BatchesTable
                     }),
                 TextColumn::make('fill_percentage')
                     ->label('Progress')
-                    ->state(function (Batch $record): string {
-                        if ($record->max_capacity <= 0) {
-                            return '0%';
-                        }
-
-                        $pct = min(100, round((($record->registrations_count ?? 0) / $record->max_capacity) * 100));
-
-                        return $pct.'%';
-                    })
+                    ->state(fn (Batch $record): string => $record->fillPercentage((int) ($record->registrations_count ?? 0)).'%')
                     ->badge()
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderByOccupancy($direction))
                     ->color(function (Batch $record): string {
-                        if ($record->max_capacity <= 0) {
-                            return 'gray';
-                        }
-
-                        $pct = ($record->registrations_count ?? 0) / $record->max_capacity;
+                        $pct = $record->occupancyRatio((int) ($record->registrations_count ?? 0));
 
                         return match (true) {
                             $pct >= 1.0 => 'danger',
@@ -133,6 +132,36 @@ class BatchesTable
                         false: fn (Builder $query): Builder => $query->whereFullByOccupancy(false),
                         blank: fn (Builder $query): Builder => $query,
                     ),
+                SelectFilter::make('progress_band')
+                    ->label('Progress Batch')
+                    ->options([
+                        'full' => '100% (Penuh)',
+                        'high' => '80 - 99%',
+                        'low' => 'Di bawah 80%',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'full' => $query->whereFullByOccupancy(true),
+                            'high' => $query->whereOccupancyBetween(0.8, 1.0),
+                            'low' => $query->whereOccupancyBetween(null, 0.8),
+                            default => $query,
+                        };
+                    }),
+                SelectFilter::make('admin_segment')
+                    ->label('Kategori')
+                    ->options([
+                        'umum' => 'UMUM',
+                        'non_umum' => 'Non-UMUM',
+                        'global_null' => 'VIP Global',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'umum' => $query->whereUmum(),
+                            'non_umum' => $query->whereNonUmum(),
+                            'global_null' => $query->whereGlobalOrNull(),
+                            default => $query,
+                        };
+                    }),
                 Filter::make('vip_global')
                     ->label('VIP Jakarta (global)')
                     ->query(fn (Builder $query): Builder => $query->whereNull('district_id')->whereNull('education_level'))
@@ -150,5 +179,14 @@ class BatchesTable
                     RestoreBulkAction::make(),
                 ]),
             ]);
+    }
+
+    private static function adminSegmentLabel(Batch $record): string
+    {
+        return match (true) {
+            $record->education_level === 'UMUM' => 'UMUM',
+            $record->education_level === null => 'VIP Global',
+            default => 'Non-UMUM',
+        };
     }
 }
