@@ -51,6 +51,11 @@ jobs:
       - name: Generate App Key
         run: php artisan key:generate
 
+      - name: Install Node Dependencies & Build Assets
+        run: |
+          npm ci || npm install
+          npm run build
+
       - name: Run Pint (Code Style Check)
         run: ./vendor/bin/pint --test
 

@@ -5,25 +5,18 @@ namespace App\Filament\Resources\Districts;
 use App\Filament\Resources\Districts\Pages\CreateDistrict;
 use App\Filament\Resources\Districts\Pages\EditDistrict;
 use App\Filament\Resources\Districts\Pages\ListDistricts;
-use App\Filament\Resources\Districts\Schemas\DistrictForm;
-use App\Filament\Resources\Districts\Tables\DistrictsTable;
 use App\Models\District;
 use BackedEnum;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;        
-use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DistrictResource extends Resource
 {
@@ -53,27 +46,27 @@ class DistrictResource extends Resource
     }
 
     public static function table(Table $table): Table
-{
-    return $table
-        ->columns([
-            Tables\Columns\ImageColumn::make('photo')
-                ->label('Foto Wilayah')
-                ->circular(),
-            Tables\Columns\TextColumn::make('name')
-                ->label('Kecamatan')
-                ->searchable()
-                ->sortable(),
-            Tables\Columns\TextColumn::make('slug')
-                ->fontFamily('mono') // Tampilan kode
-                ->color('gray'),
-            // Menampilkan jumlah Batch yang ada di kecamatan ini
-            Tables\Columns\TextColumn::make('batches_count')
-                ->counts('batches')
-                ->label('Total Batch')
-                ->badge()
-                ->color('info'),
-        ]);
-}
+    {
+        return $table
+            ->columns([
+                ImageColumn::make('photo')
+                    ->label('Foto Wilayah')
+                    ->circular(),
+                TextColumn::make('name')
+                    ->label('Kecamatan')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('slug')
+                    ->fontFamily('mono') // Tampilan kode
+                    ->color('gray'),
+                // Menampilkan jumlah Batch yang ada di kecamatan ini
+                TextColumn::make('batches_count')
+                    ->counts('batches')
+                    ->label('Total Batch')
+                    ->badge()
+                    ->color('info'),
+            ]);
+    }
 
     public static function getRelations(): array
     {

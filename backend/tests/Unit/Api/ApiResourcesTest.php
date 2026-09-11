@@ -20,7 +20,7 @@ test('district resource maps expected fields', function () {
     ]);
     $district->id = 10;
 
-    $data = DistrictResource::make($district)->toArray(new Request());
+    $data = DistrictResource::make($district)->toArray(new Request);
 
     expect($data)->toMatchArray([
         'id' => 10,
@@ -39,7 +39,7 @@ test('university resource maps expected fields', function () {
     ]);
     $university->id = 11;
 
-    $data = UniversityResource::make($university)->toArray(new Request());
+    $data = UniversityResource::make($university)->toArray(new Request);
 
     expect($data)->toMatchArray([
         'id' => 11,
@@ -69,7 +69,7 @@ test('batch resource includes district relation when loaded', function () {
     $batch->id = 21;
     $batch->setRelation('district', $district);
 
-    $data = BatchResource::make($batch)->toArray(new Request());
+    $data = BatchResource::make($batch)->toArray(new Request);
 
     expect($data)->toMatchArray([
         'id' => 21,
@@ -117,7 +117,7 @@ test('registration resource includes financial and nested relations', function (
     $registration->setRelation('district', $district);
     $registration->setRelation('batch', $batch);
 
-    $data = RegistrationResource::make($registration)->toArray(new Request());
+    $data = RegistrationResource::make($registration)->toArray(new Request);
 
     expect($data)->toMatchArray([
         'id' => 32,
@@ -145,7 +145,7 @@ test('registration status resource returns compact status payload', function () 
     ]);
     $registration->id = 33;
 
-    $data = RegistrationStatusResource::make($registration)->toArray(new Request());
+    $data = RegistrationStatusResource::make($registration)->toArray(new Request);
 
     expect($data)->toMatchArray([
         'id' => 33,

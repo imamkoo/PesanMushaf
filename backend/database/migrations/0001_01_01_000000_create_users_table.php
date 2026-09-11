@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            
+
             // --- Tambahan Standar Top 1% ---
             $table->string('phone_number')->nullable(); // Penting untuk koordinasi logistik via WhatsApp
             $table->string('avatar')->nullable();       // Standar aplikasi profesional (foto profil)

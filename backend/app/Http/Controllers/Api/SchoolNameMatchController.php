@@ -14,7 +14,9 @@ use Illuminate\Validation\Rule;
 class SchoolNameMatchController extends Controller
 {
     private const MAX_CANDIDATES = 200;
+
     private const RESULT_LIMIT = 3;
+
     private const DEFAULT_THRESHOLD = 0.65;
 
     public function __invoke(Request $request): JsonResponse
@@ -57,7 +59,7 @@ class SchoolNameMatchController extends Controller
     }
 
     /**
-     * @param array{q: string, district_id?: int|null, education_level: string} $validated
+     * @param  array{q: string, district_id?: int|null, education_level: string}  $validated
      * @return Collection<int, array{name: string, normalized: string}>
      */
     private function loadCandidates(array $validated): Collection

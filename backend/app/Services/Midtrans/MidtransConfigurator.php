@@ -15,8 +15,6 @@ final class MidtransConfigurator
 
     /**
      * Opsi verify untuk klien HTTP Guzzle (sertifikat / dev tanpa CA bundle).
-     *
-     * @return bool|string
      */
     public static function guzzleVerify(): bool|string
     {

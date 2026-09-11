@@ -35,12 +35,12 @@ class RegistrationsTable
                     ->weight('bold')
                     ->color('primary')
                     ->description(fn (Registration $record): string => 'Daftar '.($record->created_at?->format('d M Y H:i') ?? '-')),
-                    
+
                 TextColumn::make('district.name')
-                        ->label('Kecamatan')
-                        ->sortable()
-                        ->searchable()
-                        ->placeholder('-'),
+                    ->label('Kecamatan')
+                    ->sortable()
+                    ->searchable()
+                    ->placeholder('-'),
 
                 TextColumn::make('name')
                     ->label('Nama')
@@ -49,7 +49,6 @@ class RegistrationsTable
                     ->weight('bold')
                     ->description(fn (Registration $record): ?string => self::schoolSummary($record))
                     ->wrap(),
-
 
                 TextColumn::make('batch.name')
                     ->label('Batch')
@@ -95,7 +94,7 @@ class RegistrationsTable
                         'failed' => 'danger',
                         default => 'gray',
                     }),
-                
+
                 TextColumn::make('admin_segment')
                     ->label('Kelompok')
                     ->badge()

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\ApiKeys\Schemas;
 
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section; 
-use Filament\Forms\Components\TextInput; 
 use Illuminate\Support\Str;
 
 class ApiKeyForm
@@ -21,10 +21,10 @@ class ApiKeyForm
 
                     TextInput::make('key')
                         ->label('API Key Secret')
-                        ->default(fn () => 'mushaf_' . Str::random(32))
+                        ->default(fn () => 'mushaf_'.Str::random(32))
                         ->readonly()
                         ->required(),
-                ])
+                ]),
         ]);
     }
 }
