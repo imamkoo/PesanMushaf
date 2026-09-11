@@ -4,6 +4,7 @@ namespace App\Services\Midtrans;
 
 use App\Models\Registration;
 use Illuminate\Support\Facades\Http;
+use Midtrans\Config;
 use RuntimeException;
 use Throwable;
 
@@ -19,7 +20,7 @@ final class MidtransRegistrationSyncService
         MidtransConfigurator::apply();
 
         $orderId = $registration->registration_code;
-        $baseUrl = \Midtrans\Config::getBaseUrl();
+        $baseUrl = Config::getBaseUrl();
         $url = $baseUrl.'/v2/'.rawurlencode($orderId).'/status';
         $serverKey = (string) config('midtrans.server_key');
 

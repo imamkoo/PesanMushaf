@@ -63,7 +63,7 @@ class SchoolNameNormalizer
     ];
 
     /**
-     * @return string|null  Versi kanonik (lowercase, ringkas), atau null kalau input kosong.
+     * @return string|null Versi kanonik (lowercase, ringkas), atau null kalau input kosong.
      */
     public static function normalize(?string $raw): ?string
     {
@@ -90,9 +90,9 @@ class SchoolNameNormalizer
             return null;
         }
 
-        $padded = ' ' . $value . ' ';
+        $padded = ' '.$value.' ';
         foreach (self::SYNONYMS as $needle => $replacement) {
-            $padded = str_replace(' ' . $needle . ' ', ' ' . $replacement . ' ', $padded);
+            $padded = str_replace(' '.$needle.' ', ' '.$replacement.' ', $padded);
         }
         $value = trim($padded);
 
