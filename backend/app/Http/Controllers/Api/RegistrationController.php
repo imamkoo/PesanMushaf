@@ -8,6 +8,7 @@ use App\Http\Resources\Api\RegistrationStatusResource;
 use App\Models\Registration;
 use App\Services\RegistrationService;
 use App\Support\IndonesianPhone;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -115,19 +116,7 @@ class RegistrationController extends Controller
     private function lookupRegistrationStatus(string $lookupValue): JsonResponse
     {
         try {
-            $lookup = mb_strtoupper((string) preg_replace('/\s+/', '', $lookupValue));
-            $phoneNorm = IndonesianPhone::normalizeWhatsAppTarget($lookupValue);
-
-            $registrations = Registration::query()
-                ->with(['district', 'batch'])
-                ->where(function ($query) use ($lookup, $phoneNorm) {
-                    $query->where('registration_code', $lookup);
-                    if ($phoneNorm !== '') {
-                        $query->orWhere('phone_number', $phoneNorm);
-                    }
-                })
-                ->orderByDesc('id')
-                ->get();
+            $registrations = $this->findMatchingRegistrations($lookupValue);
 
             if ($registrations->isEmpty()) {
                 throw new ModelNotFoundException;
@@ -162,5 +151,73 @@ class RegistrationController extends Controller
 
             return response()->json($response, 500);
         }
+    }
+
+    private function findMatchingRegistrations(string $lookupValue): Collection
+    {
+        $lookup = mb_strtoupper((string) preg_replace('/\s+/', '', $lookupValue));
+        $phoneNorm = IndonesianPhone::normalizeWhatsAppTarget($lookupValue);
+
+        $exactCodeMatches = $this->baseLookupQuery()
+            ->where('registration_code', $lookup)
+            ->get();
+
+        if ($exactCodeMatches->isNotEmpty()) {
+            return $exactCodeMatches;
+        }
+
+        if ($this->looksLikePhoneLookup($lookupValue, $phoneNorm)) {
+            $phoneMatches = $this->baseLookupQuery()
+                ->where('phone_number', $phoneNorm)
+                ->get();
+
+            if ($phoneMatches->isNotEmpty()) {
+                return $phoneMatches;
+            }
+        }
+
+        if (! $this->looksLikeSuffixLookup($lookup)) {
+            return new Collection;
+        }
+
+        return $this->baseLookupQuery()
+            ->where('registration_code', 'like', '%-'.$lookup)
+            ->get()
+            ->filter(fn (Registration $registration): bool => $this->extractLastCodeSegment($registration->registration_code) === $lookup)
+            ->values();
+    }
+
+    private function baseLookupQuery()
+    {
+        return Registration::query()
+            ->with(['district', 'batch'])
+            ->orderByDesc('id');
+    }
+
+    private function looksLikePhoneLookup(string $lookupValue, string $phoneNorm): bool
+    {
+        if ($phoneNorm === '' || strlen($phoneNorm) < 9) {
+            return false;
+        }
+
+        return preg_match('/^[\d\s()+-]+$/', trim($lookupValue)) === 1;
+    }
+
+    private function looksLikeSuffixLookup(string $lookup): bool
+    {
+        if ($lookup === '' || str_contains($lookup, '-')) {
+            return false;
+        }
+
+        return preg_match('/^[A-Z0-9]{4,16}$/', $lookup) === 1;
+    }
+
+    private function extractLastCodeSegment(string $registrationCode): string
+    {
+        $position = strrpos($registrationCode, '-');
+
+        return $position === false
+            ? mb_strtoupper($registrationCode)
+            : mb_strtoupper(substr($registrationCode, $position + 1));
     }
 }

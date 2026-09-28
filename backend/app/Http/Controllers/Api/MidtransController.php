@@ -8,6 +8,7 @@ use App\Models\Registration;
 use App\Services\Midtrans\MidtransPaymentStatusMapper;
 use App\Services\Midtrans\MidtransRegistrationSyncService;
 use App\Services\Midtrans\NotificationSignatureVerifier;
+use App\Services\WhatsApp\PaymentSuccessWhatsAppNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
@@ -164,8 +165,18 @@ class MidtransController extends Controller
 
         if ($newStatus !== null && $previousStatus !== $newStatus) {
             $registration->update(['payment_status' => $newStatus]);
+            $this->notifyPaymentSuccess($registration);
         }
 
         return response()->json(['success' => true, 'message' => 'OK']);
+    }
+
+    private function notifyPaymentSuccess(Registration $registration): void
+    {
+        try {
+            app(PaymentSuccessWhatsAppNotifier::class)->send($registration);
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }

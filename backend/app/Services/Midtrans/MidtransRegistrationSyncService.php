@@ -3,6 +3,7 @@
 namespace App\Services\Midtrans;
 
 use App\Models\Registration;
+use App\Services\WhatsApp\PaymentSuccessWhatsAppNotifier;
 use Illuminate\Support\Facades\Http;
 use Midtrans\Config;
 use RuntimeException;
@@ -60,7 +61,17 @@ final class MidtransRegistrationSyncService
         }
 
         $registration->update(['payment_status' => $newStatus]);
+        $this->notifyPaymentSuccess($registration);
 
         return true;
+    }
+
+    private function notifyPaymentSuccess(Registration $registration): void
+    {
+        try {
+            app(PaymentSuccessWhatsAppNotifier::class)->send($registration);
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }

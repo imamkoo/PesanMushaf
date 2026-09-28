@@ -174,6 +174,79 @@ it('returns every registration code when one WhatsApp number has multiple regist
         ->assertJsonFragment(['registration_code' => $secondCode]);
 });
 
+it('can look up a registration status with the final booking code suffix only', function () {
+    $district = District::query()->create([
+        'name' => 'Gambir',
+        'code' => '310003',
+    ]);
+
+    $registrationResponse = $this->postJson('/api/register', [
+        'district_id' => $district->id,
+        'education_level' => 'SMA',
+        'edition' => 'reguler',
+        'name' => 'Raya Pratama',
+        'phone_number' => '6281234567890',
+        'school_name' => 'SMAN 1 Jakarta',
+    ])->assertCreated();
+
+    $registrationCode = $registrationResponse->json('data.registration_code');
+    $suffix = Str::of($registrationCode)->afterLast('-')->toString();
+
+    $this->getJson('/api/registrations/status?lookup='.$suffix)
+        ->assertSuccessful()
+        ->assertJsonPath('success', true)
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.registration_code', $registrationCode);
+});
+
+it('returns every matching registration when the final booking code suffix collides', function () {
+    $district = District::query()->create([
+        'name' => 'Gambir',
+        'code' => '310003',
+    ]);
+
+    $first = $this->postJson('/api/register', [
+        'district_id' => $district->id,
+        'education_level' => 'SMA',
+        'edition' => 'reguler',
+        'name' => 'Raya Pratama',
+        'phone_number' => '6281999000001',
+        'school_name' => 'SMAN 1 Jakarta',
+    ])->assertCreated();
+
+    $second = $this->postJson('/api/register', [
+        'district_id' => $district->id,
+        'education_level' => 'SMP',
+        'edition' => 'reguler',
+        'name' => 'Raya Kedua',
+        'phone_number' => '6281999000002',
+        'school_name' => 'SMPN 2 Jakarta',
+    ])->assertCreated();
+
+    $firstCode = $first->json('data.registration_code');
+    $secondCode = $second->json('data.registration_code');
+    $sharedSuffix = 'ABCD';
+
+    Registration::query()
+        ->where('registration_code', $firstCode)
+        ->update([
+            'registration_code' => '310003-REGULER-SMA-MUSHAF1-001-SMAN01-'.$sharedSuffix,
+        ]);
+
+    Registration::query()
+        ->where('registration_code', $secondCode)
+        ->update([
+            'registration_code' => '310003-REGULER-SMP-MUSHAF1-002-SMPN02-'.$sharedSuffix,
+        ]);
+
+    $this->getJson('/api/registrations/status?lookup='.$sharedSuffix)
+        ->assertSuccessful()
+        ->assertJsonPath('success', true)
+        ->assertJsonCount(2, 'data')
+        ->assertJsonFragment(['registration_code' => '310003-REGULER-SMA-MUSHAF1-001-SMAN01-'.$sharedSuffix])
+        ->assertJsonFragment(['registration_code' => '310003-REGULER-SMP-MUSHAF1-002-SMPN02-'.$sharedSuffix]);
+});
+
 it('returns active price categories from the public api', function () {
     $this->getJson('/api/price-categories')
         ->assertSuccessful()
