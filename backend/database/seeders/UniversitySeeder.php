@@ -13,7 +13,7 @@ class UniversitySeeder extends Seeder
         // Link API Aktif (REST Service - Global University Database)
         $url = 'http://universities.hipolabs.com/search?country=Indonesia';
 
-        $this->command->info("🛰️ Menghubungi API Hipolabs untuk data universitas Indonesia...");
+        $this->command->info('🛰️ Menghubungi API Hipolabs untuk data universitas Indonesia...');
 
         try {
             // Mengambil data dengan bypass SSL untuk stabilitas di macOS/Localhost
@@ -29,7 +29,7 @@ class UniversitySeeder extends Seeder
 
                 foreach ($universities as $uni) {
                     $name = strtoupper($uni['name']);
-                    
+
                     // Logika Filter: Jika nama mengandung keyword Jakarta atau kampus besar Jakarta
                     $isJakarta = false;
                     foreach ($jakartaKeywords as $key) {
@@ -41,10 +41,10 @@ class UniversitySeeder extends Seeder
 
                     if ($isJakarta) {
                         University::updateOrCreate(
-                            ['name' => $uni['name']], 
+                            ['name' => $uni['name']],
                             [
                                 'type' => str_contains($name, 'NEGERI') ? 'PTN' : 'PTS',
-                                'city' => 'Jakarta'
+                                'city' => 'Jakarta',
                             ]
                         );
                         $count++;
@@ -54,7 +54,7 @@ class UniversitySeeder extends Seeder
                 $this->command->info("✅ Berhasil sinkronisasi {$count} Universitas Jakarta dari API!");
             }
         } catch (\Exception $e) {
-            $this->command->error("❌ Koneksi API Gagal: " . $e->getMessage());
+            $this->command->error('❌ Koneksi API Gagal: '.$e->getMessage());
         }
     }
 }

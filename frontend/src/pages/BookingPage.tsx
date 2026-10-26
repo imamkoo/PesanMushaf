@@ -29,7 +29,8 @@ type FormValues = {
   address: string
 }
 
-type FormErrors = Partial<Record<keyof FormValues, string>>
+type FormErrorKey = keyof FormValues | 'address_confirmation'
+type FormErrors = Partial<Record<FormErrorKey, string>>
 type SchoolMatchState = {
   query: string
   districtId: string
@@ -79,6 +80,7 @@ export function BookingPage() {
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState('')
+  const [hasConfirmedAddressReview, setHasConfirmedAddressReview] = useState(false)
   const [hasChosenEdition, setHasChosenEdition] = useState(false)
   const [isEditionModalOpen, setIsEditionModalOpen] = useState(true)
   const [schoolOptions, setSchoolOptions] = useState<ApiOption[]>([])
@@ -129,6 +131,7 @@ export function BookingPage() {
   const canChooseSchool = values.education_level === 'UMUM' || Boolean(values.district_id)
   const schoolCatalogHint = schoolEmptyCatalogHint(values, isLoadingSchools, schoolLoadError, schoolOptions.length)
   const needsPersonalDocs = requiresPersonalDocs(values)
+  const trimmedAddress = values.address.trim()
   const activeSchoolMatchQuery =
     values.school_name === customSchoolValue && !didYouMeanDismissed
       ? values.custom_school_name.trim()
@@ -239,17 +242,19 @@ export function BookingPage() {
       nextValues.address = ''
     }
 
+    setHasConfirmedAddressReview(false)
     setValues(nextValues)
     setHasChosenEdition(true)
     setIsEditionModalOpen(false)
 
     if (hasSubmitted) {
-      setErrors(validate(nextValues, priceBySlug))
+      setErrors(buildFormErrors(nextValues, priceBySlug, false))
     }
   }
 
   function updateValue(name: keyof FormValues, value: string) {
     const nextValues = { ...values, [name]: value } as FormValues
+    let nextAddressConfirmation = hasConfirmedAddressReview
 
     if (name === 'district_id' || name === 'education_level') {
       nextValues.school_name = ''
@@ -269,15 +274,29 @@ export function BookingPage() {
       nextValues.nik = value.replace(/\D/g, '').slice(0, 16)
     }
 
+    if (name === 'address') {
+      nextAddressConfirmation = false
+    }
+
     if (name === 'education_level' && !requiresPersonalDocs(nextValues)) {
       nextValues.nik = ''
       nextValues.address = ''
+      nextAddressConfirmation = false
     }
 
+    setHasConfirmedAddressReview(nextAddressConfirmation)
     setValues(nextValues)
 
     if (hasSubmitted) {
-      setErrors(validate(nextValues, priceBySlug))
+      setErrors(buildFormErrors(nextValues, priceBySlug, nextAddressConfirmation))
+    }
+  }
+
+  function updateAddressReviewConfirmation(checked: boolean) {
+    setHasConfirmedAddressReview(checked)
+
+    if (hasSubmitted) {
+      setErrors(buildFormErrors(values, priceBySlug, checked))
     }
   }
 
@@ -316,7 +335,7 @@ export function BookingPage() {
       return
     }
 
-    const nextErrors = validate(values, priceBySlug)
+    const nextErrors = buildFormErrors(values, priceBySlug, hasConfirmedAddressReview)
     setErrors(nextErrors)
 
     if (Object.keys(nextErrors).length > 0) {
@@ -495,6 +514,37 @@ export function BookingPage() {
                         onChange={updateValue}
                       />
                     </div>
+
+                    <div className="mt-5 rounded-[22px] border border-[#ed3833]/20 bg-white p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ed3833]">Review Alamat Pengiriman</p>
+                      <p className="mt-2 text-sm font-semibold leading-6 text-[#111111]/70">
+                        Alamat ini akan dipakai untuk pengiriman. Periksa kembali nama jalan, RT/RW, kelurahan, kecamatan, kota, dan kode pos sebelum melanjutkan.
+                      </p>
+
+                      <div className="mt-4 rounded-[18px] bg-[#faf8f4] p-4">
+                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#111111]/42">Alamat yang akan disimpan</p>
+                        <p className={`mt-2 text-sm font-semibold leading-6 ${trimmedAddress ? 'text-[#111111]' : 'text-[#111111]/42'}`}>
+                          {trimmedAddress || 'Alamat lengkap Anda akan muncul di sini setelah diisi.'}
+                        </p>
+                      </div>
+
+                      <ul className="mt-4 grid gap-2 text-sm font-semibold leading-6 text-[#111111]/72">
+                        <li>Nama penerima dan detail lokasi harus cukup jelas untuk kurir.</li>
+                        <li>Gunakan alamat yang benar-benar aktif untuk menerima pengiriman.</li>
+                        <li>Jika ada typo setelah submit, segera hubungi helpdesk dengan kode pendaftaran.</li>
+                      </ul>
+
+                      <label className="mt-4 flex items-start gap-3 rounded-[18px] border border-black/8 bg-[#fff7f7] p-4 text-sm font-bold leading-6 text-[#111111]">
+                        <input
+                          type="checkbox"
+                          checked={hasConfirmedAddressReview}
+                          onChange={(event) => updateAddressReviewConfirmation(event.target.checked)}
+                          className="mt-1 h-5 w-5 rounded border border-black/20 accent-[#ed3833]"
+                        />
+                        <span>Saya sudah memeriksa alamat pengiriman dan memastikan data yang saya tulis lengkap serta benar.</span>
+                      </label>
+                      {errors.address_confirmation ? <p className="mt-3 text-sm font-bold text-[#ed3833]">{errors.address_confirmation}</p> : null}
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -616,6 +666,20 @@ function schoolEmptyCatalogHint(values: FormValues, isLoadingSchools: boolean, l
 
 function resolveSchoolName(values: FormValues) {
   return values.school_name === customSchoolValue ? values.custom_school_name.trim() : values.school_name.trim()
+}
+
+function buildFormErrors(
+  values: FormValues,
+  priceBySlug: Record<string, number>,
+  hasConfirmedAddressReview: boolean,
+): FormErrors {
+  const nextErrors = validate(values, priceBySlug)
+
+  if (requiresPersonalDocs(values) && !hasConfirmedAddressReview) {
+    nextErrors.address_confirmation = 'Centang konfirmasi setelah memeriksa alamat pengiriman.'
+  }
+
+  return nextErrors
 }
 
 function validate(values: FormValues, priceBySlug: Record<string, number>): FormErrors {

@@ -158,6 +158,14 @@ export function BookingFinishedPage() {
                   {registration.nik ? <Info label="NIK" value={maskNik(registration.nik)} /> : null}
                   {registration.address ? <Info label="Alamat" value={registration.address} /> : null}
                 </div>
+                {registration.address ? (
+                  <div className="mt-5 rounded-[22px] border border-[#ed3833]/14 bg-[#fff7f7] p-4">
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ed3833]">Cek Alamat Pengiriman</p>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-[#111111]/72">
+                      Pastikan alamat di atas sudah benar dan lengkap untuk pengiriman. Bila ada kekeliruan, segera hubungi helpdesk sambil menyertakan kode pendaftaran ini.
+                    </p>
+                  </div>
+                ) : null}
               </div>
               <div className={`rounded-[30px] p-5 text-white sm:p-6 ${statusUi?.asideClass}`}>
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-white/60">{statusUi?.eyebrow}</p>

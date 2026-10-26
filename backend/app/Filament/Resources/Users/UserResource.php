@@ -5,24 +5,17 @@ namespace App\Filament\Resources\Users;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Filament\Resources\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;        
-use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
@@ -56,30 +49,30 @@ class UserResource extends Resource
     }
 
     public static function table(Table $table): Table
-{
-    return $table
-        ->columns([
-            Tables\Columns\ImageColumn::make('avatar')
-                ->circular(),
-            Tables\Columns\TextColumn::make('name')
-                ->label('Nama Lengkap')
-                ->searchable()
-                ->sortable(),
-            Tables\Columns\TextColumn::make('email')
-                ->copyable(), // Admin bisa klik untuk copy email
-            Tables\Columns\TextColumn::make('phone_number')
-                ->label('WhatsApp')
-                ->icon('heroicon-o-chat-bubble-left-right') // Ikon WA
-                ->searchable(),
-            Tables\Columns\TextColumn::make('role')
-                ->label('Hak Akses')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'admin' => 'danger',
-                    'buyer' => 'gray',
-                }),
-        ]);
-}
+    {
+        return $table
+            ->columns([
+                ImageColumn::make('avatar')
+                    ->circular(),
+                TextColumn::make('name')
+                    ->label('Nama Lengkap')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('email')
+                    ->copyable(), // Admin bisa klik untuk copy email
+                TextColumn::make('phone_number')
+                    ->label('WhatsApp')
+                    ->icon('heroicon-o-chat-bubble-left-right') // Ikon WA
+                    ->searchable(),
+                TextColumn::make('role')
+                    ->label('Hak Akses')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'admin' => 'danger',
+                        'buyer' => 'gray',
+                    }),
+            ]);
+    }
 
     public static function getRelations(): array
     {

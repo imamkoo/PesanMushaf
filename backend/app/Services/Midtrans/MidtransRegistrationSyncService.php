@@ -3,7 +3,9 @@
 namespace App\Services\Midtrans;
 
 use App\Models\Registration;
+use App\Services\WhatsApp\PaymentSuccessWhatsAppNotifier;
 use Illuminate\Support\Facades\Http;
+use Midtrans\Config;
 use RuntimeException;
 use Throwable;
 
@@ -19,7 +21,7 @@ final class MidtransRegistrationSyncService
         MidtransConfigurator::apply();
 
         $orderId = $registration->registration_code;
-        $baseUrl = \Midtrans\Config::getBaseUrl();
+        $baseUrl = Config::getBaseUrl();
         $url = $baseUrl.'/v2/'.rawurlencode($orderId).'/status';
         $serverKey = (string) config('midtrans.server_key');
 
@@ -59,7 +61,17 @@ final class MidtransRegistrationSyncService
         }
 
         $registration->update(['payment_status' => $newStatus]);
+        $this->notifyPaymentSuccess($registration);
 
         return true;
+    }
+
+    private function notifyPaymentSuccess(Registration $registration): void
+    {
+        try {
+            app(PaymentSuccessWhatsAppNotifier::class)->send($registration);
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }
