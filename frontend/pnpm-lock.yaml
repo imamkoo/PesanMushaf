@@ -29,16 +29,16 @@ importers:
         version: 10.0.1(eslint@10.3.0(jiti@2.7.0))
       '@rolldown/plugin-babel':
         specifier: ^0.2.3
-        version: 0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1))
+        version: 0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1))
       '@tailwindcss/vite':
         specifier: ^4.3.0
-        version: 4.3.0(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1))
+        version: 4.3.0(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1))
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
       '@types/node':
-        specifier: ^24.12.2
-        version: 24.12.3
+        specifier: ^26.6.5
+        version: 26.6.5
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
@@ -47,7 +47,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: ^6.0.1
-        version: 6.0.1(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1)))(babel-plugin-react-compiler@1.0.0)(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1))
+        version: 6.0.1(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1)))(babel-plugin-react-compiler@1.0.0)(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1))
       babel-plugin-react-compiler:
         specifier: ^1.0.0
         version: 1.0.0
@@ -77,10 +77,10 @@ importers:
         version: 8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
       vite:
         specifier: ^8.0.10
-        version: 8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1)
+        version: 8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1)
       vite-plugin-pwa:
         specifier: ^1.3.0
-        version: 1.3.0(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1))(workbox-build@7.4.1(@types/babel__core@7.20.5))(workbox-window@7.4.1)
+        version: 1.3.0(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1))(workbox-build@7.4.1(@types/babel__core@7.20.5))(workbox-window@7.4.1)
       workbox-window:
         specifier: ^7.4.1
         version: 7.4.1
@@ -1277,8 +1277,8 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@types/node@24.12.3':
-    resolution: {integrity: sha512-8oljBDGun9cIsZRJR6fkihn0TSXJI0UDOOhncYaERq6M0JMDoPLxyscwruJcb4GKS6dvK/d8xebYBg27h/duaQ==}
+  '@types/node@26.6.5':
+    resolution: {integrity: sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==}
 
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
@@ -2455,8 +2455,8 @@ packages:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
 
-  undici-types@7.16.0:
-    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
+  undici-types@8.9.0:
+    resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
   unicode-canonical-property-names-ecmascript@2.0.1:
     resolution: {integrity: sha512-dA8WbNeb2a6oQzAQ55YlT5vQAWGV9WXOsi3SskE3bcCdM0P4SDd+24zS/OCacdRq5BkdsRj9q3Pg6YyQoxIGqg==}
@@ -3563,14 +3563,14 @@ snapshots:
   '@rolldown/binding-win32-x64-msvc@1.0.0-rc.18':
     optional: true
 
-  '@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1))':
+  '@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1))':
     dependencies:
       '@babel/core': 7.29.0
       picomatch: 4.0.4
       rolldown: 1.0.0-rc.18
     optionalDependencies:
       '@babel/runtime': 7.29.2
-      vite: 8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1)
+      vite: 8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1)
 
   '@rolldown/pluginutils@1.0.0-rc.18': {}
 
@@ -3756,12 +3756,12 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.3.0
       '@tailwindcss/oxide-win32-x64-msvc': 4.3.0
 
-  '@tailwindcss/vite@4.3.0(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1))':
+  '@tailwindcss/vite@4.3.0(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1))':
     dependencies:
       '@tailwindcss/node': 4.3.0
       '@tailwindcss/oxide': 4.3.0
       tailwindcss: 4.3.0
-      vite: 8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1)
+      vite: 8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1)
 
   '@trickfilm400/rollup-plugin-off-main-thread@3.0.0-pre1':
     dependencies:
@@ -3804,9 +3804,9 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/node@24.12.3':
+  '@types/node@26.6.5':
     dependencies:
-      undici-types: 7.16.0
+      undici-types: 8.9.0
 
   '@types/react-dom@19.2.3(@types/react@19.2.14)':
     dependencies:
@@ -3911,12 +3911,12 @@ snapshots:
       '@typescript-eslint/types': 8.59.2
       eslint-visitor-keys: 5.0.1
 
-  '@vitejs/plugin-react@6.0.1(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1)))(babel-plugin-react-compiler@1.0.0)(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1))':
+  '@vitejs/plugin-react@6.0.1(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1)))(babel-plugin-react-compiler@1.0.0)(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-rc.7
-      vite: 8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1)
+      vite: 8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1)
     optionalDependencies:
-      '@rolldown/plugin-babel': 0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1))
+      '@rolldown/plugin-babel': 0.2.3(@babel/core@7.29.0)(@babel/runtime@7.29.2)(rolldown@1.0.0-rc.18)(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1))
       babel-plugin-react-compiler: 1.0.0
 
   acorn-jsx@5.3.2(acorn@8.16.0):
@@ -5165,7 +5165,7 @@ snapshots:
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
 
-  undici-types@7.16.0: {}
+  undici-types@8.9.0: {}
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
 
@@ -5196,18 +5196,18 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  vite-plugin-pwa@1.3.0(vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1))(workbox-build@7.4.1(@types/babel__core@7.20.5))(workbox-window@7.4.1):
+  vite-plugin-pwa@1.3.0(vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1))(workbox-build@7.4.1(@types/babel__core@7.20.5))(workbox-window@7.4.1):
     dependencies:
       debug: 4.4.3
       pretty-bytes: 6.1.1
       tinyglobby: 0.2.16
-      vite: 8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1)
+      vite: 8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1)
       workbox-build: 7.4.1(@types/babel__core@7.20.5)
       workbox-window: 7.4.1
     transitivePeerDependencies:
       - supports-color
 
-  vite@8.0.11(@types/node@24.12.3)(jiti@2.7.0)(terser@5.47.1):
+  vite@8.0.11(@types/node@26.6.5)(jiti@2.7.0)(terser@5.47.1):
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
@@ -5215,7 +5215,7 @@ snapshots:
       rolldown: 1.0.0-rc.18
       tinyglobby: 0.2.16
     optionalDependencies:
-      '@types/node': 24.12.3
+      '@types/node': 26.6.5
       fsevents: 2.3.3
       jiti: 2.7.0
       terser: 5.47.1
