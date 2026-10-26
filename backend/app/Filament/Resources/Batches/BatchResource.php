@@ -14,8 +14,8 @@ use App\Models\Batch;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -33,7 +33,7 @@ class BatchResource extends Resource
     {
         return BatchForm::configure($schema);
     }
-    
+
     public static function infolist(Schema $schema): Schema
     {
         return BatchInfolist::configure($schema);

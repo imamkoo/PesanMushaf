@@ -169,4 +169,3 @@ test('registration status endpoint returns not found for unknown code', function
         ->assertJsonPath('success', false)
         ->assertJsonPath('message', 'Kode pendaftaran atau nomor WhatsApp tidak ditemukan.');
 });
-

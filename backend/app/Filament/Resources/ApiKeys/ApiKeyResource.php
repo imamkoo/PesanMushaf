@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ApiKeys;
 
-use App\Filament\Resources\ApiKeys\Pages;
 use App\Filament\Resources\ApiKeys\Schemas\ApiKeyForm;
 use App\Filament\Resources\ApiKeys\Tables\ApiKeysTable;
 use App\Models\ApiKey;
@@ -14,8 +13,9 @@ class ApiKeyResource extends Resource
 {
     protected static ?string $model = ApiKey::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-key';
-    protected static string | \UnitEnum | null $navigationGroup = 'Settings';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-key';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 2;
 

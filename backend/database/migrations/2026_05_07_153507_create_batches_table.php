@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('batches', function (Blueprint $table) {
             $table->id();
             $table->foreignId('district_id')->constrained()->cascadeOnDelete();
-            $table->string('name'); 
+            $table->string('name');
             $table->string('slug')->unique();
             $table->string('batch_number'); // Contoh: GEL-01
             $table->string('education_level'); // SD, SMP, SMA, Umum

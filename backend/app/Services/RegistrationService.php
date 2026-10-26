@@ -6,10 +6,12 @@ use App\Models\Batch;
 use App\Models\District;
 use App\Models\PriceCategory;
 use App\Models\Registration;
+use App\Services\WhatsApp\RegistrationSuccessWhatsAppNotifier;
 use App\Support\IndonesianPhone;
 use App\Support\SchoolNameNormalizer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 class RegistrationService
 {
@@ -93,6 +95,10 @@ class RegistrationService
 
             // 7. Sinkronkan flag penuh dengan okupansi aktif batch.
             $batch->syncFullness($pageNumber);
+
+            DB::afterCommit(function () use ($registration): void {
+                self::sendRegistrationSuccessWhatsApp($registration);
+            });
 
             return $registration;
         });
@@ -200,5 +206,14 @@ class RegistrationService
             'max_capacity' => self::BATCH_CAPACITY,
             'is_full' => false,
         ]);
+    }
+
+    private static function sendRegistrationSuccessWhatsApp(Registration $registration): void
+    {
+        try {
+            app(RegistrationSuccessWhatsAppNotifier::class)->send($registration);
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }
