@@ -11,8 +11,7 @@ final class RegistrationSuccessWhatsAppNotifier
     public function __construct(
         private readonly GreenApiClient $greenApiClient,
         private readonly RegistrationSuccessMessageBuilder $messageBuilder,
-    ) {
-    }
+    ) {}
 
     public function send(Registration $registration, ?string $forceRecipient = null): ?string
     {
