@@ -69,9 +69,6 @@ final class GreenApiClient
         return max(1, (int) config('whatsapp.green_api.timeout', 20));
     }
 
-    /**
-     * @return bool|string
-     */
     private function guzzleVerifyOption(): bool|string
     {
         if (! (bool) config('whatsapp.green_api.verify_ssl', true)) {

@@ -11,8 +11,7 @@ final class PaymentSuccessWhatsAppNotifier
     public function __construct(
         private readonly GreenApiClient $greenApiClient,
         private readonly PaymentSuccessMessageBuilder $messageBuilder,
-    ) {
-    }
+    ) {}
 
     public function send(
         Registration $registration,

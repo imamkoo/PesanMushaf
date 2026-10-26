@@ -45,6 +45,9 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Security audit — composer (blocking)
+        run: composer audit --locked
+
       - name: Copy Environment File
         run: cp .env.example .env
 
@@ -87,6 +90,9 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Security audit — pnpm (blocking, critical)
+        run: pnpm audit --prod --audit-level critical
 
       - name: Lint Check
         run: pnpm run lint
