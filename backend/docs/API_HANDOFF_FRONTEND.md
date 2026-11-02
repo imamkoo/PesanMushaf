@@ -56,6 +56,7 @@ Field opsional:
   tetap kompatibel. Untuk `MASJID`, `KOMUNITAS`, dan `UMUM`, `nik` (16 digit) dan `address`
   menjadi **wajib** karena tidak ada sekolah yang bisa dijadikan rujukan verifikasi.
   `school_name` tetap dipakai sebagai nama institusi (nama masjid/komunitas).
+  Kombinasi `institution_type=SEKOLAH` dengan `education_level=UMUM` ditolak `422`.
 - Batch Reguler dipisah per `institution_type`. Batch sekolah tetap dipisah per jenjang
   (`SD|SMP|SMA`); batch `MASJID`, `KOMUNITAS`, dan `UMUM` tidak dicampur satu sama lain.
   Nama batch institusi non-sekolah: `Mushaf Reguler {INSTITUTION_TYPE} {Kecamatan} {n}`.
