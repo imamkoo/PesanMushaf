@@ -1,7 +1,21 @@
-# Deploy Preview — PesanMushaf (tanpa domain, tanpa VPS Litera)
+# Deploy Preview — Save Golden Age (tanpa domain, tanpa VPS Litera)
 
 Dokumen ini menyiapkan hosting **preview/produksi awal** untuk Save Golden Age tanpa memakai
 VPS Litera dan tanpa domain kustom.
+
+## 0) Status live
+
+| Bagian | URL |
+|---|---|
+| Frontend | <https://savegoldenage.vercel.app> |
+| Backend API | <https://savegoldenage-api.onrender.com> |
+| Admin Filament | <https://savegoldenage-api.onrender.com/admin> |
+| Database | Neon project `savegoldenage` |
+
+Deploy otomatis dijalankan `.github/workflows/deploy.yml` setelah workflow **CI** sukses di
+`main`. Rahasia repo yang dibutuhkan: `VERCEL_TOKEN`, `RENDER_API_KEY`, dan
+`RENDER_SERVICE_ID`. Bila salah satu belum diisi, job terkait hanya memberi peringatan dan
+tidak menggagalkan pipeline.
 
 ## 1) Jawaban singkat: bisakah semuanya di Vercel?
 
@@ -70,7 +84,7 @@ Simpan hasilnya sebagai env `APP_KEY` (jangan commit).
    - `MIDTRANS_*` — isi bila alur pembayaran mau diuji (boleh kosong untuk uji form saja)
 4. Deploy. Entrypoint container otomatis menjalankan `php artisan migrate --force`,
    `config:cache`, `view:cache`, lalu Apache.
-5. **Seed data pertama kali:** `RUN_SEEDERS=true` (default di `render.yaml`). Seed mengisi
+5. **Seed data pertama kali:** set `RUN_SEEDERS=true` pada deploy pertama. Seed mengisi
    kecamatan, saran sekolah, dan kampus. Setelah deploy pertama sukses, ubah
    `RUN_SEEDERS=false` lalu redeploy agar cold start tidak menarik data eksternal lagi.
 6. Verifikasi: `GET https://<service>.onrender.com/up` → 200.
@@ -78,8 +92,8 @@ Simpan hasilnya sebagai env `APP_KEY` (jangan commit).
 Build lokal untuk uji image (butuh Docker):
 
 ```bash
-docker build -t pesanmushaf-api ./backend
-docker run --rm -p 8080:80 --env-file backend/.env pesanmushaf-api
+docker build -t savegoldenage-api ./backend
+docker run --rm -p 8080:80 --env-file backend/.env savegoldenage-api
 ```
 
 ### 3.4 Frontend (Vercel)
@@ -119,3 +133,34 @@ docker run --rm -p 8080:80 --env-file backend/.env pesanmushaf-api
 - Free tier bisa berubah kapan saja — verifikasi kuota di dashboard masing-masing provider
   sebelum mengumumkan ke pengguna.
 - Jangan deploy apa pun ke VPS Litera.
+
+## 6) CI/CD (GitHub Actions)
+
+Alur: push/merge ke `main` → workflow **CI** (Pest, Pint, `composer audit`, lint, build) →
+workflow **Deploy** berjalan **hanya jika CI sukses**.
+
+| Job | Aksi | Rahasia |
+|---|---|---|
+| `Deploy frontend (Vercel)` | `vercel deploy --prod` dari `frontend/` | `VERCEL_TOKEN` |
+| `Deploy backend (Render)` | `POST /v1/services/{id}/deploys` | `RENDER_API_KEY`, `RENDER_SERVICE_ID` |
+
+- Job hanya jalan bila ada perubahan di folder terkait (`frontend/**` atau `backend/**`).
+- `workflow_dispatch` di tab **Actions → Deploy → Run workflow** menjalankan keduanya manual.
+- Matikan **Auto-Deploy** di Render (Settings → Build & Deploy) agar backend tidak dibangun
+  dua kali: sekali oleh GitHub Actions, sekali oleh Render sendiri.
+
+Membuat rahasia repo:
+
+```bash
+gh secret set VERCEL_TOKEN --repo imamkoo/save-golden-age
+gh secret set RENDER_API_KEY --repo imamkoo/save-golden-age
+gh secret set RENDER_SERVICE_ID --repo imamkoo/save-golden-age
+```
+
+Deploy manual (tanpa Actions), bila perlu:
+
+```bash
+cd frontend && npx vercel deploy --prod
+curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+  -H "Authorization: Bearer $RENDER_API_KEY" -H "Content-Type: application/json" -d '{}'
+```
