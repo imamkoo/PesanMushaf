@@ -31,6 +31,7 @@ class Registration extends Model
         'district_id',
         'university_id',
         'education_level',
+        'institution_type',
         'edition',
         'name',
         'phone_number',

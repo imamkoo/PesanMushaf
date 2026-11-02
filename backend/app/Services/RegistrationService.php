@@ -77,6 +77,7 @@ class RegistrationService
                 'batch_id' => $batch->id,
                 'district_id' => $registrantDistrict->id,
                 'education_level' => $level,
+                'institution_type' => $data['institution_type'] ?? 'SEKOLAH',
                 'university_id' => $data['university_id'] ?? null,
                 'name' => $data['name'],
                 'phone_number' => $phone,
