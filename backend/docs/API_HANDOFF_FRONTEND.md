@@ -30,6 +30,7 @@ Request body:
 {
   "district_id": 1,
   "education_level": "SMP",
+  "institution_type": "SEKOLAH",
   "edition": "reguler",
   "name": "Ahmad Fauzi",
   "phone_number": "081234567890",
@@ -50,6 +51,10 @@ Field wajib:
 Field opsional:
 
 - `email`
+- `institution_type` (`SEKOLAH|MASJID|KOMUNITAS|UMUM`, default `SEKOLAH`). Untuk `MASJID`,
+  `KOMUNITAS`, dan `UMUM`, `nik` (16 digit) dan `address` menjadi **wajib** karena tidak ada
+  sekolah yang bisa dijadikan rujukan verifikasi. `school_name` tetap dipakai sebagai nama
+  institusi (nama masjid/komunitas).
 
 ## 4) Response Pattern
 
