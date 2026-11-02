@@ -107,6 +107,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Bootstrap
+    |--------------------------------------------------------------------------
+    |
+    | Dipakai DatabaseSeeder untuk membuat akun admin pertama. Sengaja tidak
+    | memakai kredensial default agar deployment publik tidak punya password
+    | yang bisa ditebak.
+    |
+    */
+
+    'admin' => [
+        'name' => env('ADMIN_NAME', 'Admin Jakarta'),
+        'email' => env('ADMIN_EMAIL'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Maintenance Mode Driver
     |--------------------------------------------------------------------------
     |
