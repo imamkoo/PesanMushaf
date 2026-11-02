@@ -157,6 +157,12 @@ gh secret set RENDER_API_KEY --repo imamkoo/save-golden-age
 gh secret set RENDER_SERVICE_ID --repo imamkoo/save-golden-age
 ```
 
+- Pakai token Vercel berumur panjang (long-lived). Token berumur pendek akan mematikan
+  deploy otomatis begitu kedaluwarsa.
+- File workflow harus ada di **default branch** (`develop`) agar GitHub mendaftarkannya;
+  menaruhnya hanya di `main` membuat workflow tidak muncul di tab Actions.
+- `RENDER_SERVICE_ID` sekarang `srv-dbkd2tugekts73f5uhr0` (service `savegoldenage-api`).
+
 Deploy manual (tanpa Actions), bila perlu:
 
 ```bash
