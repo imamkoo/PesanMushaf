@@ -63,10 +63,24 @@ class RegistrationController extends Controller
             ], 422);
         }
 
+        $validated = $validator->validated();
+
+        // Kombinasi SEKOLAH + UMUM kontradiktif (sekolah tidak punya jenjang UMUM).
+        // Klien lama tidak mengirim institution_type sehingga tidak terkena aturan ini.
+        if (($validated['institution_type'] ?? null) === 'SEKOLAH' && $validated['education_level'] === 'UMUM') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data pendaftaran tidak valid.',
+                'errors' => [
+                    'institution_type' => ['Jenis institusi SEKOLAH tidak boleh memakai jenjang UMUM.'],
+                ],
+            ], 422);
+        }
+
         try {
             // 2. Jalankan Logika Pendaftaran di Service
             // Service ini yang menangani perhitungan harga, kode pendaftaran, dan nomor halaman
-            $registration = RegistrationService::register($validator->validated());
+            $registration = RegistrationService::register($validated);
 
             // 3. Eager Loading Relasi
             // Agar hasil JSON menyertakan nama kecamatan, bukan cuma ID-nya saja

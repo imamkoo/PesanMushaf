@@ -84,6 +84,25 @@ class RegistrationsTable
                     })
                     ->formatStateUsing(fn (?string $state): string => filled($state) ? (string) $state : 'Data Lama'),
 
+                TextColumn::make('institution_type')
+                    ->label('Jenis Institusi')
+                    ->badge()
+                    ->sortable()
+                    ->color(fn (?string $state): string => match (strtoupper((string) $state)) {
+                        'SEKOLAH' => 'info',
+                        'MASJID' => 'success',
+                        'KOMUNITAS' => 'warning',
+                        'UMUM' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (?string $state): string => match (strtoupper((string) $state)) {
+                        'SEKOLAH' => 'Sekolah',
+                        'MASJID' => 'Masjid',
+                        'KOMUNITAS' => 'Komunitas',
+                        'UMUM' => 'Umum',
+                        default => 'Data Lama',
+                    }),
+
                 TextColumn::make('payment_status')
                     ->label('Status')
                     ->badge()
@@ -189,6 +208,14 @@ class RegistrationsTable
                         'SMP' => 'SMP',
                         'SMA' => 'SMA',
                         'UMUM' => 'UMUM',
+                    ]),
+                SelectFilter::make('institution_type')
+                    ->label('Jenis Institusi')
+                    ->options([
+                        'SEKOLAH' => 'Sekolah',
+                        'MASJID' => 'Masjid',
+                        'KOMUNITAS' => 'Komunitas',
+                        'UMUM' => 'Umum',
                     ]),
                 SelectFilter::make('district_id')
                     ->label('Kecamatan')

@@ -2,6 +2,7 @@ const apiBaseUrl = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000/api')
 const lastRegistrationKey = 'hut500:last-registration'
 
 type EducationLevel = 'SD' | 'SMP' | 'SMA' | 'UMUM'
+export type InstitutionType = 'SEKOLAH' | 'MASJID' | 'KOMUNITAS' | 'UMUM'
 
 /**
  * Bentuk respons GET /api/registrations/status (statusLookup): district & batch
@@ -14,6 +15,7 @@ export type RegistrationStatus = {
   school_name: string
   edition: string
   education_level: string
+  institution_type: string
   page_number: number
   status: 'pending' | 'success' | 'failed'
   total_payment: number
@@ -39,6 +41,7 @@ export type ApiBatch = {
   slug: string
   batch_number: string | number
   education_level: string
+  institution_type?: string | null
   max_capacity: number
   is_full: boolean
   district?: ApiDistrict | null
@@ -66,6 +69,7 @@ export type ApiPriceCategory = {
 export type RegistrationPayload = {
   district_id: number
   education_level: EducationLevel
+  institution_type: InstitutionType
   edition: string
   name: string
   phone_number: string
@@ -73,9 +77,9 @@ export type RegistrationPayload = {
   /** true when the participant chose "Lainnya" / typed a name not from the catalog */
   exclude_from_school_suggestions?: boolean
   email?: string
-  /** Required only when education_level is UMUM (regardless of edition). */
+  /** Required when institution_type is not SEKOLAH (regardless of edition). */
   nik?: string
-  /** Required only when education_level is UMUM (regardless of edition). */
+  /** Required when institution_type is not SEKOLAH (regardless of edition). */
   address?: string
 }
 
@@ -94,6 +98,7 @@ export type Registration = {
   school_name: string
   edition: string
   education_level: string
+  institution_type: string
   page_number: number
   status: 'pending' | 'success' | 'failed'
   total_payment: number

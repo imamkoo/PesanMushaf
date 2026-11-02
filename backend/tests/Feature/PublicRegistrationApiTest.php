@@ -932,3 +932,15 @@ it('rejects an unknown institution_type', function () {
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['institution_type']);
 });
+
+it('rejects SEKOLAH institution_type with UMUM level', function () {
+    $district = makeDistrict('Sawah Besar', '310007');
+
+    postReg($district, 'UMUM', 'SMAN 1 Jakarta', '6281234500005', [
+        'institution_type' => 'SEKOLAH',
+        'nik' => makeNik(),
+        'address' => 'Jl. Sekolah No. 1',
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['institution_type']);
+});
