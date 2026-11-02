@@ -1,0 +1,131 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    name: Detect changed paths
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.paths.outputs.frontend }}
+      backend: ${{ steps.paths.outputs.backend }}
+    steps:
+      - name: Detect
+        id: paths
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          fe=false
+          be=false
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            fe=true
+            be=true
+          else
+            files=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${SHA}" --jq '.files[].filename')
+            if printf '%s\n' "$files" | grep -q '^frontend/'; then fe=true; fi
+            if printf '%s\n' "$files" | grep -q '^backend/'; then be=true; fi
+            if printf '%s\n' "$files" | grep -qE '^(render\.yaml|\.github/workflows/deploy\.yml)$'; then
+              fe=true
+              be=true
+            fi
+          fi
+          echo "frontend=${fe}" >> "$GITHUB_OUTPUT"
+          echo "backend=${be}" >> "$GITHUB_OUTPUT"
+
+  frontend:
+    name: Deploy frontend (Vercel)
+    needs: detect
+    if: needs.detect.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Guard secret
+        id: guard
+        env:
+          TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::VERCEL_TOKEN belum diisi; deploy frontend dilewati."
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js
+        if: steps.guard.outputs.ok == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Link Vercel project
+        if: steps.guard.outputs.ok == 'true'
+        working-directory: frontend
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npx --yes vercel@latest link --yes --project savegoldenage --token "$VERCEL_TOKEN"
+
+      - name: Deploy production
+        if: steps.guard.outputs.ok == 'true'
+        working-directory: frontend
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+
+  backend:
+    name: Deploy backend (Render)
+    needs: detect
+    if: needs.detect.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Guard secrets
+        id: guard
+        env:
+          API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          if [ -z "$API_KEY" ] || [ -z "$SERVICE_ID" ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::RENDER_API_KEY/RENDER_SERVICE_ID belum diisi; deploy backend dilewati."
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger Render deploy
+        if: steps.guard.outputs.ok == 'true'
+        env:
+          API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          code=$(curl -sS -o /tmp/render.json -w '%{http_code}' -X POST \
+            "https://api.render.com/v1/services/${SERVICE_ID}/deploys" \
+            -H "Authorization: Bearer ${API_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d '{"clearCache":"do_not_clear"}')
+          echo "Render responded HTTP ${code}"
+          head -c 300 /tmp/render.json || true
+          case "$code" in
+            200|201|202) ;;
+            *) echo "::error::Render deploy gagal (HTTP ${code})"; exit 1 ;;
+          esac
