@@ -22,6 +22,7 @@ class RegistrationService
         return DB::transaction(function () use ($data) {
             $edition = $data['edition'] ?? 'reguler';
             $level = $data['education_level'];
+            $institutionType = $data['institution_type'] ?? 'SEKOLAH';
             $schoolName = $data['school_name'];
             $schoolNameNormalized = SchoolNameNormalizer::normalize($schoolName);
 
@@ -30,7 +31,7 @@ class RegistrationService
             // 1. Tentukan / buat batch sesuai edisi
             $batch = $edition === 'vip'
                 ? self::resolveVipGlobalBatch()
-                : self::resolveRegulerBatch($level, $schoolNameNormalized, $registrantDistrict);
+                : self::resolveRegulerBatch($level, $institutionType, $schoolNameNormalized, $registrantDistrict);
 
             // 2. Kalkulasi halaman dalam batch tsb. Tidak butuh lockForUpdate() karena
             //    baris batches sudah dikunci di resolve*Batch() dan Postgres melarang
@@ -77,7 +78,7 @@ class RegistrationService
                 'batch_id' => $batch->id,
                 'district_id' => $registrantDistrict->id,
                 'education_level' => $level,
-                'institution_type' => $data['institution_type'] ?? 'SEKOLAH',
+                'institution_type' => $institutionType,
                 'university_id' => $data['university_id'] ?? null,
                 'name' => $data['name'],
                 'phone_number' => $phone,
@@ -139,20 +140,38 @@ class RegistrationService
     }
 
     /**
-     * Cari atau buat batch Reguler untuk jenjang tertentu dengan urutan prioritas:
-     *   1) Batch yang sudah berisi sekolah persis sama (cocok via school_name_normalized
+     * Cari atau buat batch Reguler dengan urutan prioritas:
+     *   1) Batch yang sudah berisi institusi persis sama (cocok via school_name_normalized
      *      supaya variasi penulisan tidak memecah klaster)
      *   2) Batch yang sudah berisi pendaftar dari kecamatan yang sama
      *   3) Batch yang sudah berisi pendaftar satu kota (4 digit pertama kode kecamatan)
      *   4) Batch baru, anchor pada kecamatan pendaftar
+     *
+     * Batch sekolah dipisah per jenjang (SD/SMP/SMA). Batch institusi non-sekolah
+     * (MASJID/KOMUNITAS/UMUM) dipisah per jenis institusi, bukan per jenjang.
+     * Batch lama tanpa institution_type tetap dianggap batch sekolah.
      */
-    private static function resolveRegulerBatch(string $level, ?string $schoolNameNormalized, District $registrantDistrict): Batch
-    {
+    private static function resolveRegulerBatch(
+        string $level,
+        string $institutionType,
+        ?string $schoolNameNormalized,
+        District $registrantDistrict,
+    ): Batch {
         $kotaCode = substr((string) $registrantDistrict->code, 0, 4);
+        $isSchool = $institutionType === 'SEKOLAH';
+
+        $filterInstitutionType = function ($query) use ($institutionType, $isSchool): void {
+            $query->where('institution_type', $institutionType);
+
+            if ($isSchool) {
+                $query->orWhereNull('institution_type');
+            }
+        };
 
         $baseQuery = fn () => Batch::query()
             ->whereFullByOccupancy(false)
-            ->where('education_level', $level)
+            ->where($filterInstitutionType)
+            ->when($isSchool, fn ($query) => $query->where('education_level', $level))
             ->where('name', 'not like', '%(GOR)%');
 
         // Priority 1: same school (normalized)
@@ -191,19 +210,26 @@ class RegistrationService
 
         // Priority 4: new batch anchored to registrant district
         // Cast eksplisit ke integer agar Postgres tidak melakukan lex-sort
-        // (mis. "9" > "10") setelah 10+ batch ber-jenjang sama tercipta.
-        $lastNumber = (int) Batch::query()
-            ->where('education_level', $level)
-            ->where('name', 'not like', '%(GOR)%')
-            ->max(DB::raw('CAST(batch_number AS INTEGER)'));
+        // (mis. "9" > "10") setelah 10+ batch sejenis tercipta.
+        $lastNumberQuery = Batch::query()
+            ->where($filterInstitutionType)
+            ->where('name', 'not like', '%(GOR)%');
+
+        if ($isSchool) {
+            $lastNumberQuery->where('education_level', $level);
+        }
+
+        $lastNumber = (int) $lastNumberQuery->max(DB::raw('CAST(batch_number AS INTEGER)'));
 
         $nextNumber = $lastNumber + 1;
+        $label = $isSchool ? $level : $institutionType;
 
         return Batch::create([
             'district_id' => $registrantDistrict->id,
             'education_level' => $level,
+            'institution_type' => $institutionType,
             'batch_number' => (string) $nextNumber,
-            'name' => "Mushaf Reguler {$level} {$registrantDistrict->name} {$nextNumber}",
+            'name' => "Mushaf Reguler {$label} {$registrantDistrict->name} {$nextNumber}",
             'max_capacity' => self::BATCH_CAPACITY,
             'is_full' => false,
         ]);
