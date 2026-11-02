@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: pesanmushaf-api
+    name: savegoldenage-api
     runtime: docker
     plan: free
     region: singapore
@@ -10,7 +10,7 @@ services:
     healthCheckPath: /up
     envVars:
       - key: APP_NAME
-        value: PesanMushaf
+        value: Save Golden Age
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
