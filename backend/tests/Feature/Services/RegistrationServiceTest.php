@@ -334,3 +334,24 @@ it('keeps masjid, komunitas, and sekolah registrations in separate batches', fun
         ->and($komunitas->batch_id)->not->toBe($sekolah->batch_id)
         ->and(Batch::findOrFail($sekolah->batch_id)->name)->toContain('Mushaf Reguler SMA');
 });
+
+it('keeps legacy UMUM registrations without institution_type in a UMUM batch', function () {
+    $district = makeServiceDistrict('Kebayoran Baru', '3171060');
+
+    $registration = RegistrationService::register([
+        'district_id' => $district->id,
+        'education_level' => 'UMUM',
+        'edition' => 'reguler',
+        'name' => 'Peserta Lama',
+        'phone_number' => '6281000099301',
+        'school_name' => 'Yayasan Contoh',
+        'nik' => makeNikDigits(),
+        'address' => 'Jl. Sisingamangaraja No. 3',
+    ]);
+
+    $batch = Batch::findOrFail($registration->batch_id);
+
+    expect($registration->institution_type)->toBe('UMUM')
+        ->and($batch->institution_type)->toBe('UMUM')
+        ->and($batch->name)->toContain('Mushaf Reguler UMUM');
+});
