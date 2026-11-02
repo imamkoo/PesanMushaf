@@ -23,6 +23,7 @@ class RegistrationResource extends JsonResource
             'nik' => $this->nik,
             'address' => $this->address,
             'education_level' => $this->education_level,
+            'institution_type' => $this->institution_type,
             'edition' => $this->edition,
             'school_name' => $this->school_name,
             'page_number' => $this->page_number,
