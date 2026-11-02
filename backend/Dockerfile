@@ -17,7 +17,7 @@ RUN composer install --no-dev --no-interaction --no-scripts --prefer-dist --opti
 COPY . .
 RUN composer dump-autoload --no-dev --optimize --no-scripts
 
-FROM php:8.3-apache AS runtime
+FROM php:8.4-apache AS runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libfreetype6-dev \
