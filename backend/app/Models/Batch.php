@@ -16,7 +16,7 @@ class Batch extends Model
 
     protected $fillable = [
         'district_id', 'name', 'slug', 'batch_number',
-        'education_level', 'max_capacity', 'is_full',
+        'education_level', 'institution_type', 'max_capacity', 'is_full',
     ];
 
     protected function casts(): array
