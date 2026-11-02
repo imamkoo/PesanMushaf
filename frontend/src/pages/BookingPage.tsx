@@ -10,6 +10,7 @@ import {
   getSchoolOptions,
   saveLastRegistration,
   type ApiOption,
+  type InstitutionType,
   type SchoolNameMatch,
 } from '../lib/api'
 import { formatRupiah, getBasePrice } from '../lib/payment'
@@ -24,6 +25,7 @@ type FormValues = {
   email: string
   district_id: string
   education_level: EducationLevel
+  institution_type: InstitutionType
   edition: string
   nik: string
   address: string
@@ -46,15 +48,62 @@ const initialValues: FormValues = {
   email: '',
   district_id: '',
   education_level: 'SMA',
+  institution_type: 'SEKOLAH',
   edition: 'reguler',
   nik: '',
   address: '',
 }
 
-function requiresPersonalDocs(values: Pick<FormValues, 'education_level'>) {
-  // NIK & alamat hanya wajib bagi peserta jenjang UMUM (VIP-UMUM atau Reguler-UMUM),
+const institutionChoices: { value: InstitutionType; label: string }[] = [
+  { value: 'SEKOLAH', label: 'Sekolah' },
+  { value: 'MASJID', label: 'Masjid' },
+  { value: 'KOMUNITAS', label: 'Komunitas' },
+  { value: 'UMUM', label: 'Umum / Lembaga' },
+]
+
+function institutionNameLabel(institutionType: InstitutionType): string {
+  switch (institutionType) {
+    case 'MASJID':
+      return 'Nama Masjid'
+    case 'KOMUNITAS':
+      return 'Nama Komunitas'
+    case 'UMUM':
+      return 'Nama Lembaga / Instansi'
+    default:
+      return 'Instansi / Perguruan Tinggi'
+  }
+}
+
+function institutionNamePlaceholder(institutionType: InstitutionType): string {
+  switch (institutionType) {
+    case 'MASJID':
+      return 'Contoh: Masjid Al-Azhar Kebayoran'
+    case 'KOMUNITAS':
+      return 'Contoh: Komunitas Literasi Jakarta'
+    case 'UMUM':
+      return 'Contoh: Yayasan / perusahaan / instansi'
+    default:
+      return 'Cari sekolah atau instansi Anda'
+  }
+}
+
+function institutionPersonalDocsLabel(institutionType: InstitutionType): string {
+  switch (institutionType) {
+    case 'MASJID':
+      return 'masjid'
+    case 'KOMUNITAS':
+      return 'komunitas'
+    case 'UMUM':
+      return 'lembaga atau instansi'
+    default:
+      return 'sekolah'
+  }
+}
+
+function requiresPersonalDocs(values: Pick<FormValues, 'institution_type'>) {
+  // NIK & alamat wajib bagi peserta non-sekolah (masjid, komunitas, umum),
   // karena verifikasi tidak bisa melalui institusi sekolah formal.
-  return values.education_level === 'UMUM'
+  return values.institution_type !== 'SEKOLAH'
 }
 
 const fallbackEditionChoices = [
@@ -152,7 +201,7 @@ export function BookingPage() {
       setSchoolLoadError('')
       setSchoolOptions([])
 
-      if (!values.education_level || (values.education_level !== 'UMUM' && !values.district_id)) {
+      if (values.institution_type !== 'SEKOLAH' || !values.district_id) {
         return
       }
 
@@ -184,7 +233,7 @@ export function BookingPage() {
     return () => {
       isMounted = false
     }
-  }, [values.district_id, values.education_level])
+  }, [values.district_id, values.education_level, values.institution_type])
 
   // Fuzzy did-you-mean: hanya aktif saat user memilih "Lainnya" dan mengetik
   // nama bebas. Endpoint backend sudah menormalisasi & threshold di server side.
@@ -256,7 +305,12 @@ export function BookingPage() {
     const nextValues = { ...values, [name]: value } as FormValues
     let nextAddressConfirmation = hasConfirmedAddressReview
 
-    if (name === 'district_id' || name === 'education_level') {
+    if (name === 'institution_type') {
+      const nextInstitutionType = value as InstitutionType
+      nextValues.education_level = nextInstitutionType === 'SEKOLAH' ? 'SMA' : 'UMUM'
+    }
+
+    if (name === 'district_id' || name === 'education_level' || name === 'institution_type') {
       nextValues.school_name = ''
       nextValues.custom_school_name = ''
       setDidYouMeanDismissed(false)
@@ -278,7 +332,7 @@ export function BookingPage() {
       nextAddressConfirmation = false
     }
 
-    if (name === 'education_level' && !requiresPersonalDocs(nextValues)) {
+    if ((name === 'education_level' || name === 'institution_type') && !requiresPersonalDocs(nextValues)) {
       nextValues.nik = ''
       nextValues.address = ''
       nextAddressConfirmation = false
@@ -350,11 +404,13 @@ export function BookingPage() {
       const response = await createRegistration({
         district_id: Number(values.district_id),
         education_level: values.education_level,
+        institution_type: values.institution_type,
         edition: values.edition,
         name: values.name.trim(),
         phone_number: values.phone_number.trim(),
         school_name: resolveSchoolName(values),
-        exclude_from_school_suggestions: values.school_name === customSchoolValue,
+        exclude_from_school_suggestions:
+          values.institution_type === 'SEKOLAH' && values.school_name === customSchoolValue,
         email: values.email.trim() || undefined,
         nik: includePersonalDocs ? values.nik.trim() : undefined,
         address: includePersonalDocs ? values.address.trim() : undefined,
@@ -424,57 +480,71 @@ export function BookingPage() {
                 <Field label="Nomor WhatsApp" name="phone_number" value={values.phone_number} error={errors.phone_number} placeholder="Awali dengan 62 (Contoh: 6281234...)" type="tel" onChange={updateValue} />
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Select label="Kecamatan Aktif" name="district_id" value={values.district_id} error={errors.district_id} placeholder={isLoading ? 'Menyinkronkan data...' : 'Pilih area pendaftaran'} options={districts.map((district) => ({ label: district.name, value: String(district.id) }))} onChange={updateValue} />
-                  <Select label="Jenjang / Kategori" name="education_level" value={values.education_level} error={errors.education_level} placeholder="Pilih jenjang pendidikan" options={['SD', 'SMP', 'SMA', 'UMUM'].map((level) => ({ label: level, value: level }))} onChange={updateValue} />
+                  <Select label="Jenis Institusi" name="institution_type" value={values.institution_type} error={errors.institution_type} options={institutionChoices.map((choice) => ({ label: choice.label, value: choice.value }))} onChange={updateValue} />
                 </div>
-                <SearchableSchoolSelect
-                  key={schoolFieldResetKey}
-                  label="Instansi / Perguruan Tinggi"
-                  options={canChooseSchool ? schoolSelectOptions : []}
-                  value={values.school_name}
-                  placeholder={schoolSelectPlaceholder(values, isLoadingSchools, schoolLoadError)}
-                  error={errors.school_name}
-                  disabled={!canChooseSchool || isLoadingSchools}
-                  customOptionValue={customSchoolValue}
-                  onChange={(next) => updateValue('school_name', next)}
-                />
-                {schoolLoadError ? <p className="rounded-2xl bg-[#fff7f7] p-4 text-sm font-bold leading-6 text-[#ed3833]">{schoolLoadError}</p> : null}
-                {schoolCatalogHint ? <p className="rounded-2xl bg-[#f7f7fd] p-4 text-sm font-semibold leading-6 text-[#111111]/65">{schoolCatalogHint}</p> : null}
-                {values.school_name === customSchoolValue ? (
-                  <div className="flex flex-col gap-3">
-                    <Field label="Nama Instansi Spesifik" name="custom_school_name" value={values.custom_school_name} error={errors.custom_school_name} placeholder="Tuliskan nama instansi atau sekolah Anda" onChange={updateValue} />
-                    {visibleCustomSchoolMatches.length > 0 && !didYouMeanDismissed ? (
-                      <div className="rounded-[20px] border border-[#ed3833]/25 bg-[#fff7f7]/70 p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#ed3833]">Saran Penulisan</p>
-                            <p className="mt-1 text-sm font-semibold leading-6 text-[#111111]">
-                              Apakah maksud Anda salah satu sekolah berikut? Pilih agar peserta dari sekolah yang sama otomatis tergabung satu batch.
-                            </p>
+                {values.institution_type === 'SEKOLAH' ? (
+                  <>
+                    <Select label="Jenjang / Kategori" name="education_level" value={values.education_level} error={errors.education_level} placeholder="Pilih jenjang pendidikan" options={['SD', 'SMP', 'SMA'].map((level) => ({ label: level, value: level }))} onChange={updateValue} />
+                    <SearchableSchoolSelect
+                      key={schoolFieldResetKey}
+                      label="Instansi / Perguruan Tinggi"
+                      options={canChooseSchool ? schoolSelectOptions : []}
+                      value={values.school_name}
+                      placeholder={schoolSelectPlaceholder(values, isLoadingSchools, schoolLoadError)}
+                      error={errors.school_name}
+                      disabled={!canChooseSchool || isLoadingSchools}
+                      customOptionValue={customSchoolValue}
+                      onChange={(next) => updateValue('school_name', next)}
+                    />
+                    {schoolLoadError ? <p className="rounded-2xl bg-[#fff7f7] p-4 text-sm font-bold leading-6 text-[#ed3833]">{schoolLoadError}</p> : null}
+                    {schoolCatalogHint ? <p className="rounded-2xl bg-[#f7f7fd] p-4 text-sm font-semibold leading-6 text-[#111111]/65">{schoolCatalogHint}</p> : null}
+                    {values.school_name === customSchoolValue ? (
+                      <div className="flex flex-col gap-3">
+                        <Field label="Nama Instansi Spesifik" name="custom_school_name" value={values.custom_school_name} error={errors.custom_school_name} placeholder="Tuliskan nama instansi atau sekolah Anda" onChange={updateValue} />
+                        {visibleCustomSchoolMatches.length > 0 && !didYouMeanDismissed ? (
+                          <div className="rounded-[20px] border border-[#ed3833]/25 bg-[#fff7f7]/70 p-4">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#ed3833]">Saran Penulisan</p>
+                                <p className="mt-1 text-sm font-semibold leading-6 text-[#111111]">
+                                  Apakah maksud Anda salah satu sekolah berikut? Pilih agar peserta dari sekolah yang sama otomatis tergabung satu batch.
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setDidYouMeanDismissed(true)}
+                                className="shrink-0 rounded-full border border-black/10 px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-[#111111]/65 transition hover:border-[#ed3833] hover:text-[#ed3833]"
+                              >
+                                Nama Saya Benar
+                              </button>
+                            </div>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              {visibleCustomSchoolMatches.map((match) => (
+                                <button
+                                  key={`${match.value}-${match.score ?? ''}`}
+                                  type="button"
+                                  onClick={() => adoptSchoolSuggestion(match.value)}
+                                  className="rounded-full border border-[#ed3833]/40 bg-white px-4 py-2 text-sm font-bold text-[#ed3833] transition hover:bg-[#ed3833] hover:text-white"
+                                >
+                                  {match.label}
+                                </button>
+                              ))}
+                            </div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => setDidYouMeanDismissed(true)}
-                            className="shrink-0 rounded-full border border-black/10 px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-[#111111]/65 transition hover:border-[#ed3833] hover:text-[#ed3833]"
-                          >
-                            Nama Saya Benar
-                          </button>
-                        </div>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {visibleCustomSchoolMatches.map((match) => (
-                            <button
-                              key={`${match.value}-${match.score ?? ''}`}
-                              type="button"
-                              onClick={() => adoptSchoolSuggestion(match.value)}
-                              className="rounded-full border border-[#ed3833]/40 bg-white px-4 py-2 text-sm font-bold text-[#ed3833] transition hover:bg-[#ed3833] hover:text-white"
-                            >
-                              {match.label}
-                            </button>
-                          ))}
-                        </div>
+                        ) : null}
                       </div>
                     ) : null}
-                  </div>
-                ) : null}
+                  </>
+                ) : (
+                  <Field
+                    label={institutionNameLabel(values.institution_type)}
+                    name="school_name"
+                    value={values.school_name}
+                    error={errors.school_name}
+                    placeholder={institutionNamePlaceholder(values.institution_type)}
+                    onChange={updateValue}
+                  />
+                )}
                 <Field label="Alamat Email (Opsional)" name="email" value={values.email} error={errors.email} placeholder="Surat elektronik aktif" type="email" onChange={updateValue} />
 
                 {needsPersonalDocs ? (
@@ -486,7 +556,7 @@ export function BookingPage() {
                           Verifikasi identitas peserta non-sekolah.
                         </h4>
                         <p className="mt-2 text-sm font-semibold leading-6 text-[#111111]/62">
-                          Data ini diperlukan karena Anda memilih jenjang UMUM, sehingga verifikasi tidak dapat melalui institusi sekolah formal.
+                          Data ini diperlukan karena Anda mendaftar sebagai {institutionPersonalDocsLabel(values.institution_type)}, sehingga verifikasi tidak melalui institusi sekolah formal.
                         </p>
                       </div>
                     </div>
@@ -696,7 +766,7 @@ function validate(values: FormValues, priceBySlug: Record<string, number>): Form
   }
 
   if (!values.school_name.trim()) {
-    nextErrors.school_name = 'Pilih afiliasi instansi Anda.'
+    nextErrors.school_name = 'Nama institusi wajib diisi.'
   } else if (values.school_name === customSchoolValue && !values.custom_school_name.trim()) {
     nextErrors.custom_school_name = 'Tuliskan nama instansi dengan jelas.'
   }
@@ -713,6 +783,10 @@ function validate(values: FormValues, priceBySlug: Record<string, number>): Form
     nextErrors.education_level = 'Kategori jenjang tidak valid.'
   }
 
+  if (!['SEKOLAH', 'MASJID', 'KOMUNITAS', 'UMUM'].includes(values.institution_type)) {
+    nextErrors.institution_type = 'Jenis institusi tidak valid.'
+  }
+
   if (!values.edition || priceBySlug[values.edition] === undefined) {
     nextErrors.edition = 'Paket tidak tersedia. Silakan muat ulang halaman.'
   }
@@ -720,7 +794,7 @@ function validate(values: FormValues, priceBySlug: Record<string, number>): Form
   if (requiresPersonalDocs(values)) {
     const trimmedNik = values.nik.trim()
     if (!trimmedNik) {
-      nextErrors.nik = 'NIK wajib diisi untuk peserta jenjang UMUM.'
+      nextErrors.nik = 'NIK wajib diisi untuk peserta non-sekolah.'
     } else if (!/^\d{16}$/.test(trimmedNik)) {
       nextErrors.nik = 'NIK harus 16 digit angka sesuai KTP.'
     }

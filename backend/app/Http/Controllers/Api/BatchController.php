@@ -27,6 +27,10 @@ class BatchController extends Controller
                 fn ($query) => $query->where('education_level', $request->string('education_level')->toString())
             )
             ->when(
+                $request->filled('institution_type'),
+                fn ($query) => $query->where('institution_type', $request->string('institution_type')->toString())
+            )
+            ->when(
                 $request->boolean('only_available'),
                 fn ($query) => $query->whereFullByOccupancy(false)
             )

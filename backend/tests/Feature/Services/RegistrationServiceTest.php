@@ -257,3 +257,80 @@ it('syncs batch fullness when a registration is deleted and restored', function 
 
     expect($batch->fresh()->is_full)->toBeTrue();
 });
+
+it('groups masjid registrations into their own batch', function () {
+    $district = makeServiceDistrict('Kebayoran Baru', '3171060');
+
+    $first = RegistrationService::register([
+        'district_id' => $district->id,
+        'education_level' => 'UMUM',
+        'institution_type' => 'MASJID',
+        'edition' => 'reguler',
+        'name' => 'Jamaah A',
+        'phone_number' => '6281000099101',
+        'school_name' => 'Masjid Al-Azhar',
+        'nik' => makeNikDigits(),
+        'address' => 'Jl. Sisingamangaraja No. 1',
+    ]);
+
+    $second = RegistrationService::register([
+        'district_id' => $district->id,
+        'education_level' => 'UMUM',
+        'institution_type' => 'MASJID',
+        'edition' => 'reguler',
+        'name' => 'Jamaah B',
+        'phone_number' => '6281000099102',
+        'school_name' => 'Masjid Al-Azhar',
+        'nik' => makeNikDigits(),
+        'address' => 'Jl. Sisingamangaraja No. 2',
+    ]);
+
+    $batch = Batch::findOrFail($first->batch_id);
+
+    expect($first->batch_id)->toBe($second->batch_id)
+        ->and($batch->institution_type)->toBe('MASJID')
+        ->and($batch->name)->toContain('Mushaf Reguler MASJID');
+});
+
+it('keeps masjid, komunitas, and sekolah registrations in separate batches', function () {
+    $district = makeServiceDistrict('Kebayoran Baru', '3171060');
+
+    $masjid = RegistrationService::register([
+        'district_id' => $district->id,
+        'education_level' => 'UMUM',
+        'institution_type' => 'MASJID',
+        'edition' => 'reguler',
+        'name' => 'Jamaah Masjid',
+        'phone_number' => '6281000099201',
+        'school_name' => 'Masjid Al-Azhar',
+        'nik' => makeNikDigits(),
+        'address' => 'Jl. Sisingamangaraja No. 1',
+    ]);
+
+    $komunitas = RegistrationService::register([
+        'district_id' => $district->id,
+        'education_level' => 'UMUM',
+        'institution_type' => 'KOMUNITAS',
+        'edition' => 'reguler',
+        'name' => 'Anggota Komunitas',
+        'phone_number' => '6281000099202',
+        'school_name' => 'Komunitas Literasi Kebayoran',
+        'nik' => makeNikDigits(),
+        'address' => 'Jl. Sisingamangaraja No. 2',
+    ]);
+
+    $sekolah = RegistrationService::register([
+        'district_id' => $district->id,
+        'education_level' => 'SMA',
+        'institution_type' => 'SEKOLAH',
+        'edition' => 'reguler',
+        'name' => 'Siswa SMA',
+        'phone_number' => '6281000099203',
+        'school_name' => 'SMAN 1 Kebayoran',
+    ]);
+
+    expect($masjid->batch_id)->not->toBe($komunitas->batch_id)
+        ->and($masjid->batch_id)->not->toBe($sekolah->batch_id)
+        ->and($komunitas->batch_id)->not->toBe($sekolah->batch_id)
+        ->and(Batch::findOrFail($sekolah->batch_id)->name)->toContain('Mushaf Reguler SMA');
+});

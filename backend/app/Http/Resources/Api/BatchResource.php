@@ -25,6 +25,7 @@ class BatchResource extends JsonResource
             'slug' => $this->slug,
             'batch_number' => $this->batch_number,
             'education_level' => $this->education_level,
+            'institution_type' => $this->institution_type,
             'max_capacity' => $this->max_capacity,
             'is_full' => $isFull,
             'district' => DistrictResource::make($this->whenLoaded('district')),

@@ -15,7 +15,7 @@
 - `GET /api/districts/{district}`
 - `GET /api/universities`
 - `GET /api/universities/{university}`
-- `GET /api/batches?district_id={id}&education_level={SD|SMP|SMA|UMUM}&only_available=1`
+- `GET /api/batches?district_id={id}&education_level={SD|SMP|SMA|UMUM}&institution_type={SEKOLAH|MASJID|KOMUNITAS|UMUM}&only_available=1`
 - `GET /api/batches/{batch}`
 - `POST /api/register`
 - `GET /api/registrations/{registrationCode}/status`
@@ -55,6 +55,9 @@ Field opsional:
   `KOMUNITAS`, dan `UMUM`, `nik` (16 digit) dan `address` menjadi **wajib** karena tidak ada
   sekolah yang bisa dijadikan rujukan verifikasi. `school_name` tetap dipakai sebagai nama
   institusi (nama masjid/komunitas).
+- Batch Reguler dipisah per `institution_type`. Batch sekolah tetap dipisah per jenjang
+  (`SD|SMP|SMA`); batch `MASJID`, `KOMUNITAS`, dan `UMUM` tidak dicampur satu sama lain.
+  Nama batch institusi non-sekolah: `Mushaf Reguler {INSTITUTION_TYPE} {Kecamatan} {n}`.
 
 ## 4) Response Pattern
 
