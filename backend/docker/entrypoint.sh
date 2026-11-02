@@ -22,4 +22,11 @@ php artisan config:cache
 php artisan view:cache || true
 php artisan storage:link >/dev/null 2>&1 || true
 
+# Render/Vercel-style platforms memberi port lewat $PORT. Apache default 80.
+PORT="${PORT:-80}"
+if [ "$PORT" != "80" ]; then
+    sed -i "s/^Listen 80$/Listen ${PORT}/" /etc/apache2/ports.conf
+    sed -i "s/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-available/000-default.conf
+fi
+
 exec apache2-foreground
