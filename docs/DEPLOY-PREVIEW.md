@@ -65,10 +65,15 @@ Simpan hasilnya sebagai env `APP_KEY` (jangan commit).
    - `APP_URL` — `https://<service>.onrender.com` (isi setelah URL diberikan Render)
    - `DB_URL` — connection string Neon
    - `CORS_ALLOWED_ORIGINS` — URL Vercel, mis. `https://<project>.vercel.app`
+   - `ADMIN_EMAIL` + `ADMIN_PASSWORD` — akun admin Filament pertama (password minimal 12 karakter).
+     Tidak ada akun default di kode; seeder melewati pembuatan admin bila dua env ini kosong.
    - `MIDTRANS_*` — isi bila alur pembayaran mau diuji (boleh kosong untuk uji form saja)
 4. Deploy. Entrypoint container otomatis menjalankan `php artisan migrate --force`,
    `config:cache`, `view:cache`, lalu Apache.
-5. Verifikasi: `GET https://<service>.onrender.com/up` → 200.
+5. **Seed data pertama kali:** `RUN_SEEDERS=true` (default di `render.yaml`). Seed mengisi
+   kecamatan, saran sekolah, dan kampus. Setelah deploy pertama sukses, ubah
+   `RUN_SEEDERS=false` lalu redeploy agar cold start tidak menarik data eksternal lagi.
+6. Verifikasi: `GET https://<service>.onrender.com/up` → 200.
 
 Build lokal untuk uji image (butuh Docker):
 
@@ -104,7 +109,7 @@ docker run --rm -p 8080:80 --env-file backend/.env pesanmushaf-api
 - [ ] Submit pendaftaran masjid → batch baru bernama `Mushaf Reguler MASJID <Kecamatan> <n>`
 - [ ] Submit pendaftaran sekolah di kecamatan sama → batch berbeda
 - [ ] Cek status pendaftaran via kode
-- [ ] Login admin Filament (`/admin`) dengan akun seeder
+- [ ] Login admin Filament (`/admin`) dengan `ADMIN_EMAIL`/`ADMIN_PASSWORD` yang diisi saat deploy
 
 ## 5) Batasan & tindak lanjut
 
