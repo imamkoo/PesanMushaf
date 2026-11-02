@@ -884,3 +884,51 @@ it('returns only live available batches even when is_full is stale', function ()
 
     expect($response->json('data.0.is_full'))->toBeFalse();
 });
+
+it('defaults institution_type to SEKOLAH when the client does not send it', function () {
+    $district = makeDistrict('Gambir', '310003');
+
+    $response = postReg($district, 'SMA', 'SMAN 1 Jakarta', '6281234500001')
+        ->assertCreated()
+        ->assertJsonPath('data.institution_type', 'SEKOLAH');
+
+    expect(
+        Registration::query()
+            ->where('registration_code', $response->json('data.registration_code'))
+            ->value('institution_type')
+    )->toBe('SEKOLAH');
+});
+
+it('stores a MASJID registration together with its personal documents', function () {
+    $district = makeDistrict('Kebayoran Baru', '310004');
+
+    $response = postReg($district, 'UMUM', 'Masjid Al-Azhar', '6281234500002', [
+        'institution_type' => 'MASJID',
+        'nik' => makeNik(),
+        'address' => 'Jl. Masjid No. 1',
+    ])
+        ->assertCreated()
+        ->assertJsonPath('data.institution_type', 'MASJID');
+
+    expect($response->json('data.education_level'))->toBe('UMUM');
+});
+
+it('requires NIK and address for non-school institutions even when the level is not UMUM', function () {
+    $district = makeDistrict('Menteng', '310005');
+
+    postReg($district, 'SMA', 'Masjid Baiturrahman', '6281234500003', [
+        'institution_type' => 'KOMUNITAS',
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['nik', 'address']);
+});
+
+it('rejects an unknown institution_type', function () {
+    $district = makeDistrict('Tanah Abang', '310006');
+
+    postReg($district, 'SMA', 'SMAN 7 Jakarta', '6281234500004', [
+        'institution_type' => 'PESANTREN',
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['institution_type']);
+});

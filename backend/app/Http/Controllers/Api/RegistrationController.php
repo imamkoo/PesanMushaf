@@ -27,11 +27,16 @@ class RegistrationController extends Controller
         // Memastikan data yang dikirim sesuai dengan aturan bisnis Mushaf.
         // NIK & alamat hanya wajib bagi peserta jenjang UMUM (baik VIP maupun
         // Reguler) karena verifikasi tidak bisa lewat institusi sekolah formal.
-        $requiresPersonalDocs = $request->input('education_level') === 'UMUM';
+        // Institusi non-sekolah (masjid/komunitas) diperlakukan sama: tidak ada
+        // sekolah yang bisa dijadikan rujukan verifikasi.
+        $institutionType = $request->input('institution_type');
+        $requiresPersonalDocs = $request->input('education_level') === 'UMUM'
+            || (is_string($institutionType) && in_array($institutionType, ['MASJID', 'KOMUNITAS', 'UMUM'], true));
 
         $validator = Validator::make($request->all(), [
             'district_id' => 'required|exists:districts,id',
             'education_level' => 'required|in:SD,SMP,SMA,UMUM',
+            'institution_type' => ['sometimes', 'string', Rule::in(['SEKOLAH', 'MASJID', 'KOMUNITAS', 'UMUM'])],
             'edition' => ['required', 'string', 'max:32', Rule::exists('price_categories', 'slug')->where('is_active', true)],
             'university_id' => ['nullable', 'integer', Rule::exists('universities', 'id')],
             'name' => 'required|string|max:255',
@@ -42,6 +47,7 @@ class RegistrationController extends Controller
             'address' => [$requiresPersonalDocs ? 'required' : 'nullable', 'string', 'max:500'],
             'exclude_from_school_suggestions' => 'sometimes|boolean',
         ], [
+            'institution_type.in' => 'Jenis institusi harus salah satu dari: SEKOLAH, MASJID, KOMUNITAS, UMUM.',
             'nik.required' => 'NIK wajib diisi untuk peserta jenjang UMUM.',
             'nik.digits' => 'NIK harus 16 digit angka sesuai KTP.',
             'address.required' => 'Alamat wajib diisi untuk peserta jenjang UMUM.',
