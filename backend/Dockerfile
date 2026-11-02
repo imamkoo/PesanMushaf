@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Build context harus folder backend/:
-#   docker build -t pesanmushaf-api ./backend
+#   docker build -t savegoldenage-api ./backend
 
 FROM node:22-bookworm-slim AS node
 
