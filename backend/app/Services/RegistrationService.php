@@ -22,7 +22,10 @@ class RegistrationService
         return DB::transaction(function () use ($data) {
             $edition = $data['edition'] ?? 'reguler';
             $level = $data['education_level'];
-            $institutionType = $data['institution_type'] ?? 'SEKOLAH';
+            // Klien lama belum mengirim institution_type. Turunkan dari jenjang agar
+            // peserta UMUM tidak masuk batch sekolah dan tetap bergabung dengan batch
+            // UMUM yang sudah di-backfill migrasi.
+            $institutionType = $data['institution_type'] ?? ($level === 'UMUM' ? 'UMUM' : 'SEKOLAH');
             $schoolName = $data['school_name'];
             $schoolNameNormalized = SchoolNameNormalizer::normalize($schoolName);
 
