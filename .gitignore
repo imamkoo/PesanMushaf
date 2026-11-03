@@ -9,5 +9,6 @@ node_modules/
 !**/.env.production.example
 
 
-# QA artifacts
-qa/screenshots/
+# Dokumen & QA lokal — tidak pernah di-push
+/docs/
+/qa/
