@@ -15,6 +15,14 @@ type SearchableSchoolSelectProps = {
   /** Nilai `value` untuk opsi "Lainnya" — dipisah dan ditampilkan di bawah daftar. */
   customOptionValue: string
   onChange: (value: string) => void
+  /** Label entitas untuk teks bantuan, mis. "sekolah" atau "masjid". */
+  entityLabel?: string
+  helperText?: string
+  searchPlaceholder?: string
+  emptyText?: string
+  /** Aktifkan saat opsi diambil ulang dari API setiap kali pencarian berubah. */
+  remote?: boolean
+  onSearch?: (query: string) => void
 }
 
 /** Combobox untuk daftar panjang: ketik untuk menyaring, daftar di-scroll terbatas (bukan select bawaan browser). */
@@ -27,6 +35,12 @@ export function SearchableSchoolSelect({
   disabled,
   customOptionValue,
   onChange,
+  entityLabel = 'sekolah',
+  helperText = 'Ketik untuk menyaring nama sekolah — tidak perlu scroll seluruh daftar.',
+  searchPlaceholder = 'Cari nama sekolah…',
+  emptyText,
+  remote = false,
+  onSearch,
 }: SearchableSchoolSelectProps) {
   const id = useId()
   const listId = `${id}-list`
@@ -85,7 +99,7 @@ export function SearchableSchoolSelect({
   return (
     <div ref={rootRef} className="relative flex flex-col gap-2 font-bold text-[#111111]">
       <span id={`${id}-label`}>{label}</span>
-      <p className="-mt-1 text-xs font-semibold leading-5 text-[#111111]/50">Ketik untuk menyaring nama sekolah — tidak perlu scroll seluruh daftar.</p>
+      <p className="-mt-1 text-xs font-semibold leading-5 text-[#111111]/50">{helperText}</p>
 
       <button
         type="button"
@@ -118,9 +132,12 @@ export function SearchableSchoolSelect({
               type="search"
               value={searchQuery}
               autoComplete="off"
-              placeholder="Cari nama sekolah…"
-              aria-label="Cari nama sekolah"
-              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={searchPlaceholder}
+              aria-label={searchPlaceholder}
+              onChange={(event) => {
+                setSearchQuery(event.target.value)
+                onSearch?.(event.target.value)
+              }}
               onKeyDown={(event) => {
                 if (event.key === 'Escape') {
                   setIsOpen(false)
@@ -130,8 +147,9 @@ export function SearchableSchoolSelect({
             />
             {totalRegular > 0 ? (
               <p className="mt-2 px-1 text-xs font-semibold text-[#111111]/45">
-                Menampilkan {shownRegular} dari {totalRegular} sekolah
-                {searchQuery.trim() ? ` untuk “${searchQuery.trim()}”` : ''}
+                {remote
+                  ? `Menampilkan ${shownRegular} hasil${searchQuery.trim() ? ` untuk “${searchQuery.trim()}”` : ''}`
+                  : `Menampilkan ${shownRegular} dari ${totalRegular} ${entityLabel}${searchQuery.trim() ? ` untuk “${searchQuery.trim()}”` : ''}`}
               </p>
             ) : null}
           </div>
@@ -139,9 +157,10 @@ export function SearchableSchoolSelect({
           <ul className="max-h-[min(280px,40vh)] overflow-y-auto overscroll-contain py-1">
             {filteredRegular.length === 0 ? (
               <li className="px-4 py-3 text-sm font-semibold text-[#111111]/45">
-                {totalRegular === 0
-                  ? 'Belum ada entri sekolah untuk disaring. Pilih Lainnya di bawah jika nama tidak tercantum.'
-                  : 'Tidak ada yang cocok. Ubah kata kunci atau pilih Lainnya di bawah.'}
+                {emptyText ??
+                  (totalRegular === 0
+                    ? `Belum ada entri ${entityLabel} untuk disaring. Pilih Lainnya di bawah jika nama tidak tercantum.`
+                    : 'Tidak ada yang cocok. Ubah kata kunci atau pilih Lainnya di bawah.')}
               </li>
             ) : (
               filteredRegular.map((option) => (

@@ -67,6 +67,21 @@ export type ApiOption = {
   value: string
 }
 
+export type ApiMosque = {
+  id: number
+  name: string
+  address: string | null
+  village: string | null
+  district_name: string | null
+  city: string | null
+  province: string | null
+  latitude: string | number | null
+  longitude: string | number | null
+  dmi_code: string | null
+  source: string
+  is_verified: boolean
+}
+
 export type ApiPriceCategory = {
   slug: string
   name: string
@@ -81,6 +96,8 @@ export type RegistrationPayload = {
   name: string
   phone_number: string
   school_name: string
+  /** Catalog mosque selected for institution_type = MASJID. */
+  mosque_id?: number
   /** true when the participant chose "Lainnya" / typed a name not from the catalog */
   exclude_from_school_suggestions?: boolean
   email?: string
@@ -106,6 +123,7 @@ export type Registration = {
   edition: string
   education_level: string
   institution_type: string
+  mosque_id?: number | null
   page_number: number
   status: 'pending' | 'success' | 'failed'
   total_payment: number
@@ -371,6 +389,37 @@ export async function getSchoolOptions(districtId: string, educationLevel: Educa
   }
 
   const response = await apiRequest<ApiOption[]>(`/school-options?${params.toString()}`)
+
+  return response.data
+}
+
+export async function fetchMosques(params: {
+  query?: string
+  districtId?: string
+  city?: string
+  limit?: number
+  signal?: AbortSignal
+}): Promise<ApiMosque[]> {
+  const search = new URLSearchParams()
+  const query = params.query?.trim() ?? ''
+
+  if (query.length >= 2) {
+    search.set('q', query)
+  }
+
+  if (params.districtId) {
+    search.set('district_id', params.districtId)
+  }
+
+  if (params.city?.trim()) {
+    search.set('city', params.city.trim())
+  }
+
+  search.set('limit', String(params.limit ?? 10))
+
+  const response = await apiRequest<ApiMosque[]>(`/mosques?${search.toString()}`, {
+    signal: params.signal,
+  })
 
   return response.data
 }

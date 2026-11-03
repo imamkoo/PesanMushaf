@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\RegistrationResource;
 use App\Http\Resources\Api\RegistrationStatusResource;
+use App\Models\Mosque;
 use App\Models\Registration;
 use App\Services\RegistrationService;
 use App\Support\IndonesianPhone;
@@ -37,11 +38,12 @@ class RegistrationController extends Controller
             'district_id' => 'required|exists:districts,id',
             'education_level' => 'required|in:SD,SMP,SMA,UMUM',
             'institution_type' => ['sometimes', 'string', Rule::in(['SEKOLAH', 'MASJID', 'KOMUNITAS', 'UMUM'])],
+            'mosque_id' => ['nullable', 'integer', Rule::exists('mosques', 'id')->where('is_active', true)],
             'edition' => ['required', 'string', 'max:32', Rule::exists('price_categories', 'slug')->where('is_active', true)],
             'university_id' => ['nullable', 'integer', Rule::exists('universities', 'id')],
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
-            'school_name' => 'required|string|max:255',
+            'school_name' => ['required_without:mosque_id', 'nullable', 'string', 'max:255'],
             'email' => 'nullable|email|max:255',
             'nik' => [$requiresPersonalDocs ? 'required' : 'nullable', 'string', 'digits:16'],
             'address' => [$requiresPersonalDocs ? 'required' : 'nullable', 'string', 'max:500'],
@@ -75,6 +77,23 @@ class RegistrationController extends Controller
                     'institution_type' => ['Jenis institusi SEKOLAH tidak boleh memakai jenjang UMUM.'],
                 ],
             ], 422);
+        }
+
+        if (! empty($validated['mosque_id']) && ($validated['institution_type'] ?? null) !== 'MASJID') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data pendaftaran tidak valid.',
+                'errors' => [
+                    'mosque_id' => ['Data masjid hanya boleh dipakai untuk institusi MASJID.'],
+                ],
+            ], 422);
+        }
+
+        if (! empty($validated['mosque_id'])) {
+            $mosque = Mosque::query()->active()->findOrFail($validated['mosque_id']);
+            // Nama katalog adalah nama kanonik; school_name tetap disimpan untuk
+            // kompatibilitas laporan dan clustering batch.
+            $validated['school_name'] = $mosque->name;
         }
 
         try {

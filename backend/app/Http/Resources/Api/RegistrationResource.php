@@ -24,6 +24,7 @@ class RegistrationResource extends JsonResource
             'address' => $this->address,
             'education_level' => $this->education_level,
             'institution_type' => $this->institution_type,
+            'mosque_id' => $this->mosque_id,
             'edition' => $this->edition,
             'school_name' => $this->school_name,
             'page_number' => $this->page_number,
