@@ -47,6 +47,8 @@ export function BatchCard({ batch }: BatchCardProps) {
             )}
             <img
               src={batch.imageUrl}
+              width={460}
+              height={600}
               className="h-full w-full object-cover saturate-[0.88] transition duration-700 group-hover:scale-105 group-hover:saturate-100"
               alt={batch.name}
               loading="lazy"

@@ -40,12 +40,9 @@ export default defineConfig({
       workbox: {
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
-        // Thumbnail-details & icon-1024 masih besar; banner.webp (216 KB) tetap di-precache.
-        globIgnores: [
-          '**/assets/images/thumbnails/thumbnail-details-*.png',
-          '**/icons/icon-1024.png',
-        ],
+        // Gambar tidak di-precache saat install; di-cache on-demand lewat runtimeCaching.
+        globPatterns: ['**/*.{js,css,html,svg,woff2}'],
+        globIgnores: ['**/icons/icon-1024.png'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         runtimeCaching: [
