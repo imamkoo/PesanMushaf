@@ -8,9 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "pwa:icons": "node scripts/generate-pwa-icons.mjs"
+    "pwa:icons": "node scripts/generate-pwa-icons.mjs",
+    "assets:prepare": "node scripts/prepare-assets.mjs"
   },
   "dependencies": {
+    "framer-motion": "^14.9.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.4",
@@ -38,5 +40,10 @@
     "vite": "^8.3.5",
     "vite-plugin-pwa": "^2.0.0",
     "workbox-window": "^7.4.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "zod@<4.6.6": "4.6.6"
+    }
   }
 }

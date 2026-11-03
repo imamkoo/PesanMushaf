@@ -430,12 +430,26 @@ export function BookingPage() {
       <AppNavbar />
       <main className="min-h-[calc(100vh-73px)] bg-[#f4f0ea] px-5 py-6">
         <section className="mx-auto w-full max-w-[920px]">
-          <header className="rounded-[32px] bg-[#111111] p-5 text-white sm:p-7 lg:p-8">
-            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] text-white/45">
+          <header className="relative overflow-hidden rounded-[32px] bg-ink p-5 text-white shadow-[0_30px_80px_-52px_rgba(0,0,0,0.8)] sm:p-7 lg:p-8">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(216,180,90,0.24),transparent_68%)] blur-2xl"
+            />
+            <img
+              src="/icons/icon-512.png"
+              alt=""
+              width={512}
+              height={512}
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+              className="seal-watermark pointer-events-none absolute -bottom-20 -right-16 h-56 w-56 rounded-full object-cover opacity-[0.12]"
+            />
+            <div className="relative z-10 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] text-white/45">
               <p>Area Pendaftaran</p>
-              <p>HUT500 Jakarta</p>
+              <p>JAKARTA500</p>
             </div>
-            <div className="mt-10 max-w-[700px]">
+            <div className="relative z-10 mt-10 max-w-[700px]">
               <p className="mb-4 w-fit rounded-full bg-white/10 px-4 py-2 text-sm font-black text-white">Langkah 1 dari 2</p>
               <h1 className="text-[40px] font-black leading-[0.94] tracking-[-0.06em] sm:text-[62px]">
                 Tentukan Langkah Anda.
@@ -661,7 +675,7 @@ export function BookingPage() {
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {isLoading ? (
                 <div className="col-span-2 py-8 text-center">
-                   <p className="animate-pulse font-bold text-[#111111]/50">Mensinkronkan data kategori...</p>
+                   <p className="motion-safe:animate-pulse font-bold text-[#111111]/50">Mensinkronkan data kategori...</p>
                 </div>
               ) : (
                 editionChoices.map((option) => {

@@ -20,15 +20,15 @@ export default defineConfig({
         'icons/maskable-512.png',
       ],
       manifest: {
-        name: 'HUT500 Jakarta',
-        short_name: 'HUT500',
-        description: 'Pendaftaran Mushaf Jakarta 500 — kontribusi nyata untuk Jakarta.',
+        name: 'JAKARTA500 — Arsip Abadi Jakarta 500 Tahun',
+        short_name: 'JAKARTA500',
+        description: 'JAKARTA500 — Arsip Abadi Jakarta 500 Tahun. Pendaftaran mushaf dan kontribusi nyata untuk Jakarta.',
         lang: 'id',
         start_url: '/',
         scope: '/',
         display: 'standalone',
         background_color: '#f4f0ea',
-        theme_color: '#ed3833',
+        theme_color: '#f4f0ea',
         orientation: 'portrait',
         categories: ['social', 'lifestyle', 'productivity'],
         icons: [
@@ -41,10 +41,8 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
-        // Banner & thumbnail-details sangat besar (>2 MiB default Workbox) — tidak di-precache.
-        // Tetap tersedia lewat runtime CacheFirst untuk /assets/images/... di bawah.
+        // Thumbnail-details & icon-1024 masih besar; banner.webp (216 KB) tetap di-precache.
         globIgnores: [
-          '**/assets/images/backgrounds/banner.png',
           '**/assets/images/thumbnails/thumbnail-details-*.png',
           '**/icons/icon-1024.png',
         ],

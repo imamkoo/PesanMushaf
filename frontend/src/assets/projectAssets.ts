@@ -18,7 +18,7 @@ export const icons = {
 }
 
 export const photos = {
-  hero: image('backgrounds/banner.png'),
+  hero: image('backgrounds/banner.webp'),
   districts: [
     image('thumbnails/thumbnails-2.png'),
     image('thumbnails/thumbnails-1.png'),
@@ -29,7 +29,7 @@ export const photos = {
     image('thumbnails/thumbnails-7.png'),
   ],
   batches: [
-    image('thumbnails/thumbnails-1.png'),
+    image('thumbnails/thumbnails-2.png'),
     image('thumbnails/thumbnails-3.png'),
     image('thumbnails/thumbnails-4.png'),
     image('thumbnails/thumbnails-5.png'),

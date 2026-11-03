@@ -1,5 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import 'tailwindcss';
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/inter-latin-var.woff2') format('woff2');
+}
+
+@theme {
+  --color-ink: #0b0b0f;
+  --color-ink-soft: #15151a;
+  --color-cream: #f4f0ea;
+  --color-brand: #ed3833;
+  --color-brand-dark: #c92a26;
+  --color-gold: #d8b45a;
+  --color-gold-deep: #8a671f;
+  --color-gold-soft: #f4dfa4;
+  --color-mist: #f7f7fd;
+}
 
 :root {
   font-family:
@@ -11,23 +30,36 @@
     'Segoe UI',
     sans-serif;
   color: #111111;
-  background-color: #f7f7fd;
+  background-color: #f4f0ea;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(17 17 17 / 28%) transparent;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
+  overflow-x: clip;
   background:
-    radial-gradient(circle at top left, rgb(237 56 51 / 10%), transparent 34rem),
-    #f7f7fd;
+    radial-gradient(55rem 38rem at 8% -12%, rgb(237 56 51 / 8%), transparent 62%),
+    radial-gradient(48rem 32rem at 100% 8%, rgb(216 180 90 / 10%), transparent 60%),
+    #f4f0ea;
+}
+
+#root {
+  min-height: 100dvh;
 }
 
 a {
@@ -40,6 +72,123 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: #ed3833;
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid #f4f0ea;
+  border-radius: 999px;
+  background: rgb(17 17 17 / 28%);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid #ed3833;
+  outline-offset: 3px;
+}
+
+input,
+textarea,
+select {
+  caret-color: #ed3833;
+}
+
+@layer components {
+  .glass-dark {
+    border: 1px solid rgb(255 255 255 / 12%);
+    background: linear-gradient(135deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 2.5%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 12%),
+      0 24px 60px -34px rgb(0 0 0 / 90%);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+
+  .glass-light {
+    border: 1px solid rgb(255 255 255 / 80%);
+    background: linear-gradient(135deg, rgb(255 255 255 / 90%), rgb(255 255 255 / 66%));
+    box-shadow:
+      0 24px 70px -38px rgb(17 17 17 / 28%),
+      inset 0 1px 0 #ffffff;
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+
+  .seal-face {
+    box-shadow:
+      0 18px 44px -22px rgb(0 0 0 / 90%),
+      0 0 0 1px rgb(216 180 90 / 55%),
+      inset 0 0 0 4px rgb(255 255 255 / 8%);
+  }
+
+  .seal-watermark {
+    -webkit-mask-image: radial-gradient(circle, #000 38%, transparent 72%);
+    mask-image: radial-gradient(circle, #000 38%, transparent 72%);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .shine-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine-sweep::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background: linear-gradient(110deg, transparent 20%, rgb(255 255 255 / 28%) 48%, transparent 72%);
+    transform: translateX(-120%);
+    transition: transform 700ms var(--ease-out-expo);
+    pointer-events: none;
+  }
+
+  .shine-sweep:hover::after {
+    transform: translateX(120%);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-dark {
+    background: rgb(21 21 26 / 96%);
+  }
+
+  .glass-light {
+    background: rgb(255 255 255 / 96%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .shine-sweep::after {
+    display: none;
+  }
+
+  .shine-sweep:hover::after {
+    transform: none;
+  }
 }
 
 .swiper {
@@ -58,24 +207,10 @@ select {
   padding-block: 4px 12px;
 }
 
-.hut-district-carousel .swiper-button-prev,
-.hut-district-carousel .swiper-button-next {
-  width: 46px;
-  height: 46px;
-  border-radius: 9999px;
-  background: #ffffff;
-  color: #000929;
-  box-shadow: 0 16px 40px rgb(0 9 41 / 12%);
-}
-
-.hut-district-carousel .swiper-button-prev::after,
-.hut-district-carousel .swiper-button-next::after {
-  font-size: 16px;
-  font-weight: 800;
-}
-
-.hut-district-carousel .swiper-button-disabled {
-  opacity: 0;
+.hut-district-prev.swiper-button-disabled,
+.hut-district-next.swiper-button-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .hut-lookup-results-swiper {

@@ -46,7 +46,7 @@ function computeStats(batches: Batch[]): Hut500PublicStats {
 
   const byLevelMap = new Map<string, { capacity: number; filled: number }>()
   for (const batch of batches) {
-    const key = batch.educationLevel || 'Lainnya'
+    const key = batch.educationLevel || (batch.edition === 'vip' ? 'VIP' : 'UMUM')
     const current = byLevelMap.get(key) ?? { capacity: 0, filled: 0 }
     current.capacity += batch.maxCapacity
     current.filled += batch.registrationsCount
@@ -111,7 +111,7 @@ function mapDistrict(district: ApiDistrict, index: number): District {
     name: district.name,
     slug: district.slug,
     code: district.code ?? undefined,
-    totalBatches: `${district.batches_count ?? 0} Gelombang`,
+    totalBatches: district.batches_count ? `${district.batches_count} Gelombang` : 'Belum ada gelombang',
     imageUrl: resolveImage(district.photo, photos.districts[index % photos.districts.length]),
     href: `/districts/${district.slug}`,
   }
@@ -130,7 +130,7 @@ function mapBatch(batch: ApiBatch, index: number, priceBySlug: Record<string, nu
     educationLevel: batch.education_level,
     edition,
     basePrice,
-    districtName: batch.district?.name ?? 'Tanpa Kecamatan',
+    districtName: batch.district?.name ?? 'Jakarta',
     maxCapacity: batch.max_capacity,
     registrationsCount,
     imageUrl: photos.batches[index % photos.batches.length],
