@@ -23,6 +23,7 @@ export type Batch = {
   edition: 'reguler' | 'vip'
   basePrice: number
   districtName: string
+  isGlobal: boolean
   maxCapacity: number
   registrationsCount: number
   imageUrl: string

@@ -111,7 +111,7 @@ function mapDistrict(district: ApiDistrict, index: number): District {
     name: district.name,
     slug: district.slug,
     code: district.code ?? undefined,
-    totalBatches: district.batches_count ? `${district.batches_count} Gelombang` : 'Belum ada gelombang',
+    totalBatches: district.batches_count ? `${district.batches_count} Gelombang` : 'Pendaftaran dibuka',
     imageUrl: resolveImage(district.photo, photos.districts[index % photos.districts.length]),
     href: `/districts/${district.slug}`,
   }
@@ -130,7 +130,8 @@ function mapBatch(batch: ApiBatch, index: number, priceBySlug: Record<string, nu
     educationLevel: batch.education_level,
     edition,
     basePrice,
-    districtName: batch.district?.name ?? 'Jakarta',
+    districtName: batch.district?.name ?? 'VIP Global',
+    isGlobal: batch.district_id === null || batch.district_id === undefined,
     maxCapacity: batch.max_capacity,
     registrationsCount,
     imageUrl: photos.batches[index % photos.batches.length],

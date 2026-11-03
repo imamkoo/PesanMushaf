@@ -170,7 +170,7 @@ export function HomePage() {
               Array.from({ length: 4 }).map((_, index) => <BatchCardSkeleton key={index} />)
             ) : (
               <p className="glass-light rounded-2xl px-5 py-4 text-sm font-bold text-ink/60">
-                Belum ada gelombang pendaftaran yang dibuka.
+                Pendaftaran dibuka. Gelombang pertama dibuat otomatis saat pendaftaran pertama masuk.
               </p>
             )}
           </div>
