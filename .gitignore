@@ -7,3 +7,6 @@ node_modules/
 **/.env.*
 !**/.env.example
 
+# Dokumen & QA lokal — tidak pernah di-push
+/docs/
+/qa/
