@@ -177,7 +177,10 @@ export function HomeHero({ districtCount, batchCount, isLoading }: HomeHeroProps
             </span>
           </m.div>
 
-          <h1 className="max-w-[790px] text-[clamp(2.25rem,8.6vw,6.1rem)] font-black leading-[0.92] tracking-[-0.04em] text-white">
+          <h1
+            aria-label="Langkah Nyata untuk Jakarta."
+            className="max-w-[790px] text-[clamp(2.25rem,8.6vw,6.1rem)] font-black leading-[0.92] tracking-[-0.04em] text-white"
+          >
             <span className="block overflow-hidden pb-1">
               <m.span variants={lineReveal} className="block">
                 Langkah Nyata
