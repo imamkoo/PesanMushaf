@@ -16,6 +16,8 @@ export function HomeAside() {
         >
           <img
             src={photos.hero}
+            width={1200}
+            height={960}
             className="absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-multiply transition duration-700 group-hover:scale-[1.06]"
             alt="JAKARTA500 — Arsip Abadi Jakarta 500 Tahun"
             loading="lazy"

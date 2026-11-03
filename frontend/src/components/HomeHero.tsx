@@ -12,19 +12,17 @@ import { useRef } from 'react'
 import type { PointerEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-import { ArrowRight, CheckIcon } from './icons'
+import { ArrowRight } from './icons'
 import { Magnetic } from './motion/Magnetic'
 import { SealEmblem } from './SealEmblem'
 
 type HomeHeroProps = {
   districtCount: number
-  batchCount: number
-  isLoading: boolean
 }
 
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
-export function HomeHero({ districtCount, batchCount, isLoading }: HomeHeroProps) {
+export function HomeHero({ districtCount }: HomeHeroProps) {
   const reduce = useReducedMotion()
   const canHover = useMediaQuery('(hover: hover) and (pointer: fine)')
   const interactive = canHover && !reduce
@@ -129,10 +127,10 @@ export function HomeHero({ districtCount, batchCount, isLoading }: HomeHeroProps
         <m.div
           aria-hidden="true"
           style={{ y: reduce ? 0 : sealY }}
-          className="pointer-events-none absolute -right-16 -top-20 z-0 h-[240px] w-[240px] sm:-right-10 sm:-top-16 sm:h-[360px] sm:w-[360px]"
+          className="pointer-events-none absolute -right-24 -top-24 z-0 h-[300px] w-[300px] sm:-right-16 sm:-top-20 sm:h-[460px] sm:w-[460px]"
         >
-          <span className="absolute inset-0 rounded-full border border-gold/20" />
-          <span className="absolute inset-6 rounded-full border border-dashed border-gold/15 motion-safe:animate-[spin_70s_linear_infinite]" />
+          <span className="absolute inset-0 rounded-full border border-white/10" />
+          <span className="absolute inset-6 rounded-full border border-dashed border-white/[0.08] motion-safe:animate-[spin_70s_linear_infinite]" />
           <img
             src="/icons/icon-512.png"
             alt=""
@@ -141,7 +139,7 @@ export function HomeHero({ districtCount, batchCount, isLoading }: HomeHeroProps
             loading="eager"
             decoding="async"
             draggable={false}
-            className="seal-watermark absolute inset-0 h-full w-full rounded-full object-cover opacity-[0.08]"
+            className="seal-watermark seal-watermark-white absolute inset-0 h-full w-full rounded-full object-cover opacity-[0.2]"
           />
         </m.div>
 
@@ -212,7 +210,7 @@ export function HomeHero({ districtCount, batchCount, isLoading }: HomeHeroProps
           </m.div>
         </m.div>
 
-        <m.div variants={fadeUp} initial="hidden" animate="show" className="relative z-10 space-y-4 border-t border-white/10 pt-5">
+        <m.div variants={fadeUp} initial="hidden" animate="show" className="relative z-10 border-t border-white/10 pt-5">
           <div className="flex items-center gap-3">
             <SealEmblem size={56} eager />
             <div className="min-w-0">
@@ -224,38 +222,8 @@ export function HomeHero({ districtCount, batchCount, isLoading }: HomeHeroProps
               </p>
             </div>
           </div>
-
-          <div className="grid divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            <HeroMetric label="Cakupan Area" value="DKI Jakarta" />
-            <HeroMetric label="Gelombang" value={isLoading ? 'Memuat...' : `${batchCount} Aktif`} />
-            <HeroMetric label="Infrastruktur" value="Terverifikasi" verified />
-          </div>
         </m.div>
       </m.div>
     </m.div>
-  )
-}
-
-function HeroMetric({
-  label,
-  value,
-  verified = false,
-}: {
-  label: string
-  value: string
-  verified?: boolean
-}) {
-  return (
-    <div className="px-4 py-3">
-      <p className="text-[9px] font-black uppercase tracking-[0.18em] text-white/35">{label}</p>
-      <p className="mt-1.5 flex items-center gap-1.5 text-sm font-black text-white [word-spacing:0.14em]">
-        {verified ? (
-          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gold/15 text-gold">
-            <CheckIcon className="h-3 w-3" />
-          </span>
-        ) : null}
-        {value}
-      </p>
-    </div>
   )
 }

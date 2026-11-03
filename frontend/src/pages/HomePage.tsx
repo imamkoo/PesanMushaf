@@ -1,7 +1,7 @@
+import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { AppNavbar } from '../components/AppNavbar'
 import { BatchCard } from '../components/BatchCard'
-import { DistrictCarousel } from '../components/DistrictCarousel'
 import { HomeAside } from '../components/HomeAside'
 import { HomeHero } from '../components/HomeHero'
 import { ArrowRight } from '../components/icons'
@@ -9,6 +9,10 @@ import { Reveal } from '../components/motion/Reveal'
 import { SealEmblem } from '../components/SealEmblem'
 import { StatsPanel } from '../components/StatsPanel'
 import { useHut500Data } from '../hooks/useHut500Data'
+
+const DistrictCarousel = lazy(() =>
+  import('../components/DistrictCarousel').then((module) => ({ default: module.DistrictCarousel })),
+)
 
 const whatsappUrl =
   'https://api.whatsapp.com/send/?phone=6287756877484&text&type=phone_number&app_absent=0'
@@ -29,7 +33,7 @@ export function HomePage() {
           id="hero"
           className="relative mx-auto grid min-h-[600px] w-full max-w-[1280px] gap-4 lg:min-h-[680px] lg:grid-cols-[1fr_0.52fr]"
         >
-          <HomeHero districtCount={districts.length} batchCount={batches.length} isLoading={isLoading} />
+          <HomeHero districtCount={districts.length} />
           <HomeAside />
         </section>
       </header>
@@ -64,7 +68,9 @@ export function HomePage() {
           )}
 
           {districts.length > 0 ? (
-            <DistrictCarousel districts={districts} />
+            <Suspense fallback={<DistrictSkeleton />}>
+              <DistrictCarousel districts={districts} />
+            </Suspense>
           ) : isLoading ? (
             <DistrictSkeleton />
           ) : (

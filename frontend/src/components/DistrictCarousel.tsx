@@ -47,6 +47,8 @@ export function DistrictCarousel({ districts }: DistrictCarouselProps) {
                 <article className="relative flex h-full w-full overflow-hidden rounded-[28px] bg-ink shadow-[0_30px_80px_-46px_rgba(0,0,0,0.7)]">
                   <img
                     src={district.imageUrl}
+                    width={460}
+                    height={600}
                     className="absolute h-full w-full object-cover opacity-55 saturate-[0.5] transition duration-700 group-hover:scale-105 group-hover:opacity-70 group-hover:saturate-100"
                     alt={district.name}
                     loading="lazy"
