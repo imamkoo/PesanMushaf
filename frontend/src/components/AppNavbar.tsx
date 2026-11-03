@@ -18,9 +18,13 @@ export function AppNavbar() {
     <nav className="sticky top-0 z-50 border-b border-black/6 bg-[#f6f1e8]/88 shadow-[0_10px_40px_rgba(17,17,17,0.05)] backdrop-blur-2xl">
       <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between gap-4 px-5 py-3.5">
         <Link to="/" aria-label="HUT500 home" className="group flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#111111] text-xs font-black tracking-[-0.02em] text-white transition group-hover:bg-[#ed3833]">
-            H5
-          </div>
+          <img
+            src="/icons/icon-192.png"
+            alt=""
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-full object-cover transition group-hover:scale-[1.03]"
+          />
           <p className="text-sm font-black uppercase tracking-[-0.02em] text-[#111111] sm:text-base">HUT500</p>
         </Link>
 

@@ -5,7 +5,7 @@ import { getBasePrice } from '../lib/payment'
 import type { Batch, District } from '../types/batch'
 
 const defaultPriceBySlug: Record<string, number> = {
-  reguler: 12_000,
+  reguler: 30_000,
   vip: 50_000,
 }
 

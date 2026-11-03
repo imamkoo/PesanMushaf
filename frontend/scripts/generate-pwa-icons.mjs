@@ -1,65 +1,61 @@
-// Generator placeholder icon HUT500 PWA.
+// Generator ikon PWA, favicon, dan apple-touch-icon dari logo Arsip Abadi Jakarta 500 Tahun.
 // Jalankan: `node scripts/generate-pwa-icons.mjs` (sekali jalan; commit hasilnya).
-// Ganti dengan logo final kapan saja — cukup replace 4 file PNG di public/icons + public/apple-touch-icon.png.
 import sharp from 'sharp'
-import { mkdir } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const projectRoot = resolve(__dirname, '..')
+const source = resolve(__dirname, 'assets/logo-seal.jpeg')
 const iconsDir = resolve(projectRoot, 'public/icons')
 const publicDir = resolve(projectRoot, 'public')
 
-const brandRed = '#ed3833'
-const brandDark = '#111111'
-const safeRatio = 0.8 // for maskable safe-area
+const background = '#ffffff'
+const pngOptions = { compressionLevel: 9, palette: true, quality: 92, effort: 10 }
 
-function tightSvg(size) {
-  const radius = Math.round(size * 0.22)
-  const fontSize = Math.round(size * 0.46)
-  const accentSize = Math.round(size * 0.16)
-  const accentY = Math.round(size * 0.78)
-  const accentX = Math.round(size * 0.5)
+async function tightLogo(size) {
+  const trimmed = await sharp(source)
+    .trim({ background, threshold: 14 })
+    .toBuffer()
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="${brandDark}" />
-  <text x="50%" y="50%" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="900" font-size="${fontSize}" letter-spacing="-${Math.round(fontSize * 0.06)}" fill="#ffffff" text-anchor="middle" dominant-baseline="middle" dy="0.02em">H5</text>
-  <circle cx="${accentX}" cy="${accentY}" r="${accentSize / 2}" fill="${brandRed}" />
-</svg>`
+  return sharp(trimmed)
+    .resize(size, size, { fit: 'contain', background })
+    .flatten({ background })
+    .png(pngOptions)
+    .toBuffer()
 }
 
-function maskableSvg(size) {
-  // For maskable icons, content lives inside safe-area (~80% of canvas).
-  // Background bleeds full-canvas with brand red so the OS-imposed mask never reveals empty edges.
-  const safeSize = Math.round(size * safeRatio)
-  const safeOffset = Math.round((size - safeSize) / 2)
-  const radius = Math.round(safeSize * 0.22)
-  const fontSize = Math.round(safeSize * 0.46)
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" fill="${brandRed}" />
-  <rect x="${safeOffset}" y="${safeOffset}" width="${safeSize}" height="${safeSize}" rx="${radius}" ry="${radius}" fill="${brandDark}" />
-  <text x="50%" y="50%" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="900" font-size="${fontSize}" letter-spacing="-${Math.round(fontSize * 0.06)}" fill="#ffffff" text-anchor="middle" dominant-baseline="middle" dy="0.02em">H5</text>
-</svg>`
-}
-
-async function writeIcon(svgString, outputPath) {
-  const buffer = Buffer.from(svgString)
+async function writeTight(size, outputPath) {
   await mkdir(dirname(outputPath), { recursive: true })
-  await sharp(buffer).png({ compressionLevel: 9 }).toFile(outputPath)
+  await writeFile(outputPath, await tightLogo(size))
+  console.log('wrote', outputPath)
+}
+
+async function writeMaskable(size, outputPath) {
+  const innerSize = Math.round(size * 0.76)
+  const inner = await tightLogo(innerSize)
+  const canvas = sharp({
+    create: { width: size, height: size, channels: 3, background },
+  })
+
+  await mkdir(dirname(outputPath), { recursive: true })
+  await canvas
+    .composite([{ input: inner, gravity: 'center' }])
+    .png(pngOptions)
+    .toFile(outputPath)
   console.log('wrote', outputPath)
 }
 
 async function main() {
   await mkdir(iconsDir, { recursive: true })
 
-  await writeIcon(tightSvg(192), resolve(iconsDir, 'icon-192.png'))
-  await writeIcon(tightSvg(512), resolve(iconsDir, 'icon-512.png'))
-  await writeIcon(maskableSvg(512), resolve(iconsDir, 'maskable-512.png'))
-  await writeIcon(tightSvg(180), resolve(publicDir, 'apple-touch-icon.png'))
+  await writeTight(192, resolve(iconsDir, 'icon-192.png'))
+  await writeTight(512, resolve(iconsDir, 'icon-512.png'))
+  await writeTight(1024, resolve(iconsDir, 'icon-1024.png'))
+  await writeMaskable(512, resolve(iconsDir, 'maskable-512.png'))
+  await writeTight(180, resolve(publicDir, 'apple-touch-icon.png'))
+  await writeTight(32, resolve(publicDir, 'favicon-32.png'))
 
   console.log('done')
 }

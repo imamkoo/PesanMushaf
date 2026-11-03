@@ -944,3 +944,15 @@ it('rejects SEKOLAH institution_type with UMUM level', function () {
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['institution_type']);
 });
+
+it('uses the current price category amount for reguler and vip', function () {
+    $district = makeDistrict('Cilandak', '3171030');
+
+    $reguler = postReg($district, 'SMP', 'SMPN 1 Cilandak')->assertCreated();
+    expect($reguler->json('data.financial.base_price'))->toBe(30000)
+        ->and($reguler->json('data.financial.total_payment'))->toBe(30000);
+
+    $vip = postVipWithDocs($district, 'SMA')->assertCreated();
+    expect($vip->json('data.financial.base_price'))->toBe(50000)
+        ->and($vip->json('data.financial.total_payment'))->toBe(50000);
+});

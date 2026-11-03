@@ -13,7 +13,7 @@ export default defineConfig({
       registerType: 'prompt',
       injectRegister: false,
       includeAssets: [
-        'favicon.svg',
+        'favicon-32.png',
         'apple-touch-icon.png',
         'icons/icon-192.png',
         'icons/icon-512.png',
@@ -46,16 +46,29 @@ export default defineConfig({
         globIgnores: [
           '**/assets/images/backgrounds/banner.png',
           '**/assets/images/thumbnails/thumbnail-details-*.png',
+          '**/icons/icon-1024.png',
         ],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => /\/api\/(districts|batches|price-categories|universities)/.test(url.pathname),
+            urlPattern: ({ url }) => /\/api\/(districts|batches|universities)/.test(url.pathname),
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'hut500-catalog',
               expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Harga bisa diubah admin kapan saja — jangan sajikan cache 7 hari.
+            // NetworkFirst: selalu ambil harga terbaru saat online, cache hanya untuk offline.
+            urlPattern: ({ url }) => /\/api\/price-categories/.test(url.pathname),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'hut500-prices',
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

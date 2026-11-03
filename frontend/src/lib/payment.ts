@@ -1,5 +1,5 @@
 export function getBasePrice(edition: 'reguler' | 'vip') {
-  return edition === 'vip' ? 50000 : 12000
+  return edition === 'vip' ? 50000 : 30000
 }
 
 export function formatRupiah(value: number) {
