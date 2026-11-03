@@ -84,7 +84,7 @@ export function StatsPanel({ stats, isLoading }: StatsPanelProps) {
             />
             <div className="relative flex items-start justify-between gap-4">
               <h3 className="max-w-[24ch] text-[24px] font-black leading-[1.02] tracking-[-0.04em] text-ink">
-                Distribusi kuota antar kategori peserta.
+                Sebaran kuota tiap kategori peserta.
               </h3>
               <span className="shrink-0 rounded-full border border-gold/40 bg-gold/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-gold-deep">
                 Kapasitas
