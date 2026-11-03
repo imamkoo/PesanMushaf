@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\BatchController;
 use App\Http\Controllers\Api\DistrictController;
 use App\Http\Controllers\Api\MidtransController;
+use App\Http\Controllers\Api\MosqueController;
 use App\Http\Controllers\Api\PriceCategoryController;
 use App\Http\Controllers\Api\RegistrationController;
 use App\Http\Controllers\Api\SchoolNameMatchController;
@@ -21,6 +22,7 @@ Route::middleware('throttle:120,1')->group(function () {
     Route::apiResource('districts', DistrictController::class)->only(['index', 'show']);
     Route::apiResource('universities', UniversityController::class)->only(['index', 'show']);
     Route::apiResource('batches', BatchController::class)->only(['index', 'show']);
+    Route::apiResource('mosques', MosqueController::class)->only(['index', 'show']);
     Route::get('/school-options', SchoolOptionController::class);
     Route::get('/school-options/match', SchoolNameMatchController::class);
 });

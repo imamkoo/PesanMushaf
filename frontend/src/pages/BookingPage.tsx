@@ -6,9 +6,11 @@ import { SearchableSchoolSelect } from '../components/SearchableSchoolSelect'
 import { useHut500Data } from '../hooks/useHut500Data'
 import {
   createRegistration,
+  fetchMosques,
   fetchSchoolNameMatches,
   getSchoolOptions,
   saveLastRegistration,
+  type ApiMosque,
   type ApiOption,
   type InstitutionType,
   type SchoolNameMatch,
@@ -21,6 +23,7 @@ type FormValues = {
   name: string
   phone_number: string
   school_name: string
+  mosque_id: string
   custom_school_name: string
   email: string
   district_id: string
@@ -44,6 +47,7 @@ const initialValues: FormValues = {
   name: '',
   phone_number: '',
   school_name: '',
+  mosque_id: '',
   custom_school_name: '',
   email: '',
   district_id: '',
@@ -135,6 +139,11 @@ export function BookingPage() {
   const [schoolOptions, setSchoolOptions] = useState<ApiOption[]>([])
   const [isLoadingSchools, setIsLoadingSchools] = useState(false)
   const [schoolLoadError, setSchoolLoadError] = useState('')
+  const [mosqueOptions, setMosqueOptions] = useState<ApiMosque[]>([])
+  const [selectedMosque, setSelectedMosque] = useState<ApiMosque | null>(null)
+  const [mosqueSearchQuery, setMosqueSearchQuery] = useState('')
+  const [isLoadingMosques, setIsLoadingMosques] = useState(false)
+  const [mosqueLoadError, setMosqueLoadError] = useState('')
   const [customSchoolMatchState, setCustomSchoolMatchState] = useState<SchoolMatchState>({
     query: '',
     districtId: '',
@@ -176,6 +185,27 @@ export function BookingPage() {
     [schoolOptions],
   )
 
+  const mosqueSelectOptions = useMemo(() => {
+    const list =
+      selectedMosque && !mosqueOptions.some((mosque) => mosque.id === selectedMosque.id)
+        ? [selectedMosque, ...mosqueOptions]
+        : mosqueOptions
+
+    return [
+      ...list.map((mosque) => ({
+        label: `${mosque.name}${mosque.district_name ? ` — ${mosque.district_name}` : mosque.city ? ` — ${mosque.city}` : ''}`,
+        value: String(mosque.id),
+      })),
+      {
+        label: 'Lainnya / belum ada di daftar DMI',
+        value: customSchoolValue,
+      },
+    ]
+  }, [mosqueOptions, selectedMosque])
+
+  const mosqueFieldResetKey = `${values.institution_type}-${values.district_id}`
+  const mosqueSelectValue =
+    values.mosque_id || (values.school_name === customSchoolValue ? customSchoolValue : '')
   const schoolFieldResetKey = `${values.district_id}-${values.education_level}-${schoolOptions.length}-${isLoadingSchools ? '1' : '0'}`
   const canChooseSchool = values.education_level === 'UMUM' || Boolean(values.district_id)
   const schoolCatalogHint = schoolEmptyCatalogHint(values, isLoadingSchools, schoolLoadError, schoolOptions.length)
@@ -234,6 +264,56 @@ export function BookingPage() {
       isMounted = false
     }
   }, [values.district_id, values.education_level, values.institution_type])
+
+  useEffect(() => {
+    let isMounted = true
+    const controller = new AbortController()
+
+    if (values.institution_type !== 'MASJID' || !values.district_id) {
+      return () => controller.abort()
+    }
+
+    const query = mosqueSearchQuery.trim()
+    const timer = window.setTimeout(() => {
+      setMosqueLoadError('')
+      setIsLoadingMosques(true)
+
+      void fetchMosques({
+        query: query.length >= 2 ? query : undefined,
+        districtId: values.district_id,
+        limit: 25,
+        signal: controller.signal,
+      })
+        .then((options) => {
+          if (isMounted) {
+            setMosqueOptions(options)
+          }
+        })
+        .catch((error) => {
+          if (error instanceof DOMException && error.name === 'AbortError') {
+            return
+          }
+
+          if (isMounted) {
+            setMosqueOptions([])
+            setMosqueLoadError(
+              error instanceof Error ? error.message : 'Data masjid tidak dapat dimuat saat ini.',
+            )
+          }
+        })
+        .finally(() => {
+          if (isMounted) {
+            setIsLoadingMosques(false)
+          }
+        })
+    }, 300)
+
+    return () => {
+      isMounted = false
+      window.clearTimeout(timer)
+      controller.abort()
+    }
+  }, [mosqueSearchQuery, values.district_id, values.institution_type])
 
   // Fuzzy did-you-mean: hanya aktif saat user memilih "Lainnya" dan mengetik
   // nama bebas. Endpoint backend sudah menormalisasi & threshold di server side.
@@ -312,8 +392,17 @@ export function BookingPage() {
 
     if (name === 'district_id' || name === 'education_level' || name === 'institution_type') {
       nextValues.school_name = ''
+      nextValues.mosque_id = ''
       nextValues.custom_school_name = ''
       setDidYouMeanDismissed(false)
+    }
+
+    if (name === 'district_id' || name === 'institution_type') {
+      setSelectedMosque(null)
+      setMosqueSearchQuery('')
+      setMosqueOptions([])
+      setMosqueLoadError('')
+      setIsLoadingMosques(false)
     }
 
     if (name === 'school_name' && value !== customSchoolValue) {
@@ -343,6 +432,27 @@ export function BookingPage() {
 
     if (hasSubmitted) {
       setErrors(buildFormErrors(nextValues, priceBySlug, nextAddressConfirmation))
+    }
+  }
+
+  function updateMosqueSelection(next: string) {
+    const requestedMosque =
+      mosqueOptions.find((mosque) => String(mosque.id) === next) ??
+      (selectedMosque && String(selectedMosque.id) === next ? selectedMosque : null)
+    const isCustom = next === customSchoolValue
+    const nextValues: FormValues = {
+      ...values,
+      mosque_id: isCustom ? '' : requestedMosque ? String(requestedMosque.id) : '',
+      school_name: isCustom ? customSchoolValue : requestedMosque?.name ?? '',
+      custom_school_name: isCustom ? values.custom_school_name : '',
+    }
+
+    setSelectedMosque(requestedMosque)
+    setDidYouMeanDismissed(false)
+    setValues(nextValues)
+
+    if (hasSubmitted) {
+      setErrors(buildFormErrors(nextValues, priceBySlug, hasConfirmedAddressReview))
     }
   }
 
@@ -405,6 +515,10 @@ export function BookingPage() {
         district_id: Number(values.district_id),
         education_level: values.education_level,
         institution_type: values.institution_type,
+        mosque_id:
+          values.institution_type === 'MASJID' && values.mosque_id
+            ? Number(values.mosque_id)
+            : undefined,
         edition: values.edition,
         name: values.name.trim(),
         phone_number: values.phone_number.trim(),
@@ -547,6 +661,47 @@ export function BookingPage() {
                           </div>
                         ) : null}
                       </div>
+                    ) : null}
+                  </>
+                ) : values.institution_type === 'MASJID' ? (
+                  <>
+                    <SearchableSchoolSelect
+                      key={mosqueFieldResetKey}
+                      label="Nama Masjid (data DMI)"
+                      options={mosqueSelectOptions}
+                      value={mosqueSelectValue}
+                      placeholder={
+                        !values.district_id
+                          ? 'Pilih kecamatan aktif dahulu'
+                          : isLoadingMosques
+                            ? 'Memuat data masjid...'
+                            : 'Cari nama masjid'
+                      }
+                      error={errors.school_name}
+                      disabled={!values.district_id}
+                      customOptionValue={customSchoolValue}
+                      entityLabel="masjid"
+                      helperText="Ketik nama masjid untuk mencari katalog DMI. Pilih 'Lainnya' jika masjid belum terdaftar."
+                      searchPlaceholder="Cari nama masjid…"
+                      emptyText="Belum ada masjid yang cocok di katalog DMI. Pilih 'Lainnya' lalu ketik nama masjid Anda."
+                      remote
+                      onSearch={setMosqueSearchQuery}
+                      onChange={updateMosqueSelection}
+                    />
+                    {mosqueLoadError ? (
+                      <p className="rounded-2xl bg-[#fff7f7] p-4 text-sm font-bold leading-6 text-[#ed3833]">
+                        {mosqueLoadError}
+                      </p>
+                    ) : null}
+                    {values.school_name === customSchoolValue ? (
+                      <Field
+                        label="Nama Masjid"
+                        name="custom_school_name"
+                        value={values.custom_school_name}
+                        error={errors.custom_school_name}
+                        placeholder="Tuliskan nama masjid Anda"
+                        onChange={updateValue}
+                      />
                     ) : null}
                   </>
                 ) : (

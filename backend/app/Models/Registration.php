@@ -30,6 +30,7 @@ class Registration extends Model
         'batch_id',
         'district_id',
         'university_id',
+        'mosque_id',
         'education_level',
         'institution_type',
         'edition',
@@ -90,6 +91,11 @@ class Registration extends Model
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class);
+    }
+
+    public function mosque(): BelongsTo
+    {
+        return $this->belongsTo(Mosque::class);
     }
 
     public function scopeWhereUmum(Builder $query): Builder

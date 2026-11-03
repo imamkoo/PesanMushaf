@@ -83,6 +83,7 @@ class RegistrationService
                 'education_level' => $level,
                 'institution_type' => $institutionType,
                 'university_id' => $data['university_id'] ?? null,
+                'mosque_id' => $data['mosque_id'] ?? null,
                 'name' => $data['name'],
                 'phone_number' => $phone,
                 'email' => $data['email'] ?? null,

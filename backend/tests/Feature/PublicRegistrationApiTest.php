@@ -2,6 +2,7 @@
 
 use App\Models\Batch;
 use App\Models\District;
+use App\Models\Mosque;
 use App\Models\Registration;
 use App\Models\SchoolSuggestion;
 use App\Models\University;
@@ -273,6 +274,10 @@ it('allows public read-only master data endpoints without an api key', function 
     $this->getJson('/api/batches')
         ->assertSuccessful()
         ->assertJsonStructure(['data']);
+
+    $this->getJson('/api/mosques')
+        ->assertSuccessful()
+        ->assertJsonStructure(['data', 'meta']);
 });
 
 it('registers a participant and can look up the generated code', function () {
@@ -955,4 +960,74 @@ it('uses the current price category amount for reguler and vip', function () {
     $vip = postVipWithDocs($district, 'SMA')->assertCreated();
     expect($vip->json('data.financial.base_price'))->toBe(50000)
         ->and($vip->json('data.financial.total_payment'))->toBe(50000);
+});
+
+it('uses a selected mosque as the canonical institution name', function () {
+    $district = makeDistrict('Sawah Besar', '3171070');
+
+    $mosque = Mosque::query()->create([
+        'dmi_code' => 'M-1417',
+        'name' => 'Masjid Istiqlal',
+        'district_name' => 'Sawah Besar',
+        'city' => 'Jakarta Pusat',
+        'province' => 'DKI Jakarta',
+        'source' => 'dmi',
+        'is_active' => true,
+    ]);
+
+    $response = postReg($district, 'UMUM', 'Nama yang diketik peserta', '6281234500099', [
+        'institution_type' => 'MASJID',
+        'mosque_id' => $mosque->id,
+        'nik' => makeNik(),
+        'address' => 'Jl. Taman Wijaya Kusuma No. 1',
+    ])->assertCreated();
+
+    expect($response->json('data.mosque_id'))->toBe($mosque->id)
+        ->and($response->json('data.school_name'))->toBe('Masjid Istiqlal');
+});
+
+it('derives the institution name from mosque_id when school_name is omitted', function () {
+    $district = makeDistrict('Sawah Besar', '3171070');
+
+    $mosque = Mosque::query()->create([
+        'dmi_code' => 'M-1418',
+        'name' => 'Masjid Istiqlal',
+        'district_name' => 'Sawah Besar',
+        'city' => 'Jakarta Pusat',
+        'province' => 'DKI Jakarta',
+        'source' => 'dmi',
+        'is_active' => true,
+    ]);
+
+    $response = $this->postJson('/api/register', [
+        'district_id' => $district->id,
+        'education_level' => 'UMUM',
+        'institution_type' => 'MASJID',
+        'mosque_id' => $mosque->id,
+        'edition' => 'reguler',
+        'name' => 'Tester Masjid',
+        'phone_number' => '6281234500100',
+        'nik' => makeNik(),
+        'address' => 'Jl. Taman Wijaya Kusuma No. 1',
+    ])->assertCreated();
+
+    expect($response->json('data.school_name'))->toBe('Masjid Istiqlal')
+        ->and($response->json('data.mosque_id'))->toBe($mosque->id);
+});
+
+it('rejects a mosque_id for a non-mosque institution', function () {
+    $district = makeDistrict('Sawah Besar', '3171070');
+
+    $mosque = Mosque::query()->create([
+        'name' => 'Masjid Istiqlal',
+        'source' => 'manual',
+        'is_active' => true,
+    ]);
+
+    postReg($district, 'SMA', 'SMAN 1 Jakarta', '6281234500098', [
+        'institution_type' => 'SEKOLAH',
+        'mosque_id' => $mosque->id,
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['mosque_id']);
 });
