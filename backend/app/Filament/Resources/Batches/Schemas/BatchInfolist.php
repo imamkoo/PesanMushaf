@@ -39,6 +39,19 @@ class BatchInfolist
                         default => 'gray',
                     }),
 
+                TextEntry::make('institution_type')
+                    ->label('🏷️ Jenis Institusi')
+                    ->badge()
+                    ->state(fn ($record): string => $record->institution_type
+                        ?? ($record->district_id === null ? 'VIP Global' : 'SEKOLAH (lama)'))
+                    ->color(fn (string $state): string => match ($state) {
+                        'SEKOLAH' => 'primary',
+                        'MASJID' => 'success',
+                        'KOMUNITAS' => 'info',
+                        'UMUM' => 'danger',
+                        default => 'gray',
+                    }),
+
                 TextEntry::make('education_level')
                     ->label('🎓 Kategori Peserta')
                     ->badge()

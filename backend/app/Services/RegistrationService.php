@@ -148,7 +148,8 @@ class RegistrationService
      *      supaya variasi penulisan tidak memecah klaster)
      *   2) Batch yang sudah berisi pendaftar dari kecamatan yang sama
      *   3) Batch yang sudah berisi pendaftar satu kota (4 digit pertama kode kecamatan)
-     *   4) Batch baru, anchor pada kecamatan pendaftar
+     *   4) Batch kosong yang dibuat admin untuk kecamatan tersebut
+     *   5) Batch baru, anchor pada kecamatan pendaftar
      *
      * Batch sekolah dipisah per jenjang (SD/SMP/SMA). Batch institusi non-sekolah
      * (MASJID/KOMUNITAS/UMUM) dipisah per jenis institusi, bukan per jenjang.
@@ -207,11 +208,23 @@ class RegistrationService
                 ->first();
         }
 
+        // Priority 4: batch yang baru dibuat admin dan belum punya pendaftar.
+        // Tanpa langkah ini, batch kosong tidak pernah dipakai dan sistem membuat
+        // batch duplikat pada pendaftaran pertama.
+        if (! $batch) {
+            $batch = (clone $baseQuery())
+                ->where('district_id', $registrantDistrict->id)
+                ->whereDoesntHave('registrations')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->first();
+        }
+
         if ($batch) {
             return $batch;
         }
 
-        // Priority 4: new batch anchored to registrant district
+        // Priority 5: new batch anchored to registrant district
         // Cast eksplisit ke integer agar Postgres tidak melakukan lex-sort
         // (mis. "9" > "10") setelah 10+ batch sejenis tercipta.
         $lastNumberQuery = Batch::query()

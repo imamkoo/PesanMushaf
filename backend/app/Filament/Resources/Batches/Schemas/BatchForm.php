@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Batches\Schemas;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class BatchForm
@@ -16,8 +18,15 @@ class BatchForm
                 Select::make('district_id')
                     ->relationship('district', 'name')
                     ->label('Kecamatan')
-                    ->helperText('Boleh kosong untuk batch VIP global lintas kecamatan.')
-                    ->searchable(),
+                    ->helperText('Boleh kosong hanya untuk batch VIP global lintas kecamatan. Nama batch global harus memakai penanda (GOR).')
+                    ->searchable()
+                    ->live()
+                    ->afterStateUpdated(function (Set $set, ?string $state): void {
+                        if (blank($state)) {
+                            $set('education_level', null);
+                            $set('institution_type', null);
+                        }
+                    }),
                 TextInput::make('name')
                     ->label('Nama Batch / Box')
                     ->required(),
@@ -27,13 +36,30 @@ class BatchForm
                     ->required(),
                 Select::make('education_level')
                     ->label('Tingkat Pendidikan')
-                    ->helperText('Kosongkan untuk batch VIP global (mencampur semua jenjang).')
+                    ->helperText('Wajib untuk batch kecamatan. Kosongkan untuk batch VIP global.')
                     ->options([
                         'SD' => 'SD',
                         'SMP' => 'SMP',
                         'SMA' => 'SMA',
                         'UMUM' => 'Umum / Mahasiswa',
-                    ]),
+                    ])
+                    ->required(fn (Get $get): bool => filled($get('district_id'))),
+                Select::make('institution_type')
+                    ->label('Jenis Institusi')
+                    ->helperText('Wajib untuk batch kecamatan. Menentukan batch yang dipakai pendaftar MASJID, KOMUNITAS, atau UMUM.')
+                    ->options([
+                        'SEKOLAH' => 'Sekolah',
+                        'MASJID' => 'Masjid',
+                        'KOMUNITAS' => 'Komunitas',
+                        'UMUM' => 'Umum / Lembaga',
+                    ])
+                    ->live()
+                    ->afterStateUpdated(function (Set $set, ?string $state): void {
+                        if (filled($state) && $state !== 'SEKOLAH') {
+                            $set('education_level', 'UMUM');
+                        }
+                    })
+                    ->required(fn (Get $get): bool => filled($get('district_id'))),
                 TextInput::make('max_capacity')
                     ->numeric()
                     ->default(603)

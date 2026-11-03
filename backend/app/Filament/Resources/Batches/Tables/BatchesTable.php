@@ -50,6 +50,18 @@ class BatchesTable
                     ->placeholder('VIP Global')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('institution_type')
+                    ->label('Jenis Institusi')
+                    ->badge()
+                    ->state(fn (Batch $record): string => $record->institution_type
+                        ?? ($record->district_id === null ? 'VIP Global' : 'SEKOLAH (lama)'))
+                    ->color(fn (Batch $record): string => match ($record->institution_type) {
+                        'SEKOLAH' => 'primary',
+                        'MASJID' => 'success',
+                        'KOMUNITAS' => 'info',
+                        'UMUM' => 'danger',
+                        default => 'gray',
+                    }),
                 TextColumn::make('education_level')
                     ->label('Jenjang')
                     ->badge()
@@ -122,6 +134,14 @@ class BatchesTable
                     ->label('Kecamatan')
                     ->options(fn (): array => District::query()->orderBy('name')->pluck('name', 'id')->toArray())
                     ->searchable(),
+                SelectFilter::make('institution_type')
+                    ->label('Jenis Institusi')
+                    ->options([
+                        'SEKOLAH' => 'Sekolah',
+                        'MASJID' => 'Masjid',
+                        'KOMUNITAS' => 'Komunitas',
+                        'UMUM' => 'Umum / Lembaga',
+                    ]),
                 TernaryFilter::make('is_full')
                     ->label('Status Kuota')
                     ->placeholder('Semua')
