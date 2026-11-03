@@ -28,6 +28,22 @@ class Batch extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (self $batch): void {
+            if (blank($batch->district_id)) {
+                $batch->education_level = null;
+                $batch->institution_type = null;
+
+                return;
+            }
+
+            if (filled($batch->institution_type) && $batch->institution_type !== 'SEKOLAH') {
+                $batch->education_level = 'UMUM';
+            }
+        });
+    }
+
     public function scopeWithActiveRegistrationsCount(Builder $query): Builder
     {
         return $query->withCount('registrations');

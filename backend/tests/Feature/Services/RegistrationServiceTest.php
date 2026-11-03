@@ -292,6 +292,34 @@ it('groups masjid registrations into their own batch', function () {
         ->and($batch->name)->toContain('Mushaf Reguler MASJID');
 });
 
+it('uses an admin-created masjid batch instead of creating a duplicate', function () {
+    $district = makeServiceDistrict('Kebayoran Baru', '3171060');
+
+    $batch = Batch::query()->create([
+        'district_id' => $district->id,
+        'name' => 'Mushaf Reguler MASJID Kebayoran Baru 1',
+        'batch_number' => '1',
+        'education_level' => 'UMUM',
+        'institution_type' => 'MASJID',
+        'max_capacity' => RegistrationService::BATCH_CAPACITY,
+        'is_full' => false,
+    ]);
+
+    $registration = RegistrationService::register([
+        'district_id' => $district->id,
+        'education_level' => 'UMUM',
+        'institution_type' => 'MASJID',
+        'edition' => 'reguler',
+        'name' => 'Jamaah Admin Batch',
+        'phone_number' => '6281000099151',
+        'school_name' => 'Masjid Al-Azhar',
+        'nik' => makeNikDigits(),
+        'address' => 'Jl. Sisingamangaraja No. 1',
+    ]);
+
+    expect($registration->batch_id)->toBe($batch->id);
+});
+
 it('keeps masjid, komunitas, and sekolah registrations in separate batches', function () {
     $district = makeServiceDistrict('Kebayoran Baru', '3171060');
 
