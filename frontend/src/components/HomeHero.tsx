@@ -154,7 +154,7 @@ export function HomeHero({ districtCount }: HomeHeroProps) {
           animate="show"
           className="relative z-10 flex items-center justify-between gap-4 text-[10px] font-black uppercase tracking-[0.18em] text-white/45"
         >
-          <p>Distribusi Wilayah Jakarta</p>
+          <p>Sebaran Wilayah Jakarta</p>
           <p className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-gold" />
             2027
@@ -176,7 +176,7 @@ export function HomeHero({ districtCount }: HomeHeroProps) {
               <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
             </span>
             <span className="text-[11px] font-black uppercase tracking-[0.16em] text-white/80">
-              {districtCount || 44} Kecamatan Terakomodasi
+              {districtCount || 44} Kecamatan Terdaftar
             </span>
           </m.div>
 
@@ -201,7 +201,7 @@ export function HomeHero({ districtCount }: HomeHeroProps) {
             className="mt-7 grid max-w-[770px] gap-6 border-t border-white/10 pt-6 sm:grid-cols-[1fr_auto] sm:items-end"
           >
             <p className="max-w-[52ch] text-base font-medium leading-7 text-white/60 sm:text-lg sm:leading-8">
-              Tentukan titik partisipasi Anda, amankan kuota pendaftaran yang tersedia, dan pantau status kontribusi Anda secara real-time.
+              Tentukan titik partisipasi Anda, amankan kuota pendaftaran yang tersedia, dan pantau status kontribusi Anda secara langsung.
             </p>
             <Magnetic>
               <Link
