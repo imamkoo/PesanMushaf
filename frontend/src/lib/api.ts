@@ -43,7 +43,7 @@ export type ApiDistrict = {
 
 export type ApiBatch = {
   id: number
-  district_id: number
+  district_id: number | null
   name: string
   slug: string
   batch_number: string | number

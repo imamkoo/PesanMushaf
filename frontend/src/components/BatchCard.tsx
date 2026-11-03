@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { icons } from '../assets/projectAssets'
+import { getBatchLocationLabel } from '../lib/batchDisplay'
 import type { Batch } from '../types/batch'
 import { ArrowRight } from './icons'
 import { ProgressBar } from './ProgressBar'
@@ -11,6 +12,7 @@ type BatchCardProps = {
 
 export function BatchCard({ batch }: BatchCardProps) {
   const remainingSlots = Math.max(batch.maxCapacity - batch.registrationsCount, 0)
+  const locationLabel = getBatchLocationLabel(batch)
   const status = batch.status ?? (batch.isFull ? 'full' : 'available')
   const statusLabel = status === 'full' ? 'Penuh' : status === 'closed' ? 'Ditutup' : 'Tersedia'
   const filledPct =
@@ -87,7 +89,7 @@ export function BatchCard({ batch }: BatchCardProps) {
               <div className="flex items-center justify-between gap-2 text-[13px]">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <img src={icons.location} className="h-4 w-4 shrink-0" alt="" />
-                  <p className="truncate font-bold text-ink">{batch.districtName}</p>
+                  <p className="truncate font-bold text-ink" title={locationLabel}>{locationLabel}</p>
                 </div>
                 <div className="flex shrink-0 items-center justify-end gap-1.5">
                   <p className="whitespace-nowrap font-bold text-ink">{remainingSlots} tersisa</p>

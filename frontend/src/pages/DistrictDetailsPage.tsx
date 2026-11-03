@@ -84,7 +84,7 @@ export function DistrictDetailsPage() {
                 {district.name}
               </h1>
               <p className="mt-6 max-w-[560px] text-base font-medium leading-7 text-white/62 sm:text-lg sm:leading-8">
-                Lihat gelombang yang tersedia untuk wilayah ini, lalu lanjutkan ke formulir pendaftaran jika kuota masih ada.
+                Lihat gelombang yang tersedia untuk wilayah ini, atau mulai pendaftaran untuk membuka gelombang pertama.
               </p>
             </div>
             <Link to="/booking" className="w-fit rounded-full bg-[#ed3833] px-6 py-4 font-black text-white transition hover:bg-[#d92f2a]">
@@ -97,7 +97,7 @@ export function DistrictDetailsPage() {
               <img src={district.imageUrl} className="absolute inset-0 h-full w-full object-cover mix-blend-multiply opacity-75" alt={district.name} />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(237,56,51,0.1),_rgba(17,17,17,0.72))]" />
               <p className="absolute bottom-6 left-6 right-6 text-[34px] font-black leading-[0.96] tracking-[-0.055em] text-white sm:text-[48px]">
-                Gelombang aktif berdasarkan data wilayah.
+                Gelombang wilayah dibuka saat pendaftaran pertama.
               </p>
             </div>
             {displayedBatches.length > 0 ? (
@@ -108,12 +108,12 @@ export function DistrictDetailsPage() {
               </section>
             ) : (
               <section className="rounded-[36px] border border-black/10 bg-white p-6 shadow-[0_24px_90px_rgba(0,0,0,0.06)] sm:p-8">
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Belum ada gelombang</p>
+                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Pendaftaran dibuka</p>
                 <h2 className="mt-4 text-[34px] font-black leading-[0.98] tracking-[-0.055em] text-[#111111]">
-                  Kecamatan {district.name} belum memiliki gelombang aktif saat ini.
+                  Gelombang pertama untuk Kecamatan {district.name} dibuka saat pendaftaran pertama.
                 </h2>
                 <p className="mt-4 text-base font-medium leading-7 text-[#111111]/62">
-                  Silakan pilih kecamatan lain yang masih memiliki kuota, atau kembali lagi beberapa saat lagi.
+                  Anda tetap bisa mendaftar sekarang. Sistem akan membentuk gelombang baru secara otomatis, lalu kode pendaftaran dan nomor halaman Anda terbit setelah data tersimpan.
                 </p>
               </section>
             )}

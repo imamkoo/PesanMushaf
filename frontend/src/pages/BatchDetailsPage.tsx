@@ -2,13 +2,14 @@ import { Link, useParams } from 'react-router-dom'
 import { photos } from '../assets/projectAssets'
 import { AppNavbar } from '../components/AppNavbar'
 import { useHut500Data } from '../hooks/useHut500Data'
+import { getBatchLocationLabel } from '../lib/batchDisplay'
 import { formatRupiah } from '../lib/payment'
 import type { Batch } from '../types/batch'
 
 const statusConfig: Record<NonNullable<Batch['status']>, { label: string; description: string; tone: string }> = {
   available: {
     label: 'Tersedia',
-    description: 'Gelombang ini siap dipilih peserta sesuai kecamatan, jenjang, dan kuota tersisa.',
+    description: 'Gelombang ini siap dipilih peserta sesuai wilayah, jenjang, dan kuota tersisa.',
     tone: 'bg-[#ed3833] text-white',
   },
   full: {
@@ -77,7 +78,7 @@ export function BatchDetailsPage() {
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Info label="Kecamatan" value={batch.districtName} />
+              <Info label={batch.isGlobal ? 'Wilayah' : 'Kecamatan'} value={getBatchLocationLabel(batch)} />
               <Info label="Jenjang" value={batch.educationLevel || 'Umum'} />
               <Info label="Kuota" value={`${remainingSlots} tersisa`} />
               <Info label="Harga" value={formatRupiah(batch.basePrice)} />
