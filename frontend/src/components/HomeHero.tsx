@@ -139,9 +139,14 @@ export function HomeHero({ districtCount }: HomeHeroProps) {
             loading="eager"
             decoding="async"
             draggable={false}
-            className="seal-watermark seal-watermark-white absolute inset-0 h-full w-full rounded-full object-cover opacity-[0.2]"
+            className="seal-watermark seal-watermark-white absolute inset-0 h-full w-full rounded-full object-cover opacity-[0.16]"
           />
         </m.div>
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(115%_90%_at_18%_55%,rgba(11,11,15,0.9)_0%,rgba(11,11,15,0.55)_42%,rgba(11,11,15,0.08)_68%,transparent_82%)]"
+        />
 
         <m.div
           variants={fadeUp}
@@ -177,7 +182,7 @@ export function HomeHero({ districtCount }: HomeHeroProps) {
 
           <h1
             aria-label="Langkah Nyata untuk Jakarta."
-            className="max-w-[790px] text-[clamp(2.25rem,8.6vw,6.1rem)] font-black leading-[0.92] tracking-[-0.04em] text-white"
+            className="hero-headline max-w-[790px] text-[clamp(2.25rem,8.6vw,6.1rem)] font-black leading-[0.92] tracking-[-0.04em] text-white"
           >
             <span className="block overflow-hidden pb-1">
               <m.span variants={lineReveal} className="block">
