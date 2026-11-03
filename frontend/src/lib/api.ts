@@ -1,6 +1,13 @@
 const apiBaseUrl = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000/api').replace(/\/$/, '')
 const lastRegistrationKey = 'hut500:last-registration'
 
+const GENERIC_REQUEST_ERROR = 'Permintaan belum dapat diproses. Silakan coba lagi.'
+const SERVER_ERROR = 'Layanan sedang mengalami kendala. Silakan coba beberapa saat lagi.'
+const NETWORK_ERROR = 'Tidak dapat terhubung ke layanan. Periksa koneksi internet Anda, lalu coba lagi.'
+const TECHNICAL_MESSAGE_PATTERN =
+  /\b(?:backend|laravel|sqlstate|sql|database|query|exception|stack|trace|debug|route|endpoint|json|http|api|server|payload|request|response|timeout|unavailable|internal|invalid|unauthenticated|unauthorized|forbidden|error|failed|failure|batch|admin)\b/i
+const MAX_USER_MESSAGE_LENGTH = 240
+
 type EducationLevel = 'SD' | 'SMP' | 'SMA' | 'UMUM'
 export type InstitutionType = 'SEKOLAH' | 'MASJID' | 'KOMUNITAS' | 'UMUM'
 
@@ -129,7 +136,7 @@ type ApiFailure = {
   success: false
   message: string
   errors?: Record<string, string[]>
-  /** Hanya hadir saat APP_DEBUG=true di backend; berisi pesan exception sesungguhnya. */
+  /** Hanya untuk diagnostik lokal; tidak pernah ditampilkan di produksi. */
   error?: string
 }
 
@@ -152,20 +159,63 @@ function isApiFailure(value: unknown): value is ApiFailure {
   return isRecord(value) && value.success === false && typeof value.message === 'string'
 }
 
+function safeUserMessage(message: string, fallback: string) {
+  const trimmed = message.trim()
+
+  if (!trimmed || trimmed.length > MAX_USER_MESSAGE_LENGTH || TECHNICAL_MESSAGE_PATTERN.test(trimmed)) {
+    return fallback
+  }
+
+  return trimmed
+}
+
+function fallbackForStatus(status: number) {
+  if (status === 401 || status === 403) {
+    return 'Akses ke data ini belum tersedia. Muat ulang halaman lalu coba lagi.'
+  }
+
+  if (status === 404) {
+    return 'Data yang diminta tidak ditemukan.'
+  }
+
+  if (status === 409) {
+    return 'Data sudah berubah. Muat ulang halaman lalu coba lagi.'
+  }
+
+  if (status === 422) {
+    return 'Ada isian yang perlu diperiksa.'
+  }
+
+  if (status === 429) {
+    return 'Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.'
+  }
+
+  if (status >= 500) {
+    return SERVER_ERROR
+  }
+
+  return GENERIC_REQUEST_ERROR
+}
+
 function getErrorMessage(payload: unknown, fallback: string) {
   if (isApiFailure(payload)) {
-    const validationMessage = payload.errors ? Object.values(payload.errors).flat().join(' ') : ''
-    const baseMessage = validationMessage || payload.message || fallback
+    const validationMessage = payload.errors ? Object.values(payload.errors).flat().join(' ').trim() : ''
 
-    if (payload.error && !validationMessage) {
-      return `${baseMessage} (debug: ${payload.error})`
+    if (validationMessage) {
+      return safeUserMessage(validationMessage, fallback)
     }
 
-    return baseMessage
+    const message = safeUserMessage(payload.message, fallback)
+
+    if (import.meta.env.DEV && payload.error) {
+      return `${message} (debug: ${payload.error})`
+    }
+
+    return message
   }
 
   if (isRecord(payload) && typeof payload.message === 'string') {
-    return payload.message
+    return safeUserMessage(payload.message, fallback)
   }
 
   return fallback
@@ -182,13 +232,17 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<A
         ...options.headers,
       },
     })
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw error
+    }
+
     // Service worker (PWA) bisa men-serve katalog GET dari cache; namun POST
     // sensitif (register, midtrans) selalu NetworkOnly dan akan jatuh ke sini saat offline.
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-      throw new Error('Tidak ada koneksi internet. Beberapa data publik mungkin tersedia dari cache, namun aksi ini butuh koneksi aktif. Coba lagi setelah online.')
+      throw new Error('Tidak ada koneksi internet. Sambungkan perangkat Anda lalu coba lagi.', { cause: error })
     }
-    throw new Error('Tidak bisa terhubung ke backend. Pastikan Laravel API aktif dan VITE_API_URL benar.')
+    throw new Error(NETWORK_ERROR, { cause: error })
   }
 
   let payload: unknown
@@ -196,15 +250,22 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<A
   try {
     payload = await response.json()
   } catch {
-    throw new Error(`Backend merespon ${response.status}, tetapi bukan JSON. Periksa URL API dan route Laravel.`)
+    if (import.meta.env.DEV) {
+      console.warn('[api] Respons bukan JSON:', response.status)
+    }
+    throw new Error(SERVER_ERROR)
   }
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(payload, 'Request ke backend gagal.'))
+    throw new Error(getErrorMessage(payload, fallbackForStatus(response.status)))
   }
 
   if (isApiFailure(payload)) {
-    throw new Error(getErrorMessage(payload, 'Request ke backend gagal.'))
+    throw new Error(getErrorMessage(payload, GENERIC_REQUEST_ERROR))
+  }
+
+  if (isRecord(payload) && payload.success === false) {
+    throw new Error(GENERIC_REQUEST_ERROR)
   }
 
   if (isApiSuccess<T>(payload)) {

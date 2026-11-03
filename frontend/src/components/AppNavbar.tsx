@@ -90,7 +90,7 @@ export function AppNavbar() {
             className={`${actionButtonClass} shine-sweep hidden items-center gap-2 bg-brand text-white shadow-[0_16px_36px_-18px_rgba(237,56,51,0.9)] hover:bg-brand-dark sm:flex`}
           >
             <img src={icons.call} className="h-4 w-4 brightness-0 invert" alt="" />
-            <span className="relative z-10 text-white">Helpdesk</span>
+            <span className="relative z-10 text-white">Bantuan</span>
           </a>
         </div>
       </div>

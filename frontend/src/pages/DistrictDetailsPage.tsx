@@ -16,12 +16,12 @@ export function DistrictDetailsPage() {
             <header className="rounded-[38px] bg-[#111111] p-6 text-white sm:p-8 lg:p-10">
               <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Semua Kecamatan</p>
               <h1 className="mt-4 max-w-[820px] text-[48px] font-black leading-[0.94] tracking-[-0.06em] sm:text-[76px]">
-                {isLoading ? 'Memuat kecamatan...' : 'Pilih kecamatan sebelum melihat batch.'}
+                {isLoading ? 'Memuat kecamatan...' : 'Pilih kecamatan sebelum melihat gelombang.'}
               </h1>
             </header>
             {error ? (
               <p className="mt-6 rounded-2xl bg-[#fff7f7] px-5 py-4 text-sm font-bold text-[#ed3833]">
-                Backend API belum bisa dimuat: {error}.
+                Data wilayah belum dapat dimuat. {error}
               </p>
             ) : null}
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -53,12 +53,12 @@ export function DistrictDetailsPage() {
         <AppNavbar />
         <main className="bg-[#f4f0ea] px-5 py-8">
           <section className="mx-auto rounded-[38px] bg-white p-6 shadow-[0_24px_90px_rgba(0,0,0,0.06)] sm:p-8 lg:max-w-[900px] lg:p-10">
-            <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Kecamatan tidak tersedia</p>
+            <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Data wilayah</p>
             <h1 className="mt-4 text-[42px] font-black leading-[0.96] tracking-[-0.06em] text-[#111111] sm:text-[64px]">
-              {isLoading ? 'Memuat data ...' : 'Data kecamatan tidak ditemukan.'}
+              {isLoading ? 'Memuat data wilayah...' : error ? 'Data wilayah belum dapat dimuat.' : 'Data kecamatan tidak ditemukan.'}
             </h1>
             <p className="mt-5 text-base font-medium leading-7 text-[#111111]/62">
-              {error || 'Pastikan data kecamatan tersedia dari endpoint /api/districts.'}
+              {error || 'Data kecamatan ini belum tersedia atau tautan tidak valid. Silakan pilih wilayah lain dari daftar.'}
             </p>
           </section>
         </main>
@@ -84,7 +84,7 @@ export function DistrictDetailsPage() {
                 {district.name}
               </h1>
               <p className="mt-6 max-w-[560px] text-base font-medium leading-7 text-white/62 sm:text-lg sm:leading-8">
-                Lihat batch yang tersedia untuk wilayah ini, lalu lanjutkan ke form pendaftaran jika kuota masih ada.
+                Lihat gelombang yang tersedia untuk wilayah ini, lalu lanjutkan ke formulir pendaftaran jika kuota masih ada.
               </p>
             </div>
             <Link to="/booking" className="w-fit rounded-full bg-[#ed3833] px-6 py-4 font-black text-white transition hover:bg-[#d92f2a]">
@@ -97,7 +97,7 @@ export function DistrictDetailsPage() {
               <img src={district.imageUrl} className="absolute inset-0 h-full w-full object-cover mix-blend-multiply opacity-75" alt={district.name} />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(237,56,51,0.1),_rgba(17,17,17,0.72))]" />
               <p className="absolute bottom-6 left-6 right-6 text-[34px] font-black leading-[0.96] tracking-[-0.055em] text-white sm:text-[48px]">
-                Batch aktif berdasarkan data wilayah.
+                Gelombang aktif berdasarkan data wilayah.
               </p>
             </div>
             {displayedBatches.length > 0 ? (
@@ -108,12 +108,12 @@ export function DistrictDetailsPage() {
               </section>
             ) : (
               <section className="rounded-[36px] border border-black/10 bg-white p-6 shadow-[0_24px_90px_rgba(0,0,0,0.06)] sm:p-8">
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Belum ada batch</p>
+                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Belum ada gelombang</p>
                 <h2 className="mt-4 text-[34px] font-black leading-[0.98] tracking-[-0.055em] text-[#111111]">
-                  Kecamatan {district.name} belum memiliki batch aktif dari backend.
+                  Kecamatan {district.name} belum memiliki gelombang aktif saat ini.
                 </h2>
                 <p className="mt-4 text-base font-medium leading-7 text-[#111111]/62">
-                  Ini lebih aman daripada menampilkan batch dari kecamatan lain. Data akan muncul setelah endpoint backend mengembalikan batch untuk kecamatan ini.
+                  Silakan pilih kecamatan lain yang masih memiliki kuota, atau kembali lagi beberapa saat lagi.
                 </p>
               </section>
             )}

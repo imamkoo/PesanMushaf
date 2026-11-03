@@ -63,7 +63,7 @@ export function HomePage() {
 
           {error && (
             <p className="glass-light mx-auto w-full max-w-[1180px] rounded-2xl border-brand/20 px-5 py-4 text-sm font-bold text-brand">
-              Gagal menyinkronkan data: {error}.
+              Data wilayah belum dapat dimuat. {error}
             </p>
           )}
 
@@ -198,7 +198,7 @@ export function HomePage() {
               rel="noreferrer noopener"
               className="group inline-flex w-fit items-center gap-2 text-xs font-black text-brand transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
             >
-              Hubungi Helpdesk
+              Hubungi Kami
               <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
           </div>

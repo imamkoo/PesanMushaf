@@ -419,7 +419,7 @@ export function BookingPage() {
       saveLastRegistration(response.data)
       navigate('/booking/finished', { state: response.data })
     } catch (error) {
-      setSubmitMessage(error instanceof Error ? error.message : 'Gagal memproses pendaftaran. Silakan coba lagi.')
+      setSubmitMessage(error instanceof Error ? error.message : 'Pendaftaran belum dapat diproses. Silakan coba lagi.')
     } finally {
       setIsSubmitting(false)
     }
@@ -455,14 +455,14 @@ export function BookingPage() {
                 Tentukan Langkah Anda.
               </h1>
               <p className="mt-5 max-w-[640px] text-base font-medium leading-7 text-white/62">
-                Pilih kategori Reguler untuk pendaftar umum, atau VIP bagi yang menginginkan akses fitur eksklusif serta sistem pendampingan intensif.
+                Pilih kategori Reguler untuk pendaftar umum, atau VIP bagi yang menginginkan akses fitur eksklusif serta pendampingan intensif.
               </p>
             </div>
           </header>
 
           {error ? (
             <p className="mt-6 rounded-2xl bg-[#fff7f7] px-5 py-4 text-sm font-bold text-[#ed3833]">
-              Sinkronisasi data terganggu: {error}.
+              Data pendaftaran belum dapat dimuat. {error}
             </p>
           ) : null}
 
@@ -493,7 +493,7 @@ export function BookingPage() {
                 <Field label="Nama Lengkap" name="name" value={values.name} error={errors.name} placeholder="Sesuai kartu identitas" onChange={updateValue} />
                 <Field label="Nomor WhatsApp" name="phone_number" value={values.phone_number} error={errors.phone_number} placeholder="Awali dengan 62 (Contoh: 6281234...)" type="tel" onChange={updateValue} />
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Select label="Kecamatan Aktif" name="district_id" value={values.district_id} error={errors.district_id} placeholder={isLoading ? 'Menyinkronkan data...' : 'Pilih area pendaftaran'} options={districts.map((district) => ({ label: district.name, value: String(district.id) }))} onChange={updateValue} />
+                  <Select label="Kecamatan Aktif" name="district_id" value={values.district_id} error={errors.district_id} placeholder={isLoading ? 'Memuat data...' : 'Pilih area pendaftaran'} options={districts.map((district) => ({ label: district.name, value: String(district.id) }))} onChange={updateValue} />
                   <Select label="Jenis Institusi" name="institution_type" value={values.institution_type} error={errors.institution_type} options={institutionChoices.map((choice) => ({ label: choice.label, value: choice.value }))} onChange={updateValue} />
                 </div>
                 {values.institution_type === 'SEKOLAH' ? (
@@ -521,7 +521,7 @@ export function BookingPage() {
                               <div>
                                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#ed3833]">Saran Penulisan</p>
                                 <p className="mt-1 text-sm font-semibold leading-6 text-[#111111]">
-                                  Apakah maksud Anda salah satu sekolah berikut? Pilih agar peserta dari sekolah yang sama otomatis tergabung satu batch.
+                                  Apakah maksud Anda salah satu sekolah berikut? Pilih agar peserta dari sekolah yang sama otomatis tergabung dalam satu gelombang.
                                 </p>
                               </div>
                               <button
@@ -600,7 +600,7 @@ export function BookingPage() {
                     </div>
 
                     <div className="mt-5 rounded-[22px] border border-[#ed3833]/20 bg-white p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ed3833]">Review Alamat Pengiriman</p>
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ed3833]">Periksa Alamat Pengiriman</p>
                       <p className="mt-2 text-sm font-semibold leading-6 text-[#111111]/70">
                         Alamat ini akan dipakai untuk pengiriman. Periksa kembali nama jalan, RT/RW, kelurahan, kecamatan, kota, dan kode pos sebelum melanjutkan.
                       </p>
@@ -615,7 +615,7 @@ export function BookingPage() {
                       <ul className="mt-4 grid gap-2 text-sm font-semibold leading-6 text-[#111111]/72">
                         <li>Nama penerima dan detail lokasi harus cukup jelas untuk kurir.</li>
                         <li>Gunakan alamat yang benar-benar aktif untuk menerima pengiriman.</li>
-                        <li>Jika ada typo setelah submit, segera hubungi helpdesk dengan kode pendaftaran.</li>
+                        <li>Jika ada kesalahan penulisan setelah formulir dikirim, segera hubungi layanan bantuan dengan kode pendaftaran.</li>
                       </ul>
 
                       <label className="mt-4 flex items-start gap-3 rounded-[18px] border border-black/8 bg-[#fff7f7] p-4 text-sm font-bold leading-6 text-[#111111]">
@@ -634,10 +634,10 @@ export function BookingPage() {
               </div>
 
               <button type="submit" disabled={isSubmitting} className="mt-8 flex w-full justify-center rounded-full bg-[#ed3833] px-6 py-4 font-black text-white transition hover:bg-[#111111] disabled:cursor-not-allowed disabled:opacity-60">
-                {isSubmitting ? 'Memproses Data...' : 'Konfirmasi Pendaftaran'}
+                {isSubmitting ? 'Memproses pendaftaran...' : 'Konfirmasi Pendaftaran'}
               </button>
               {submitMessage ? <p className="mt-4 rounded-2xl bg-[#fff7f7] p-4 text-sm font-bold leading-6 text-[#ed3833]">{submitMessage}</p> : null}
-              {Object.keys(errors).length > 0 ? <p className="mt-4 rounded-2xl bg-[#fff7f7] p-4 text-sm font-bold leading-6 text-[#ed3833]">Validasi gagal. Periksa kembali form yang ditandai merah.</p> : null}
+              {Object.keys(errors).length > 0 ? <p className="mt-4 rounded-2xl bg-[#fff7f7] p-4 text-sm font-bold leading-6 text-[#ed3833]">Ada isian yang perlu diperiksa. Periksa kembali kolom yang ditandai merah.</p> : null}
             </form>
           ) : (
             <section className="mt-6 rounded-[38px] border border-black/10 bg-white p-6 text-center shadow-[0_24px_90px_rgba(0,0,0,0.06)] sm:p-8">
@@ -675,7 +675,7 @@ export function BookingPage() {
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {isLoading ? (
                 <div className="col-span-2 py-8 text-center">
-                   <p className="motion-safe:animate-pulse font-bold text-[#111111]/50">Mensinkronkan data kategori...</p>
+                   <p className="motion-safe:animate-pulse font-bold text-[#111111]/50">Memuat pilihan kategori...</p>
                 </div>
               ) : (
                 editionChoices.map((option) => {
@@ -718,7 +718,7 @@ export function BookingPage() {
 
 function schoolSelectPlaceholder(values: FormValues, isLoadingSchools: boolean, loadError: string) {
   if (isLoadingSchools) {
-    return 'Memuat direktori instansi...'
+    return 'Memuat daftar instansi...'
   }
 
   if (values.education_level !== 'UMUM' && !values.district_id) {
@@ -726,7 +726,7 @@ function schoolSelectPlaceholder(values: FormValues, isLoadingSchools: boolean, 
   }
 
   if (loadError) {
-    return 'Gangguan server — mohon ulangi'
+    return 'Data belum dapat dimuat — silakan coba lagi'
   }
 
   return values.education_level === 'UMUM' ? 'Pilih universitas atau perusahaan' : 'Cari sekolah Anda'
@@ -738,14 +738,14 @@ function schoolEmptyCatalogHint(values: FormValues, isLoadingSchools: boolean, l
   }
 
   if (values.education_level === 'UMUM') {
-    return optionCount > 0 ? '' : 'Direktori perguruan tinggi belum sinkron. Silakan pilih "Lainnya" dan ketik manual.'
+    return optionCount > 0 ? '' : 'Daftar perguruan tinggi belum tersedia. Silakan pilih "Lainnya" lalu ketik nama instansi Anda.'
   }
 
   if (!values.district_id) {
     return ''
   }
 
-  return optionCount > 0 ? '' : 'Daftar institusi belum tersedia untuk zona ini. Pilih "Lainnya" untuk menginput manual.'
+  return optionCount > 0 ? '' : 'Daftar institusi belum tersedia untuk wilayah ini. Pilih "Lainnya" lalu ketik nama instansi Anda.'
 }
 
 function resolveSchoolName(values: FormValues) {
@@ -770,13 +770,13 @@ function validate(values: FormValues, priceBySlug: Record<string, number>): Form
   const nextErrors: FormErrors = {}
 
   if (!values.name.trim()) {
-    nextErrors.name = 'Identitas wajib dilengkapi.'
+    nextErrors.name = 'Nama lengkap wajib diisi.'
   }
 
   if (!values.phone_number.trim()) {
     nextErrors.phone_number = 'Kontak WhatsApp diperlukan.'
   } else if (!/^62\d{8,17}$/.test(values.phone_number.trim())) {
-    nextErrors.phone_number = 'Harus diawali 62 tanpa spasi/plus (+).'
+    nextErrors.phone_number = 'Gunakan format 62 di awal, tanpa spasi atau tanda +.'
   }
 
   if (!values.school_name.trim()) {
@@ -786,23 +786,23 @@ function validate(values: FormValues, priceBySlug: Record<string, number>): Form
   }
 
   if (values.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
-    nextErrors.email = 'Struktur alamat email tidak dikenali.'
+    nextErrors.email = 'Format alamat email belum sesuai.'
   }
 
   if (!values.district_id) {
-    nextErrors.district_id = 'Zona kecamatan belum ditentukan.'
+    nextErrors.district_id = 'Kecamatan belum dipilih.'
   }
 
   if (!['SD', 'SMP', 'SMA', 'UMUM'].includes(values.education_level)) {
-    nextErrors.education_level = 'Kategori jenjang tidak valid.'
+    nextErrors.education_level = 'Jenjang pendidikan belum dipilih.'
   }
 
   if (!['SEKOLAH', 'MASJID', 'KOMUNITAS', 'UMUM'].includes(values.institution_type)) {
-    nextErrors.institution_type = 'Jenis institusi tidak valid.'
+    nextErrors.institution_type = 'Jenis institusi belum dipilih.'
   }
 
   if (!values.edition || priceBySlug[values.edition] === undefined) {
-    nextErrors.edition = 'Paket tidak tersedia. Silakan muat ulang halaman.'
+    nextErrors.edition = 'Kategori pendaftaran tidak tersedia. Silakan muat ulang halaman.'
   }
 
   if (requiresPersonalDocs(values)) {

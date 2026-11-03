@@ -32,7 +32,7 @@ export function StatsPanel({ stats, isLoading }: StatsPanelProps) {
               </div>
               <span className="flex shrink-0 items-center gap-2 rounded-full border border-brand/15 bg-brand/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-brand">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand motion-safe:animate-pulse" />
-                Live
+                Data Langsung
               </span>
             </div>
 
@@ -57,7 +57,7 @@ export function StatsPanel({ stats, isLoading }: StatsPanelProps) {
                 }
               />
               <Metric
-                label="Batch Penuh"
+                label="Gelombang Penuh"
                 loading={isLoading}
                 value={stats.fullBatches}
               />

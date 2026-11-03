@@ -61,7 +61,7 @@ export function BookingDetailsPage() {
 
     if (!lookup.trim()) {
       setStatuses([])
-      setMessage('Masukkan kode booking lengkap, kode belakang acak, atau nomor WhatsApp.')
+      setMessage('Masukkan kode pendaftaran lengkap, kode belakang acak, atau nomor WhatsApp.')
       return
     }
 
@@ -122,7 +122,7 @@ function LookupHero() {
           </h1>
         </div>
         <p className="max-w-[430px] text-sm font-semibold leading-7 text-white/58 md:justify-self-end md:text-base">
-          Masukkan salah satu: kode booking lengkap, 4 huruf/angka terakhir yang acak, atau nomor WhatsApp terdaftar. Jika satu nomor punya beberapa pendaftaran, hasilnya akan tampil sebagai kartu yang bisa digeser.
+          Masukkan salah satu: kode pendaftaran lengkap, 4 huruf/angka terakhir yang acak, atau nomor WhatsApp terdaftar. Jika satu nomor punya beberapa pendaftaran, hasilnya akan tampil sebagai kartu yang bisa digeser.
         </p>
       </div>
     </header>
@@ -136,7 +136,7 @@ function LookupForm({ isLoading, lookup, message, onChange, onSubmit }: LookupFo
       className="mx-auto mt-5 max-w-[1200px] rounded-[28px] border border-black/8 bg-white/95 p-5 shadow-[0_18px_60px_rgba(17,17,17,0.06)] sm:p-7"
     >
       <label className="flex flex-col gap-3 font-black text-[#111111]">
-        Kode Booking, Kode Belakang, atau Nomor WhatsApp
+        Kode Pendaftaran, Kode Belakang, atau Nomor WhatsApp
         <input
           value={lookup}
           onChange={(event) => onChange(event.target.value)}
@@ -183,7 +183,7 @@ function StatusModal({ statuses, onClose, onAfterPayment }: StatusModalProps) {
                 </p>
               ) : primaryName ? (
                 <p className="mt-3 max-w-[560px] text-sm font-semibold leading-6 text-white/58">
-                  Gunakan kode booking lengkap, kode belakang, atau nomor WhatsApp untuk membuka data ini kembali.
+                  Gunakan kode pendaftaran lengkap, kode belakang, atau nomor WhatsApp untuk membuka data ini kembali.
                 </p>
               ) : null}
             </div>
@@ -272,7 +272,7 @@ function StatusResultCard({ status, index, total, onAfterPayment }: StatusResult
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ed3833]">Status Pendaftaran</p>
               <p className="mt-2 text-sm font-semibold leading-6 text-[#111111]/58">
-                Data ditemukan. Kode belakang <span className="font-black text-[#111111]">{codeTail}</span> juga bisa dipakai untuk pelacakan cepat tanpa menyalin seluruh kode booking.
+                Data ditemukan. Kode belakang <span className="font-black text-[#111111]">{codeTail}</span> juga bisa dipakai untuk pelacakan cepat tanpa menyalin seluruh kode pendaftaran.
               </p>
             </div>
             <p className={`w-fit shrink-0 rounded-full px-4 py-2 text-sm font-black ${statusUi.badgeClass}`}>
@@ -285,7 +285,7 @@ function StatusResultCard({ status, index, total, onAfterPayment }: StatusResult
             <Info label="Kode Belakang" value={codeTail} />
             <Info label="Sekolah / Instansi" value={status.school_name} />
             <Info label="Kecamatan" value={status.district ?? '-'} />
-            <Info label="Batch" value={status.batch ?? '-'} wide />
+            <Info label="Gelombang" value={status.batch ?? '-'} wide />
             <Info label="Jenjang" value={status.education_level} />
             <Info label="Kategori" value={status.edition} />
           </div>
@@ -301,7 +301,7 @@ function StatusResultCard({ status, index, total, onAfterPayment }: StatusResult
           <div className="mt-7 grid gap-3">
             <PaymentInfo label="Nomor Halaman" value={String(status.page_number)} />
             <PaymentInfo label="Kategori" value={status.edition.toUpperCase()} />
-            <PaymentInfo label="Update Terakhir" value={status.updated_at ?? status.created_at ?? '-'} />
+            <PaymentInfo label="Terakhir Diperbarui" value={status.updated_at ?? status.created_at ?? '-'} />
           </div>
           <div className="mt-5 border-t border-white/15 pt-5">
             {status.status === 'pending' ? (

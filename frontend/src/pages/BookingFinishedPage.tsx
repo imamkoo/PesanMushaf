@@ -153,7 +153,7 @@ export function BookingFinishedPage() {
                   <Info label="Jenjang" value={registration.education_level} />
                   <Info label="Kategori" value={registration.edition} />
                   {districtLabel ? <Info label="Kecamatan" value={districtLabel} /> : null}
-                  {batchLabel ? <Info label="Batch / Jilid" value={batchLabel} /> : null}
+                  {batchLabel ? <Info label="Gelombang / Jilid" value={batchLabel} /> : null}
                   {pageLabel ? <Info label="Nomor Halaman" value={pageLabel} /> : null}
                   {registration.nik ? <Info label="NIK" value={maskNik(registration.nik)} /> : null}
                   {registration.address ? <Info label="Alamat" value={registration.address} /> : null}
@@ -162,7 +162,7 @@ export function BookingFinishedPage() {
                   <div className="mt-5 rounded-[22px] border border-[#ed3833]/14 bg-[#fff7f7] p-4">
                     <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ed3833]">Cek Alamat Pengiriman</p>
                     <p className="mt-2 text-sm font-semibold leading-6 text-[#111111]/72">
-                      Pastikan alamat di atas sudah benar dan lengkap untuk pengiriman. Bila ada kekeliruan, segera hubungi helpdesk sambil menyertakan kode pendaftaran ini.
+                      Pastikan alamat di atas sudah benar dan lengkap untuk pengiriman. Bila ada kekeliruan, segera hubungi layanan bantuan sambil menyertakan kode pendaftaran ini.
                     </p>
                   </div>
                 ) : null}
@@ -199,8 +199,8 @@ export function BookingFinishedPage() {
             </div>
           ) : (
             <div className="rounded-[28px] border border-[#ed3833]/10 bg-[#fff7f7] p-6 text-[#111111]">
-              <p className="font-black">Belum ada data registrasi terbaru di browser ini.</p>
-              <p className="mt-2 text-sm font-medium text-[#111111]/60">Silakan daftar terlebih dahulu agar kode backend bisa ditampilkan di sini.</p>
+              <p className="font-black">Belum ada data pendaftaran di perangkat ini.</p>
+              <p className="mt-2 text-sm font-medium text-[#111111]/60">Silakan daftar terlebih dahulu untuk melihat bukti dan kode pendaftaran Anda.</p>
             </div>
           )}
 
@@ -215,7 +215,7 @@ export function BookingFinishedPage() {
               to="/"
               className="rounded-full border border-black/10 bg-white px-6 py-4 text-center font-black text-[#111111] shadow-[0_16px_42px_rgba(17,17,17,0.06)] transition hover:border-[#ed3833] hover:text-[#ed3833]"
             >
-              Kembali Home
+              Kembali ke Beranda
             </Link>
           </div>
         </section>

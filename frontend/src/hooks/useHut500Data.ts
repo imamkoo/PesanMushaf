@@ -180,7 +180,7 @@ export function useHut500Data(): Hut500DataState {
           return
         }
 
-        setError(loadError instanceof Error ? loadError.message : 'Data tidak bisa dimuat.')
+        setError(loadError instanceof Error ? loadError.message : 'Data belum dapat dimuat. Silakan coba lagi.')
         setApiDistricts([])
         setApiBatches([])
         setPriceCategories([])

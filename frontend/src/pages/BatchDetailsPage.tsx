@@ -8,17 +8,17 @@ import type { Batch } from '../types/batch'
 const statusConfig: Record<NonNullable<Batch['status']>, { label: string; description: string; tone: string }> = {
   available: {
     label: 'Tersedia',
-    description: 'Batch siap dipilih peserta sesuai kecamatan, jenjang, dan kuota tersisa.',
+    description: 'Gelombang ini siap dipilih peserta sesuai kecamatan, jenjang, dan kuota tersisa.',
     tone: 'bg-[#ed3833] text-white',
   },
   full: {
     label: 'Penuh',
-    description: 'Kuota batch ini sudah terpenuhi. Pilih batch lain yang masih tersedia.',
+    description: 'Kuota gelombang ini sudah terpenuhi. Pilih gelombang lain yang masih tersedia.',
     tone: 'bg-[#111111] text-white',
   },
   closed: {
     label: 'Ditutup',
-    description: 'Pendaftaran batch ini sedang ditutup oleh admin.',
+    description: 'Pendaftaran gelombang ini sedang ditutup sementara.',
     tone: 'bg-[#fff7f7] text-[#ed3833]',
   },
 }
@@ -34,12 +34,12 @@ export function BatchDetailsPage() {
         <AppNavbar />
         <main className="bg-[#f4f0ea] px-5 py-8">
           <section className="mx-auto rounded-[38px] bg-white p-6 shadow-[0_24px_90px_rgba(0,0,0,0.06)] sm:p-8 lg:max-w-[900px] lg:p-10">
-            <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Batch tidak tersedia</p>
+            <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Data gelombang</p>
             <h1 className="mt-4 text-[42px] font-black leading-[0.96] tracking-[-0.06em] text-[#111111] sm:text-[64px]">
-              {isLoading ? 'Memuat data...' : 'Data batch tidak ditemukan.'}
+              {isLoading ? 'Memuat data...' : error ? 'Data gelombang belum dapat dimuat.' : 'Data gelombang tidak ditemukan.'}
             </h1>
             <p className="mt-5 text-base font-medium leading-7 text-[#111111]/62">
-              {error || 'Pastikan data batch tersedia dari endpoint /api/batches.'}
+              {error || 'Informasi gelombang ini belum tersedia atau tautan tidak valid. Silakan kembali ke daftar gelombang.'}
             </p>
           </section>
         </main>
@@ -70,10 +70,10 @@ export function BatchDetailsPage() {
             <div>
               <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">{batch.batchNumber}</p>
               <h1 className="mt-4 text-[38px] font-black leading-[0.98] tracking-[-0.06em] text-[#111111] sm:text-[52px]">
-                {isLoading ? 'Memuat batch dari backend.' : batch.name}
+                {isLoading ? 'Memuat data gelombang...' : batch.name}
               </h1>
               <p className="mt-5 text-base font-medium leading-7 text-[#111111]/62">
-                {error ? `Backend API belum bisa dimuat: ${error}.` : config.description}
+                {error ? 'Informasi status gelombang belum dapat diperbarui saat ini.' : config.description}
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -88,7 +88,7 @@ export function BatchDetailsPage() {
               </Link>
             ) : (
               <Link to="/#batches" className="flex items-center justify-center rounded-full border border-black/10 bg-white px-6 py-4 font-black text-[#111111] transition hover:border-[#ed3833] hover:text-[#ed3833]">
-                Lihat Batch Lain
+                Lihat Gelombang Lain
               </Link>
             )}
           </aside>
