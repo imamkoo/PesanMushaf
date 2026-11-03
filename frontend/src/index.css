@@ -188,6 +188,20 @@ select {
   }
 }
 
+@keyframes pwa-update-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(420%);
+  }
+}
+
+.pwa-update-progress {
+  animation: pwa-update-progress 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -199,6 +213,12 @@ select {
 
   .shine-sweep:hover::after {
     transform: none;
+  }
+
+  .pwa-update-progress {
+    width: 45%;
+    transform: translateX(0);
+    animation: none;
   }
 }
 
