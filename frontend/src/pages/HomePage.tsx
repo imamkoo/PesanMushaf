@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
-import { photos } from '../assets/projectAssets'
 import { AppNavbar } from '../components/AppNavbar'
 import { BatchCard } from '../components/BatchCard'
 import { DistrictCarousel } from '../components/DistrictCarousel'
-import { useHut500Data, type EducationLevelStat } from '../hooks/useHut500Data'
+import { HomeAside } from '../components/HomeAside'
+import { HomeHero } from '../components/HomeHero'
+import { ArrowRight } from '../components/icons'
+import { Reveal } from '../components/motion/Reveal'
+import { SealEmblem } from '../components/SealEmblem'
+import { StatsPanel } from '../components/StatsPanel'
+import { useHut500Data } from '../hooks/useHut500Data'
 
-const numberFormat = new Intl.NumberFormat('id-ID')
+const whatsappUrl =
+  'https://api.whatsapp.com/send/?phone=6287756877484&text&type=phone_number&app_absent=0'
 
 export function HomePage() {
   const { districts, batches, stats, isLoading, error } = useHut500Data()
@@ -13,274 +19,196 @@ export function HomePage() {
   return (
     <>
       <AppNavbar />
-      <header className="overflow-hidden bg-[#f4f0ea] px-5 py-4 sm:py-5">
-        <section id="hero" className="mx-auto grid min-h-[calc(100vh-96px)] w-full max-w-[1280px] gap-4 lg:grid-cols-[1fr_0.52fr]">
-          {/* Main Hero Card */}
-          <div className="relative overflow-hidden rounded-[34px] bg-[#111111] p-6 text-white sm:p-8">
-            <p className="absolute -left-4 top-3 text-[110px] font-black leading-none tracking-[-0.09em] text-white/[0.035] sm:text-[170px] lg:text-[220px]">
-              500
-            </p>
-            <div className="relative z-10 flex h-full min-h-[520px] flex-col justify-between">
-              <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] text-white/45">
-                <p>Distribusi Wilayah Jakarta</p>
-                <p>2027</p>
-              </div>
 
-              <div className="max-w-[780px]">
-                <div className="mb-5 flex w-fit items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 backdrop-blur">
-                  <span className="h-2 w-2 rounded-full bg-[#ed3833]" />
-                  <span className="text-sm font-black uppercase tracking-[-0.01em] text-white">
-                    {districts.length || 44} Kecamatan Terakomodasi
-                  </span>
-                </div>
-                <h1 className="text-[48px] font-black leading-[0.9] tracking-[-0.075em] sm:text-[76px] lg:text-[98px]">
-                  Langkah Nyata untuk Jakarta.
-                </h1>
-                <div className="mt-6 grid max-w-[740px] gap-5 border-t border-white/10 pt-5 sm:grid-cols-[1fr_auto] sm:items-end">
-                  <p className="text-base font-medium leading-7 text-white/62 sm:text-lg sm:leading-8">
-                    Tentukan titik partisipasi Anda, amankan kuota pendaftaran yang tersedia, dan pantau status kontribusi Anda secara real-time.
-                  </p>
-                  <Link
-                    to="/booking"
-                    className="group flex min-w-[190px] items-center justify-center rounded-full bg-[#ed3833] px-7 py-4 text-base font-black text-white shadow-[0_22px_70px_rgba(237,56,51,0.35)] transition duration-300 hover:bg-white hover:!text-[#ed3833]"
-                  >
-                    Daftar Sekarang
-                    <span className="ml-3 transition group-hover:translate-x-1">→</span>
-                  </Link>
-                </div>
-              </div>
-
-              <div className="grid gap-3 text-sm sm:grid-cols-3">
-                <HeroMetric label="Cakupan Area" value="DKI Jakarta" />
-                <HeroMetric label="Gelombang" value={isLoading ? 'Memuat...' : `${batches.length} Aktif`} />
-                <HeroMetric label="Infrastruktur" value="✅ Terverifikasi" />
-              </div>
-            </div>
-          </div>
-
-          {/* Side Cards */}
-          <div className="grid gap-4">
-            <div className="relative min-h-[320px] overflow-hidden rounded-[34px] bg-[#ed3833] lg:min-h-0">
-              <img src={photos.hero} className="absolute inset-0 h-full w-full object-cover mix-blend-multiply opacity-75" alt="HUT500 Jakarta" />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(237,56,51,0.05)_0%,_rgba(17,17,17,0.82)_100%)]" />
-              <div className="relative z-10 flex h-full min-h-[240px] flex-col justify-between p-6 text-white">
-                <p className="w-fit rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#111111]">
-                  Visi Kami
-                </p>
-                <div>
-                  <p className="text-sm font-black uppercase tracking-[0.16em] text-white/55">Filosofi Program</p>
-                  <h2 className="mt-3 text-[36px] font-black leading-[0.95] tracking-[-0.06em] sm:text-[52px]">
-                    Satu mushaf, satu doa.
-                  </h2>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-              <Link to="/booking/details" className="group rounded-[34px] border border-black/10 bg-white p-6 shadow-[0_24px_80px_rgba(0,0,0,0.05)] transition hover:-translate-y-1 hover:bg-[#ed3833] hover:text-white">
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833] transition group-hover:text-white/65">Pusat Informasi</p>
-                <p className="mt-5 text-[32px] font-black leading-[0.98] tracking-[-0.055em]">Lacak progres pendaftaran Anda.</p>
-                <span className="mt-8 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#111111] text-white transition group-hover:bg-white group-hover:text-[#ed3833]">→</span>
-              </Link>
-              <a href="#districts" className="group rounded-[34px] border border-black/10 bg-white p-6 shadow-[0_24px_80px_rgba(0,0,0,0.05)] transition hover:-translate-y-1 hover:bg-[#ed3833] hover:text-white">
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833] transition group-hover:text-white/65">Eksplorasi Wilayah</p>
-                <p className="mt-5 text-[32px] font-black leading-[0.98] tracking-[-0.055em] text-[#111111]">Temukan gelombang pendaftaran.</p>
-                <span className="mt-8 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#ed3833] text-white transition group-hover:bg-white group-hover:text-[#ed3833]">↓</span>
-              </a>
-            </div>
-          </div>
+      <header className="relative overflow-hidden bg-cream px-5 pb-4 pt-4 sm:pt-5">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_12%_0%,rgba(237,56,51,0.08),transparent_62%),radial-gradient(52%_52%_at_92%_10%,rgba(216,180,90,0.13),transparent_62%)]"
+        />
+        <section
+          id="hero"
+          className="relative mx-auto grid min-h-[600px] w-full max-w-[1280px] gap-4 lg:min-h-[680px] lg:grid-cols-[1fr_0.52fr]"
+        >
+          <HomeHero districtCount={districts.length} batchCount={batches.length} isLoading={isLoading} />
+          <HomeAside />
         </section>
       </header>
 
-      <main className="bg-[#f7f7fd]">
-        {/* District Carousel Section */}
-        <section id="districts" className="flex flex-col gap-7 py-16 lg:py-20">
+      <main className="relative bg-cream">
+        <section id="districts" className="relative flex scroll-mt-24 flex-col gap-7 py-16 lg:py-20">
           <div className="mx-auto grid w-full max-w-[1180px] gap-5 px-5 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Distribusi Aktif</p>
-              <h2 className="mt-3 max-w-[700px] text-[38px] font-black leading-[0.94] tracking-[-0.06em] text-[#111111] sm:text-[58px]">
+            <Reveal>
+              <h2 className="max-w-[700px] text-balance text-[38px] font-black leading-[0.94] tracking-[-0.04em] text-ink sm:text-[58px]">
                 Kecamatan pendaftaran.
               </h2>
-            </div>
-            <Link to="/districts" className="w-fit rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-black text-[#111111] transition hover:border-[#ed3833] hover:text-[#ed3833]">
-              Lihat Seluruh Wilayah
-            </Link>
+              <p className="mt-4 flex items-center gap-2 text-sm font-bold text-ink/60">
+                <span className="h-2 w-2 rounded-full bg-brand motion-safe:animate-pulse" />
+                {districts.length || 44} wilayah aktif · diperbarui langsung dari lapangan
+              </p>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <Link
+                to="/districts"
+                className="group inline-flex w-fit items-center gap-2 rounded-full border border-white/70 bg-white/65 px-5 py-3 text-sm font-black text-ink shadow-[0_18px_40px_-34px_rgba(0,0,0,0.5)] backdrop-blur-xl transition duration-300 hover:border-gold/60 hover:text-gold-deep focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/30"
+              >
+                Lihat Seluruh Wilayah
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Reveal>
           </div>
+
           {error && (
-            <p className="mx-auto w-full max-w-[1180px] rounded-2xl bg-[#fff7f7] px-5 py-4 text-sm font-bold text-[#ed3833]">
+            <p className="glass-light mx-auto w-full max-w-[1180px] rounded-2xl border-brand/20 px-5 py-4 text-sm font-bold text-brand">
               Gagal menyinkronkan data: {error}.
             </p>
           )}
+
           {districts.length > 0 ? (
             <DistrictCarousel districts={districts} />
           ) : isLoading ? (
             <DistrictSkeleton />
           ) : (
-            <p className="mx-auto w-full max-w-[1180px] rounded-2xl bg-white px-5 py-4 text-sm font-bold text-[#111111]/60">
+            <p className="glass-light mx-auto w-full max-w-[1180px] rounded-2xl px-5 py-4 text-sm font-bold text-ink/60">
               Belum ada wilayah pendaftaran tersedia.
             </p>
           )}
         </section>
 
-        {/* Public stats overview */}
-        {(batches.length > 0 || isLoading) && (
-          <section id="stats" className="mx-auto w-full max-w-[1180px] px-5 pb-10">
-            <div className="grid gap-5 lg:grid-cols-[1fr_1.2fr]">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <StatCard
-                  label="Total Pendaftar"
-                  value={isLoading ? '…' : numberFormat.format(stats.totalRegistered)}
-                  tone="primary"
-                />
-                <StatCard
-                  label="Sisa Kuota"
-                  value={isLoading ? '…' : numberFormat.format(stats.totalRemaining)}
-                  tone="dark"
-                />
-                <StatCard
-                  label="Terisi"
-                  value={isLoading ? '…' : `${stats.fillPct}%`}
-                  tone="muted"
-                />
-                <StatCard
-                  label="Batch Penuh"
-                  value={isLoading ? '…' : numberFormat.format(stats.fullBatches)}
-                  tone="muted"
-                />
-              </div>
+        {(batches.length > 0 || isLoading) && <StatsPanel stats={stats} isLoading={isLoading} />}
 
-              <div className="rounded-[28px] border border-black/10 bg-white p-5 shadow-[0_20px_70px_rgba(0,0,0,0.04)] sm:p-7">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ed3833]">Kapasitas per Jenjang</p>
-                <h3 className="mt-2 text-[24px] font-black leading-[1.05] tracking-[-0.03em] text-[#111111]">
-                  Distribusi kuota antar kategori peserta.
-                </h3>
-                <div className="mt-5 grid gap-4">
-                  {isLoading
-                    ? Array.from({ length: 4 }).map((_, idx) => <LevelRowSkeleton key={idx} />)
-                    : stats.byLevel.length > 0
-                      ? stats.byLevel.map((row) => <LevelRow key={row.level} row={row} />)
-                      : (
-                        <p className="text-sm font-semibold text-[#111111]/55">
-                          Belum ada data jenjang yang aktif.
-                        </p>
-                      )}
-                </div>
+        <section
+          id="batches"
+          className="mx-auto grid w-full max-w-[1180px] scroll-mt-24 gap-8 px-5 pb-20 lg:grid-cols-[0.72fr_1.28fr] lg:items-start"
+        >
+          <Reveal className="static z-10 lg:sticky lg:top-[96px]">
+            <div className="relative overflow-hidden rounded-[36px] bg-[linear-gradient(145deg,#ed3833_0%,#dc302c_54%,#b92320_100%)] p-6 text-white shadow-[0_34px_90px_-38px_rgba(237,56,51,0.55)] sm:p-8">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(216,180,90,0.32),transparent_68%)] blur-2xl"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent)]"
+              />
+              <img
+                src="/icons/icon-512.png"
+                alt=""
+                width={512}
+                height={512}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+                className="seal-watermark pointer-events-none absolute -bottom-24 -right-20 h-72 w-72 rounded-full object-cover opacity-[0.17]"
+              />
+
+              <div className="relative flex items-center justify-between gap-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/65">Kuota Partisipasi</p>
+                <SealEmblem size={42} />
               </div>
+              <h2 className="relative mt-5 text-[42px] font-black leading-[0.94] tracking-[-0.04em] sm:text-[46px]">
+                Pilih Jalur.
+                <br />
+                Ambil Bagian.
+              </h2>
+              <p className="relative mt-5 max-w-[38ch] text-base font-medium leading-7 text-white/75">
+                Pilih kategori yang sesuai dengan profil Anda. Gunakan jalur Reguler untuk umum, atau VIP bagi yang ingin mendapatkan akses eksklusif dan pendampingan khusus.
+              </p>
+              <Link
+                to="/booking"
+                className="shine-sweep group relative mt-8 inline-flex items-center gap-3 rounded-full bg-ink px-7 py-4 font-black text-white shadow-[0_22px_50px_-24px_rgba(0,0,0,0.8)] transition duration-300 hover:bg-white hover:text-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30"
+              >
+                <span className="relative z-10">Mulai Pendaftaran</span>
+                <ArrowRight className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
             </div>
-          </section>
-        )}
+          </Reveal>
 
-        {/* Batches Section */}
-        <section id="batches" className="mx-auto grid w-full max-w-[1180px] gap-8 px-5 pb-20 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
-          <div className="static lg:sticky lg:top-[96px] z-10 rounded-[36px] bg-[#ed3833] p-6 text-white shadow-[0_30px_90px_rgba(237,56,51,0.22)] sm:p-8">
-            <p className="text-sm font-black uppercase tracking-[0.16em] text-white/65">Kuota Partisipasi</p>
-            <h2 className="mt-4 text-[42px] font-black leading-[0.94] tracking-[-0.06em] sm:text-[58px]">
-              Pilih Jalur. Ambil Bagian.
-            </h2>
-            <p className="mt-5 text-base font-medium leading-7 text-white/75">
-              Pilih kategori yang sesuai dengan profil Anda. Gunakan jalur Reguler untuk umum, atau VIP bagi yang ingin mendapatkan akses eksklusif dan pendampingan khusus.
-            </p>
-            <Link to="/booking" className="mt-8 inline-flex rounded-full bg-black px-7 py-4 font-black text-[#ed3833] transition duration-300 hover:bg-white hover:!text-[#ed3833]">
-              Mulai Pendaftaran
-            </Link>
-          </div>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {batches.length > 0
-              ? batches.slice(0, 4).map((batch) => (
-                  <BatchCard key={batch.id} batch={batch} />
-                ))
-              : isLoading
-                ? Array.from({ length: 4 }).map((_, idx) => <BatchCardSkeleton key={idx} />)
-                : (
-                    <p className="rounded-2xl bg-white p-5 text-sm font-bold text-[#111111]/60">
-                      Belum ada gelombang pendaftaran yang dibuka.
-                    </p>
-                  )}
+            {batches.length > 0 ? (
+              <>
+                {batches.slice(0, 4).map((batch, index) => (
+                  <Reveal key={batch.id} delay={Math.min(index * 0.06, 0.24)} className="h-full">
+                    <BatchCard batch={batch} />
+                  </Reveal>
+                ))}
+                {batches.length % 2 === 1 ? (
+                  <Reveal delay={0.12} className="hidden h-full md:block">
+                    <div className="relative flex h-full min-h-[320px] flex-col justify-between overflow-hidden rounded-[28px] border border-dashed border-black/15 bg-white/40 p-6 backdrop-blur-xl">
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(11,11,15,0.07)_1px,transparent_0)] [background-size:20px_20px] opacity-40"
+                      />
+                      <div className="relative flex items-start justify-between gap-4">
+                        <p className="text-sm font-black uppercase tracking-[0.16em] text-gold-deep">
+                          Gelombang berikutnya
+                        </p>
+                        <SealEmblem size={38} glow={false} />
+                      </div>
+                      <div className="relative">
+                        <p className="max-w-[16ch] text-[28px] font-black leading-[1] tracking-[-0.04em] text-ink">
+                          Slot baru akan tampil di sini.
+                        </p>
+                        <Link
+                          to="/districts"
+                          className="group mt-6 inline-flex items-center gap-2 text-sm font-black text-brand transition hover:text-brand-dark"
+                        >
+                          Jelajahi kecamatan
+                          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                        </Link>
+                      </div>
+                    </div>
+                  </Reveal>
+                ) : null}
+              </>
+            ) : isLoading ? (
+              Array.from({ length: 4 }).map((_, index) => <BatchCardSkeleton key={index} />)
+            ) : (
+              <p className="glass-light rounded-2xl px-5 py-4 text-sm font-bold text-ink/60">
+                Belum ada gelombang pendaftaran yang dibuka.
+              </p>
+            )}
           </div>
         </section>
       </main>
+
+      <footer className="border-t border-black/[0.08] bg-cream px-5 py-10">
+        <div className="mx-auto flex max-w-[1180px] flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <SealEmblem size={48} />
+            <div>
+              <p className="text-sm font-black tracking-[-0.03em] text-ink">
+                JAKARTA<span className="text-gold-deep">500</span>
+              </p>
+              <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-ink/55">
+                Arsip Abadi Jakarta 500 Tahun
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 sm:items-end">
+            <p className="text-xs font-semibold text-ink/60">Satu Kampung · Satu Jejak Digital</p>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="group inline-flex w-fit items-center gap-2 text-xs font-black text-brand transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+            >
+              Hubungi Helpdesk
+              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+            </a>
+          </div>
+        </div>
+      </footer>
     </>
-  )
-}
-
-function HeroMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-      <p className="text-xs font-black uppercase tracking-[0.16em] text-white/35">{label}</p>
-      <p className="mt-2 font-black text-white">{value}</p>
-    </div>
-  )
-}
-
-type StatTone = 'primary' | 'dark' | 'muted'
-
-const statToneStyles: Record<StatTone, string> = {
-  primary: 'bg-[#ed3833] text-white shadow-[0_22px_70px_rgba(237,56,51,0.22)]',
-  dark: 'bg-[#111111] text-white shadow-[0_22px_70px_rgba(0,0,0,0.18)]',
-  muted: 'bg-white text-[#111111] border border-black/10 shadow-[0_20px_70px_rgba(0,0,0,0.04)]',
-}
-
-function StatCard({ label, value, tone }: { label: string; value: string; tone: StatTone }) {
-  const labelTone =
-    tone === 'muted' ? 'text-[#ed3833]' : 'text-white/70'
-
-  return (
-    <div className={`rounded-[24px] p-5 sm:p-6 ${statToneStyles[tone]}`}>
-      <p className={`text-[11px] font-black uppercase tracking-[0.16em] ${labelTone}`}>{label}</p>
-      <p className="mt-3 text-[34px] font-black leading-none tracking-[-0.04em] sm:text-[38px]">
-        {value}
-      </p>
-    </div>
-  )
-}
-
-function LevelRow({ row }: { row: EducationLevelStat }) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between gap-3 text-sm">
-        <p className="font-black text-[#111111]">{row.level}</p>
-        <p className="font-semibold text-[#111111]/60">
-          {numberFormat.format(row.filled)} / {numberFormat.format(row.capacity)} ({row.filledPct}%)
-        </p>
-      </div>
-      <div
-        role="progressbar"
-        aria-valuenow={row.filledPct}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={`Kuota ${row.level} terisi ${row.filledPct} persen`}
-        className="mt-2 h-2 w-full overflow-hidden rounded-full bg-black/[0.06]"
-      >
-        <div
-          className={`h-full transition-[width] duration-500 ${
-            row.filledPct >= 100 ? 'bg-[#111111]' : row.filledPct >= 80 ? 'bg-amber-500' : 'bg-[#ed3833]'
-          }`}
-          style={{ width: `${row.filledPct}%` }}
-        />
-      </div>
-    </div>
-  )
-}
-
-function LevelRowSkeleton() {
-  return (
-    <div className="animate-pulse">
-      <div className="flex items-center justify-between">
-        <div className="h-3 w-12 rounded-full bg-black/[0.08]" />
-        <div className="h-3 w-24 rounded-full bg-black/[0.08]" />
-      </div>
-      <div className="mt-2 h-2 w-full rounded-full bg-black/[0.06]" />
-    </div>
   )
 }
 
 function DistrictSkeleton() {
   return (
     <div className="mx-auto flex w-full max-w-[1180px] gap-4 overflow-hidden px-5">
-      {Array.from({ length: 4 }).map((_, idx) => (
+      {Array.from({ length: 4 }).map((_, index) => (
         <div
-          key={idx}
-          className="h-[320px] w-[240px] shrink-0 animate-pulse rounded-[28px] bg-black/[0.06]"
+          key={index}
+          className="h-[320px] w-[240px] shrink-0 motion-safe:animate-pulse rounded-[28px] border border-white/70 bg-white/55 backdrop-blur-xl"
         />
       ))}
     </div>
@@ -289,7 +217,7 @@ function DistrictSkeleton() {
 
 function BatchCardSkeleton() {
   return (
-    <div className="animate-pulse overflow-hidden rounded-[28px] border border-black/10 bg-white">
+    <div className="motion-safe:animate-pulse overflow-hidden rounded-[28px] border border-white/70 bg-white/70 backdrop-blur-xl">
       <div className="h-[220px] w-full bg-black/[0.06]" />
       <div className="flex flex-col gap-4 p-6">
         <div className="h-3 w-24 rounded-full bg-black/[0.08]" />

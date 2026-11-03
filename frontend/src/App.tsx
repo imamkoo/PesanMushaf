@@ -1,5 +1,7 @@
+import { domAnimation, LazyMotion } from 'framer-motion'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { PwaUpdatePrompt } from './components/PwaUpdatePrompt'
+import { ScrollProgress } from './components/motion/ScrollProgress'
 import { BookingDetailsPage } from './pages/BookingDetailsPage'
 import { BookingFinishedPage } from './pages/BookingFinishedPage'
 import { BookingPage } from './pages/BookingPage'
@@ -11,7 +13,8 @@ import { BatchFullPage } from './pages/BatchFullPage'
 
 function App() {
   return (
-    <>
+    <LazyMotion features={domAnimation} strict>
+      <ScrollProgress />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/booking" element={<BookingPage />} />
@@ -25,7 +28,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <PwaUpdatePrompt />
-    </>
+    </LazyMotion>
   )
 }
 

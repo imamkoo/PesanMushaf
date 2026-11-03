@@ -78,7 +78,7 @@ export function BatchDetailsPage() {
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Info label="Kecamatan" value={batch.districtName} />
-              <Info label="Jenjang" value={batch.educationLevel} />
+              <Info label="Jenjang" value={batch.educationLevel || 'Umum'} />
               <Info label="Kuota" value={`${remainingSlots} tersisa`} />
               <Info label="Harga" value={formatRupiah(batch.basePrice)} />
             </div>
