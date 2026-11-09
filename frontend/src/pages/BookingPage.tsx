@@ -550,18 +550,18 @@ export function BookingPage() {
               className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(216,180,90,0.24),transparent_68%)] blur-2xl"
             />
             <img
-              src="/assets/images/logos/logo-jejaka500.png"
+              src="/icons/icon-512.png"
               alt=""
               width={512}
               height={512}
               loading="lazy"
               decoding="async"
               draggable={false}
-              className="seal-watermark seal-watermark-engraved pointer-events-none absolute -bottom-20 -right-16 h-56 w-56 rounded-full object-cover opacity-[0.16]"
+              className="seal-watermark pointer-events-none absolute -bottom-20 -right-16 h-56 w-56 rounded-full object-cover opacity-[0.12]"
             />
             <div className="relative z-10 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] text-white/45">
               <p>Area Pendaftaran</p>
-              <p>JEJAKA500</p>
+              <p>JAKARTA500</p>
             </div>
             <div className="relative z-10 mt-10 max-w-[700px]">
               <p className="mb-4 w-fit rounded-full bg-white/10 px-4 py-2 text-sm font-black text-white">Langkah 1 dari 2</p>

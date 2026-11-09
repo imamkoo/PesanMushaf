@@ -25,14 +25,14 @@ export function SealEmblem({
         />
       ) : null}
       <img
-        src="/assets/images/logos/logo-jejaka500.png"
+        src="/icons/icon-512.png"
         alt={alt}
         width={size}
         height={size}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
         draggable={false}
-        className="relative h-full w-full rounded-full object-cover"
+        className="relative h-full w-full rounded-full object-cover ring-1 ring-gold/60"
       />
     </span>
   )

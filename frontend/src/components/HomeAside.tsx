@@ -19,7 +19,7 @@ export function HomeAside() {
             width={1200}
             height={960}
             className="absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-multiply transition duration-700 group-hover:scale-[1.06]"
-            alt="JEJAKA500 — Jejak Jakarta 500 Tahun"
+            alt="JAKARTA500 — Arsip Abadi Jakarta 500 Tahun"
             loading="lazy"
             decoding="async"
           />

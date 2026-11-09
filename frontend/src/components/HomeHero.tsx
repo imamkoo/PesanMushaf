@@ -132,14 +132,14 @@ export function HomeHero({ districtCount }: HomeHeroProps) {
           <span className="absolute inset-0 rounded-full border border-white/10" />
           <span className="absolute inset-6 rounded-full border border-dashed border-white/[0.08] motion-safe:animate-[spin_70s_linear_infinite]" />
           <img
-            src="/assets/images/logos/logo-jejaka500.png"
+            src="/icons/icon-512.png"
             alt=""
             width={512}
             height={512}
             loading="eager"
             decoding="async"
             draggable={false}
-            className="seal-watermark seal-watermark-engraved absolute inset-0 h-full w-full rounded-full object-cover opacity-[0.22]"
+            className="seal-watermark seal-watermark-white absolute inset-0 h-full w-full rounded-full object-cover opacity-[0.16]"
           />
         </m.div>
 
@@ -220,7 +220,7 @@ export function HomeHero({ districtCount }: HomeHeroProps) {
             <SealEmblem size={56} eager />
             <div className="min-w-0">
               <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gold sm:text-[10px]">
-                Jejak Jakarta 500 Tahun
+                Arsip Abadi Jakarta 500 Tahun
               </p>
               <p className="mt-1 text-xs font-semibold leading-5 text-white/50">
                 Satu Kampung · Satu Jejak Digital

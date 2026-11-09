@@ -110,7 +110,7 @@ function LookupHero() {
     <header className="rounded-[28px] border border-black/8 bg-[#111111] p-5 text-white shadow-[0_18px_60px_rgba(0,0,0,0.16)] sm:p-7">
       <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
         <p>Lacak Pendaftaran</p>
-        <p>JEJAKA500</p>
+        <p>JAKARTA500</p>
       </div>
       <div className="mt-10 grid gap-6 md:grid-cols-[0.95fr_1fr] md:items-end">
         <div>

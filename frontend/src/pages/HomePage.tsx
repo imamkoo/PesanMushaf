@@ -97,14 +97,14 @@ export function HomePage() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent)]"
               />
               <img
-                src="/assets/images/logos/logo-jejaka500.png"
+                src="/icons/icon-512.png"
                 alt=""
                 width={512}
                 height={512}
                 loading="lazy"
                 decoding="async"
                 draggable={false}
-                className="seal-watermark seal-watermark-engraved pointer-events-none absolute -bottom-24 -right-20 h-72 w-72 rounded-full object-cover opacity-[0.20]"
+                className="seal-watermark pointer-events-none absolute -bottom-24 -right-20 h-72 w-72 rounded-full object-cover opacity-[0.17]"
               />
 
               <div className="relative flex items-center justify-between gap-4">
@@ -183,10 +183,10 @@ export function HomePage() {
             <SealEmblem size={48} />
             <div>
               <p className="text-sm font-black tracking-[-0.03em] text-ink">
-                JEJAKA<span className="text-gold-deep">500</span>
+                JAKARTA<span className="text-gold-deep">500</span>
               </p>
               <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-ink/55">
-                Jejak Jakarta 500 Tahun
+                Arsip Abadi Jakarta 500 Tahun
               </p>
             </div>
           </div>
