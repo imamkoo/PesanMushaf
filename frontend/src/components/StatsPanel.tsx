@@ -66,7 +66,7 @@ export function StatsPanel({ stats, isLoading }: StatsPanelProps) {
             <div className="relative mt-4 flex items-center gap-3">
               <SealEmblem size={34} glow={false} />
               <p className="text-[10px] font-black uppercase leading-4 tracking-[0.16em] text-ink/55">
-                Arsip Abadi Jakarta 500 Tahun
+                Jejak Jakarta 500 Tahun
               </p>
             </div>
           </div>

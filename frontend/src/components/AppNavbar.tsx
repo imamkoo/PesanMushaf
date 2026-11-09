@@ -39,7 +39,7 @@ export function AppNavbar() {
       >
         <Link
           to="/"
-          aria-label="JAKARTA500 — Beranda"
+          aria-label="JEJAKA500 — Beranda"
           className="group flex items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
         >
           <SealEmblem
@@ -49,10 +49,10 @@ export function AppNavbar() {
           />
           <span className="flex flex-col">
             <span className="text-[15px] font-black leading-none tracking-[-0.03em] text-ink sm:text-base">
-              JAKARTA<span className="text-gold-deep">500</span>
+              JEJAKA<span className="text-gold-deep">500</span>
             </span>
             <span className="mt-1 hidden text-[8px] font-black uppercase leading-none tracking-[0.2em] text-ink/55 sm:block">
-              Arsip Abadi · 500 Tahun
+              Jejak Jakarta · 500 Tahun
             </span>
           </span>
         </Link>
