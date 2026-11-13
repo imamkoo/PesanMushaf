@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { photos } from '../assets/projectAssets'
 import { getBatches, getDistricts, getPriceCategories, type ApiBatch, type ApiDistrict, type ApiPriceCategory } from '../lib/api'
+import { defaultEditionPrices, type Edition } from '../lib/editions'
 import { getBasePrice } from '../lib/payment'
 import type { Batch, District } from '../types/batch'
 
-const defaultPriceBySlug: Record<string, number> = {
-  reguler: 30_000,
-  vip: 50_000,
-}
+const defaultPriceBySlug: Record<string, number> = { ...defaultEditionPrices }
 
 export type EducationLevelStat = {
   level: string
@@ -46,7 +44,8 @@ function computeStats(batches: Batch[]): Hut500PublicStats {
 
   const byLevelMap = new Map<string, { capacity: number; filled: number }>()
   for (const batch of batches) {
-    const key = batch.educationLevel || (batch.edition === 'vip' ? 'VIP' : 'UMUM')
+    const key =
+      batch.edition === 'kampung' ? 'KAMPUNG' : batch.educationLevel || (batch.edition === 'vip' ? 'VIP' : 'UMUM')
     const current = byLevelMap.get(key) ?? { capacity: 0, filled: 0 }
     current.capacity += batch.maxCapacity
     current.filled += batch.registrationsCount
@@ -101,7 +100,8 @@ function resolveImage(photo: string | null | undefined, fallback: string) {
   return `/storage/${photo}`
 }
 
-function inferEdition(batch: ApiBatch): 'reguler' | 'vip' {
+function inferEdition(batch: ApiBatch): Edition {
+  if (batch.institution_type === 'KAMPUNG') return 'kampung'
   return /\bvip\b/i.test(batch.name) ? 'vip' : 'reguler'
 }
 
