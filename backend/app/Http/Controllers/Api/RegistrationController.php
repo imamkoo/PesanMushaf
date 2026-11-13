@@ -34,6 +34,11 @@ class RegistrationController extends Controller
         $requiresPersonalDocs = $request->input('education_level') === 'UMUM'
             || (is_string($institutionType) && in_array($institutionType, ['MASJID', 'KOMUNITAS', 'UMUM'], true));
 
+        // Mushaf Kampung diikuti perorangan, jadi nama institusi tidak relevan.
+        // Untuk edisi lain, aturan lama tetap: wajib kecuali peserta terhubung masjid.
+        $isKampungEdition = $request->input('edition') === RegistrationService::KAMPUNG_EDITION;
+        $requiresSchoolName = ! $isKampungEdition && blank($request->input('mosque_id'));
+
         $validator = Validator::make($request->all(), [
             'district_id' => 'required|exists:districts,id',
             'education_level' => 'required|in:SD,SMP,SMA,UMUM',
@@ -43,7 +48,7 @@ class RegistrationController extends Controller
             'university_id' => ['nullable', 'integer', Rule::exists('universities', 'id')],
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
-            'school_name' => ['required_without:mosque_id', 'nullable', 'string', 'max:255'],
+            'school_name' => [Rule::requiredIf($requiresSchoolName), 'nullable', 'string', 'max:255'],
             'email' => 'nullable|email|max:255',
             'nik' => [$requiresPersonalDocs ? 'required' : 'nullable', 'string', 'digits:16'],
             'address' => [$requiresPersonalDocs ? 'required' : 'nullable', 'string', 'max:500'],

@@ -35,10 +35,17 @@ class RegistrationService
             // peserta UMUM tidak masuk batch sekolah dan tetap bergabung dengan batch
             // UMUM yang sudah di-backfill migrasi.
             $institutionType = $data['institution_type'] ?? ($level === 'UMUM' ? 'UMUM' : 'SEKOLAH');
-            $schoolName = $data['school_name'];
-            $schoolNameNormalized = SchoolNameNormalizer::normalize($schoolName);
+            $schoolName = trim((string) ($data['school_name'] ?? ''));
 
             $registrantDistrict = District::findOrFail($data['district_id']);
+
+            // Peserta Mushaf Kampung umumnya individu tanpa institusi. Kolom school_name
+            // tetap diisi supaya segmen Smart Code dan laporan admin tidak kosong.
+            if ($edition === self::KAMPUNG_EDITION && $schoolName === '') {
+                $schoolName = "Mushaf Kampung {$registrantDistrict->name}";
+            }
+
+            $schoolNameNormalized = SchoolNameNormalizer::normalize($schoolName);
 
             // 1. Tentukan / buat batch sesuai edisi
             $batch = match ($edition) {
