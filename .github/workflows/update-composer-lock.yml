@@ -14,7 +14,6 @@ permissions:
 jobs:
   update-lock:
     name: composer update laravel/framework
-    if: ${{ !startsWith(github.event.head_commit.message || '', 'chore(deps): patch laravel/framework') }}
     runs-on: ubuntu-latest
     defaults:
       run:
