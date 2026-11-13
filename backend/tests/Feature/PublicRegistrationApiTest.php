@@ -1033,6 +1033,66 @@ it('rejects a mosque_id for a non-mosque institution', function () {
         ->assertJsonValidationErrors(['mosque_id']);
 });
 
+it('accepts a Mushaf Kampung registration without an institution name', function () {
+    $district = District::query()->create([
+        'name' => 'Gambir',
+        'code' => '310003',
+    ]);
+
+    $this->postJson('/api/register', [
+        'district_id' => $district->id,
+        'education_level' => 'SMP',
+        'edition' => 'kampung',
+        'name' => 'Warga Gambir',
+        'phone_number' => '6281234500222',
+    ])
+        ->assertCreated()
+        ->assertJsonPath('data.edition', 'kampung');
+
+    $registration = Registration::query()->where('edition', 'kampung')->firstOrFail();
+
+    expect($registration->school_name)->toBe('Mushaf Kampung Gambir')
+        ->and(str_contains($registration->registration_code, '--'))->toBeFalse()
+        ->and($registration->registration_code)->toContain('-MUSHAFK1-001-MUSHAF-');
+});
+
+it('keeps an explicit institution name on a Mushaf Kampung registration', function () {
+    $district = District::query()->create([
+        'name' => 'Gambir',
+        'code' => '310003',
+    ]);
+
+    $this->postJson('/api/register', [
+        'district_id' => $district->id,
+        'education_level' => 'SMP',
+        'edition' => 'kampung',
+        'name' => 'Warga Gambir',
+        'phone_number' => '6281234500333',
+        'school_name' => 'Karang Taruna Gambir',
+    ])->assertCreated();
+
+    expect(Registration::query()->where('edition', 'kampung')->firstOrFail()->school_name)
+        ->toBe('Karang Taruna Gambir');
+});
+
+it('still requires an institution name outside the Mushaf Kampung edition', function () {
+    $district = District::query()->create([
+        'name' => 'Gambir',
+        'code' => '310003',
+    ]);
+
+    $this->postJson('/api/register', [
+        'district_id' => $district->id,
+        'education_level' => 'SMP',
+        'institution_type' => 'SEKOLAH',
+        'edition' => 'reguler',
+        'name' => 'Warga Gambir',
+        'phone_number' => '6281234500444',
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['school_name']);
+});
+
 it('registers a Mushaf Kampung participant through the public api at Rp20.000', function () {
     $district = District::query()->create([
         'name' => 'Gambir',

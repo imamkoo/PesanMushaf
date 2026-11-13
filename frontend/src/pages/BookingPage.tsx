@@ -714,11 +714,19 @@ export function BookingPage() {
                   </>
                 ) : (
                   <Field
-                    label={institutionNameLabel(values.institution_type)}
+                    label={
+                      values.edition === 'kampung'
+                        ? 'Nama Lembaga / Instansi (Opsional)'
+                        : institutionNameLabel(values.institution_type)
+                    }
                     name="school_name"
                     value={values.school_name}
                     error={errors.school_name}
-                    placeholder={institutionNamePlaceholder(values.institution_type)}
+                    placeholder={
+                      values.edition === 'kampung'
+                        ? 'Boleh dikosongkan untuk peserta perorangan'
+                        : institutionNamePlaceholder(values.institution_type)
+                    }
                     onChange={updateValue}
                   />
                 )}
@@ -971,7 +979,7 @@ function validate(values: FormValues, priceBySlug: Record<string, number>): Form
     nextErrors.phone_number = 'Nomor WhatsApp tidak valid. Contoh: 081234567890 atau 6281234567890.'
   }
 
-  if (!values.school_name.trim()) {
+  if (values.edition !== 'kampung' && !values.school_name.trim()) {
     nextErrors.school_name = 'Nama institusi wajib diisi.'
   } else if (values.school_name === customSchoolValue && !values.custom_school_name.trim()) {
     nextErrors.custom_school_name = 'Tuliskan nama instansi dengan jelas.'

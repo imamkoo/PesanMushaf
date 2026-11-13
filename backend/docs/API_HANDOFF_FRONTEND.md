@@ -43,10 +43,10 @@ Field wajib:
 
 - `district_id`
 - `education_level` (`SD|SMP|SMA|UMUM`)
-- `edition` (`reguler|vip`)
+- `edition` (`kampung|reguler|vip`)
 - `name`
 - `phone_number`
-- `school_name`
+- `school_name` (wajib kecuali `edition=kampung`)
 
 Field opsional:
 
@@ -57,6 +57,10 @@ Field opsional:
   menjadi **wajib** karena tidak ada sekolah yang bisa dijadikan rujukan verifikasi.
   `school_name` tetap dipakai sebagai nama institusi (nama masjid/komunitas).
   Kombinasi `institution_type=SEKOLAH` dengan `education_level=UMUM` ditolak `422`.
+- Untuk `edition=kampung`, `school_name` boleh dikosongkan karena peserta umumnya
+  perorangan. Server mengisi `Mushaf Kampung {kecamatan}` agar segmen Smart Code dan
+  laporan admin tidak kosong. Bila klien mengirim nama lembaga/komunitas, nilai itu
+  yang dipakai.
 - Batch Reguler dipisah per `institution_type`. Batch sekolah tetap dipisah per jenjang
   (`SD|SMP|SMA`); batch `MASJID`, `KOMUNITAS`, dan `UMUM` tidak dicampur satu sama lain.
   Nama batch institusi non-sekolah: `Mushaf Reguler {INSTITUTION_TYPE} {Kecamatan} {n}`.

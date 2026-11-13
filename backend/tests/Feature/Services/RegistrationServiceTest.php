@@ -428,6 +428,22 @@ it('groups Mushaf Kampung registrations into a per-district kampung batch', func
         ->and($first->registration_code)->toStartWith('3171030-KAMPUNG-SD-MUSHAFK1-001-');
 });
 
+it('fills a kampung fallback when the school name key is absent', function () {
+    $district = makeServiceDistrict('Gambir', '310003');
+
+    $registration = RegistrationService::register([
+        'district_id' => $district->id,
+        'education_level' => 'SMP',
+        'edition' => 'kampung',
+        'name' => 'Warga Gambir',
+        'phone_number' => '6281000099701',
+    ]);
+
+    expect($registration->school_name)->toBe('Mushaf Kampung Gambir')
+        ->and($registration->registration_code)->toContain('-MUSHAFK1-001-MUSHAF-')
+        ->and(str_contains($registration->registration_code, '--'))->toBeFalse();
+});
+
 it('never places Reguler registrations into a Mushaf Kampung batch', function () {
     $district = makeServiceDistrict('Cilandak', '3171030');
 
