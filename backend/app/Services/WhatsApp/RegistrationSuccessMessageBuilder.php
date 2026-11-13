@@ -33,6 +33,7 @@ final class RegistrationSuccessMessageBuilder
         return match (strtolower($edition)) {
             'vip' => 'VIP',
             'reguler' => 'Reguler',
+            'kampung' => 'Mushaf Kampung',
             default => strtoupper($edition),
         };
     }

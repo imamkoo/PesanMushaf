@@ -68,7 +68,11 @@ class RegistrationsTable
                     ->label('Kategori')
                     ->badge()
                     ->sortable()
-                    ->color(fn (?string $state): string => $state === 'vip' ? 'warning' : 'info')
+                    ->color(fn (?string $state): string => match ($state) {
+                        'vip' => 'warning',
+                        'kampung' => 'success',
+                        default => 'info',
+                    })
                     ->formatStateUsing(fn (?string $state): string => strtoupper((string) $state)),
 
                 TextColumn::make('education_level')

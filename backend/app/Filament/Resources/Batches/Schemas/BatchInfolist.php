@@ -49,6 +49,7 @@ class BatchInfolist
                         'MASJID' => 'success',
                         'KOMUNITAS' => 'info',
                         'UMUM' => 'danger',
+                        'KAMPUNG' => 'warning',
                         default => 'gray',
                     }),
 

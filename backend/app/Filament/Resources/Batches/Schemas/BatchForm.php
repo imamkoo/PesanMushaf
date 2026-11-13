@@ -52,6 +52,7 @@ class BatchForm
                         'MASJID' => 'Masjid',
                         'KOMUNITAS' => 'Komunitas',
                         'UMUM' => 'Umum / Lembaga',
+                        'KAMPUNG' => 'Mushaf Kampung (A3 warna)',
                     ])
                     ->live()
                     ->afterStateUpdated(function (Set $set, ?string $state): void {
