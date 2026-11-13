@@ -16,6 +16,7 @@ import {
   type SchoolNameMatch,
 } from '../lib/api'
 import { getEditionBenefits, toEdition } from '../lib/editions'
+import { isValidIndonesianPhone, normalizeIndonesianPhone } from '../lib/phone'
 import { formatRupiah, getBasePrice } from '../lib/payment'
 
 type EducationLevel = 'SD' | 'SMP' | 'SMA' | 'UMUM'
@@ -527,7 +528,7 @@ export function BookingPage() {
             : undefined,
         edition: values.edition,
         name: values.name.trim(),
-        phone_number: values.phone_number.trim(),
+        phone_number: normalizeIndonesianPhone(values.phone_number),
         school_name: resolveSchoolName(values),
         exclude_from_school_suggestions:
           values.institution_type === 'SEKOLAH' && values.school_name === customSchoolValue,
@@ -612,7 +613,7 @@ export function BookingPage() {
 
               <div className="mt-8 grid grid-cols-1 gap-4">
                 <Field label="Nama Lengkap" name="name" value={values.name} error={errors.name} placeholder="Sesuai kartu identitas" onChange={updateValue} />
-                <Field label="Nomor WhatsApp" name="phone_number" value={values.phone_number} error={errors.phone_number} placeholder="Awali dengan 62 (Contoh: 6281234...)" type="tel" onChange={updateValue} />
+                <Field label="Nomor WhatsApp" name="phone_number" value={values.phone_number} error={errors.phone_number} placeholder="Contoh: 081234567890" type="tel" onChange={updateValue} />
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Select label="Kecamatan Aktif" name="district_id" value={values.district_id} error={errors.district_id} placeholder={isLoading ? 'Memuat data...' : 'Pilih area pendaftaran'} options={districts.map((district) => ({ label: district.name, value: String(district.id) }))} onChange={updateValue} />
                   <Select label="Jenis Institusi" name="institution_type" value={values.institution_type} error={errors.institution_type} options={institutionChoices.map((choice) => ({ label: choice.label, value: choice.value }))} onChange={updateValue} />
@@ -966,8 +967,8 @@ function validate(values: FormValues, priceBySlug: Record<string, number>): Form
 
   if (!values.phone_number.trim()) {
     nextErrors.phone_number = 'Kontak WhatsApp diperlukan.'
-  } else if (!/^62\d{8,17}$/.test(values.phone_number.trim())) {
-    nextErrors.phone_number = 'Gunakan format 62 di awal, tanpa spasi atau tanda +.'
+  } else if (!isValidIndonesianPhone(values.phone_number)) {
+    nextErrors.phone_number = 'Nomor WhatsApp tidak valid. Contoh: 081234567890 atau 6281234567890.'
   }
 
   if (!values.school_name.trim()) {

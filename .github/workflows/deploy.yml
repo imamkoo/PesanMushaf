@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: deploy-main
@@ -36,7 +37,21 @@ jobs:
             fe=true
             be=true
           else
-            files=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${SHA}" --jq '.files[].filename')
+            # Basis = commit main terakhir yang CI-nya sukses sebelum SHA ini.
+            # Run CI yang dibatalkan (merge beruntun) tidak dihitung, jadi perubahannya ikut ter-deploy.
+            base=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?branch=main&event=push&status=success&per_page=20" \
+              --jq "[.workflow_runs[] | select(.head_sha != \"${SHA}\")][0].head_sha // empty")
+            files=""
+            if [ -n "$base" ]; then
+              files=$(gh api "repos/${GITHUB_REPOSITORY}/compare/${base}...${SHA}" \
+                --jq 'if (.files | length) >= 300 then "__TOO_MANY__" else .files[].filename end' || echo "__TOO_MANY__")
+            fi
+            if [ -z "$base" ] || [ -z "$files" ] || printf '%s\n' "$files" | grep -q '^__TOO_MANY__$'; then
+              echo "::notice::Basis diff tidak dapat dipastikan; deploy frontend + backend."
+              files=$'frontend/\nbackend/'
+            fi
+            echo "Diff ${base:-<none>}...${SHA}:"
+            printf '%s\n' "$files"
             if printf '%s\n' "$files" | grep -q '^frontend/'; then fe=true; fi
             if printf '%s\n' "$files" | grep -q '^backend/'; then be=true; fi
             if printf '%s\n' "$files" | grep -qE '^(render\.yaml|\.github/workflows/deploy\.yml)$'; then
