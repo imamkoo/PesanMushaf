@@ -1,8 +1,11 @@
 name: Update Composer Lock (one-off)
 
 # Workflow sementara untuk meregenerasi backend/composer.lock di runner yang
-# punya PHP + composer. Dijalankan manual, lalu dihapus sebelum PR merge.
+# punya PHP + composer. Dijalankan dari branch ini, lalu dihapus sebelum PR merge.
 on:
+  push:
+    branches:
+      - chore/laravel-framework-advisory
   workflow_dispatch:
 
 permissions:
@@ -11,6 +14,7 @@ permissions:
 jobs:
   update-lock:
     name: composer update laravel/framework
+    if: ${{ !startsWith(github.event.head_commit.message || '', 'chore(deps): patch laravel/framework') }}
     runs-on: ubuntu-latest
     defaults:
       run:
