@@ -1,5 +1,7 @@
-export function getBasePrice(edition: 'reguler' | 'vip') {
-  return edition === 'vip' ? 50000 : 30000
+import { defaultEditionPrices, type Edition } from './editions'
+
+export function getBasePrice(edition: Edition) {
+  return defaultEditionPrices[edition]
 }
 
 export function formatRupiah(value: number) {

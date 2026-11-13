@@ -117,7 +117,7 @@ export function HomePage() {
                 Ambil Bagian.
               </h2>
               <p className="relative mt-5 max-w-[38ch] text-base font-medium leading-7 text-white/75">
-                Pilih kategori yang sesuai dengan profil Anda. Gunakan jalur Reguler untuk umum, atau VIP bagi yang ingin mendapatkan akses eksklusif dan pendampingan khusus.
+                Tiga paket: Mushaf Kampung Rp20.000, Reguler Rp30.000, dan VIP Rp50.000. Pilih yang sesuai dengan Anda.
               </p>
               <Link
                 to="/booking"

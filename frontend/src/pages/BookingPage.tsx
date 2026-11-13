@@ -15,6 +15,7 @@ import {
   type InstitutionType,
   type SchoolNameMatch,
 } from '../lib/api'
+import { getEditionBenefits, toEdition } from '../lib/editions'
 import { formatRupiah, getBasePrice } from '../lib/payment'
 
 type EducationLevel = 'SD' | 'SMP' | 'SMA' | 'UMUM'
@@ -112,6 +113,11 @@ function requiresPersonalDocs(values: Pick<FormValues, 'institution_type'>) {
 
 const fallbackEditionChoices = [
   {
+    value: 'kampung',
+    title: 'Mushaf Kampung',
+    description: 'Untuk warga kampung, dihimpun per kecamatan dalam satu mushaf bersama.',
+  },
+  {
     value: 'reguler',
     title: 'Reguler',
     description: 'Untuk peserta umum dengan alur pendaftaran standar.',
@@ -171,7 +177,7 @@ export function BookingPage() {
 
   const basePrice =
     priceBySlug[values.edition] ??
-    getBasePrice(values.edition === 'vip' ? 'vip' : 'reguler')
+    getBasePrice(toEdition(values.edition))
   const selectedEdition = editionChoices.find((option) => option.value === values.edition) ?? editionChoices[0]
   
   const schoolSelectOptions = useMemo(
@@ -569,7 +575,7 @@ export function BookingPage() {
                 Tentukan Langkah Anda.
               </h1>
               <p className="mt-5 max-w-[640px] text-base font-medium leading-7 text-white/62">
-                Pilih kategori Reguler untuk pendaftar umum, atau VIP bagi yang menginginkan akses fitur eksklusif serta pendampingan intensif.
+                Pilih Mushaf Kampung untuk warga kampung per kecamatan, Reguler untuk pendaftar umum, atau VIP dengan perlengkapan tambahan.
               </p>
             </div>
           </header>
@@ -587,6 +593,7 @@ export function BookingPage() {
                   <p className="text-sm font-black uppercase tracking-[0.16em] text-white/45">Jalur Pilihan</p>
                   <h2 className="mt-2 text-[28px] font-black leading-[0.95] tracking-[-0.05em]">{selectedEdition.title}</h2>
                   <p className="mt-3 text-sm font-semibold leading-6 text-white/58">{selectedEdition.description}</p>
+                  <EditionBenefitList edition={selectedEdition.value} className="mt-4 text-white/80" markerClassName="bg-white/70" />
                 </div>
                 <div className="flex flex-col gap-3 sm:items-end">
                   <p className="text-[28px] font-black tracking-[-0.05em]">{formatRupiah(basePrice)}</p>
@@ -810,8 +817,8 @@ export function BookingPage() {
 
       {/* Modal Kategori */}
       {isEditionModalOpen ? (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#111111]/70 px-5 py-8 backdrop-blur-md">
-          <section className="w-full max-w-[780px] rounded-[32px] bg-white p-5 shadow-[0_30px_120px_rgba(0,0,0,0.28)] sm:p-7">
+        <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-[#111111]/70 px-5 py-8 backdrop-blur-md lg:items-center">
+          <section className="w-full max-w-[1080px] rounded-[32px] bg-white p-5 shadow-[0_30px_120px_rgba(0,0,0,0.28)] sm:p-7">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">Pilih Kategori</p>
@@ -827,9 +834,9 @@ export function BookingPage() {
               </button>
             </div>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
+            <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {isLoading ? (
-                <div className="col-span-2 py-8 text-center">
+                <div className="col-span-full py-8 text-center">
                    <p className="motion-safe:animate-pulse font-bold text-[#111111]/50">Memuat pilihan kategori...</p>
                 </div>
               ) : (
@@ -841,7 +848,8 @@ export function BookingPage() {
                       key={option.value}
                       type="button"
                       onClick={() => chooseEdition(option.value)}
-                      className={`group rounded-[26px] border p-5 text-left transition hover:-translate-y-1 ${
+                      aria-pressed={isSelected}
+                      className={`group flex flex-col rounded-[26px] border p-5 text-left transition hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ed3833] focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
                         isSelected ? 'border-[#ed3833] bg-[#fff7f7]' : 'border-black/10 bg-white hover:border-[#ed3833]'
                       }`}
                     >
@@ -849,7 +857,7 @@ export function BookingPage() {
                         <div>
                           <p className="text-sm font-black uppercase tracking-[0.16em] text-[#ed3833]">{option.title}</p>
                           <p className="mt-4 text-[34px] font-black tracking-[-0.06em] text-[#111111]">
-                            {formatRupiah(priceBySlug[option.value] ?? getBasePrice(option.value === 'vip' ? 'vip' : 'reguler'))}
+                            {formatRupiah(priceBySlug[option.value] ?? getBasePrice(toEdition(option.value)))}
                           </p>
                         </div>
                         <span className={`flex h-11 w-11 items-center justify-center rounded-full text-lg font-black transition ${isSelected ? 'bg-[#ed3833] text-white' : 'bg-[#111111] text-white group-hover:bg-[#ed3833]'}`}>
@@ -857,6 +865,7 @@ export function BookingPage() {
                         </span>
                       </div>
                       <p className="mt-5 text-sm font-semibold leading-6 text-[#111111]/58">{option.description}</p>
+                      <EditionBenefitList edition={option.value} className="mt-5 border-t border-black/10 pt-4 text-[#111111]/75" />
                     </button>
                   )
                 })
@@ -866,6 +875,33 @@ export function BookingPage() {
         </div>
       ) : null}
     </>
+  )
+}
+
+function EditionBenefitList({
+  edition,
+  className = '',
+  markerClassName = 'bg-[#ed3833]',
+}: {
+  edition: string
+  className?: string
+  markerClassName?: string
+}) {
+  const benefits = getEditionBenefits(edition)
+  if (benefits.length === 0) return null
+
+  return (
+    <div className={className}>
+      <p className="text-xs font-black uppercase tracking-[0.14em] opacity-70">Yang Anda dapatkan</p>
+      <ul className="mt-3 space-y-2 text-sm font-semibold leading-6">
+        {benefits.map((benefit) => (
+          <li key={benefit} className="flex gap-3">
+            <span aria-hidden="true" className={`mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full ${markerClassName}`} />
+            <span>{benefit}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

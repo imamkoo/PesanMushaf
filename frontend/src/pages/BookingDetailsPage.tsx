@@ -6,6 +6,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { AppNavbar } from '../components/AppNavbar'
 import { MidtransPayButton } from '../components/MidtransPayButton'
 import { getLastRegistration, getRegistrationStatus, type RegistrationStatus } from '../lib/api'
+import { getEditionLabel } from '../lib/editions'
 import { formatRupiah } from '../lib/payment'
 import { paymentStatusUi } from '../lib/paymentStatusUi'
 
@@ -287,7 +288,7 @@ function StatusResultCard({ status, index, total, onAfterPayment }: StatusResult
             <Info label="Kecamatan" value={status.district ?? '-'} />
             <Info label="Gelombang" value={status.batch ?? '-'} wide />
             <Info label="Jenjang" value={status.education_level} />
-            <Info label="Kategori" value={status.edition} />
+            <Info label="Kategori" value={getEditionLabel(status.edition)} />
           </div>
         </div>
 
@@ -300,7 +301,7 @@ function StatusResultCard({ status, index, total, onAfterPayment }: StatusResult
           </p>
           <div className="mt-7 grid gap-3">
             <PaymentInfo label="Nomor Halaman" value={String(status.page_number)} />
-            <PaymentInfo label="Kategori" value={status.edition.toUpperCase()} />
+            <PaymentInfo label="Kategori" value={getEditionLabel(status.edition).toUpperCase()} />
             <PaymentInfo label="Terakhir Diperbarui" value={status.updated_at ?? status.created_at ?? '-'} />
           </div>
           <div className="mt-5 border-t border-white/15 pt-5">

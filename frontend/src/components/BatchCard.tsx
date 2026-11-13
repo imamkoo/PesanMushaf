@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { icons } from '../assets/projectAssets'
 import { getBatchLocationLabel } from '../lib/batchDisplay'
+import { getEditionLabel } from '../lib/editions'
 import type { Batch } from '../types/batch'
 import { ArrowRight } from './icons'
 import { ProgressBar } from './ProgressBar'
@@ -21,9 +22,11 @@ export function BatchCard({ batch }: BatchCardProps) {
       : 0
   const progressTone: 'ink' | 'amber' | 'brand' =
     filledPct >= 100 ? 'ink' : filledPct >= 80 ? 'amber' : 'brand'
-  const category = batch.educationLevel
-    ? `${batch.educationLevel} · ${batch.edition.toUpperCase()}`
-    : batch.edition.toUpperCase()
+  const editionLabel = getEditionLabel(batch.edition).toUpperCase()
+  const category =
+    batch.edition === 'kampung' || !batch.educationLevel
+      ? editionLabel
+      : `${batch.educationLevel} · ${editionLabel}`
   const price = new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',

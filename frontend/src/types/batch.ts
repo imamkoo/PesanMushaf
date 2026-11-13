@@ -1,3 +1,5 @@
+import type { Edition } from '../lib/editions'
+
 export type District = {
   id: number
   name: string
@@ -20,7 +22,7 @@ export type Batch = {
   name: string
   batchNumber: string
   educationLevel: string
-  edition: 'reguler' | 'vip'
+  edition: Edition
   basePrice: number
   districtName: string
   isGlobal: boolean

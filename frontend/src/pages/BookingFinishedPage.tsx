@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { AppNavbar } from '../components/AppNavbar'
 import { MidtransPayButton } from '../components/MidtransPayButton'
 import { getLastRegistration, getRegistrationStatus, saveLastRegistration, type PaymentUiStatus, type Registration } from '../lib/api'
+import { getEditionLabel } from '../lib/editions'
 import { formatRupiah } from '../lib/payment'
 import { paymentStatusUi } from '../lib/paymentStatusUi'
 
@@ -151,7 +152,7 @@ export function BookingFinishedPage() {
                   <Info label="Nama" value={registration.name} />
                   <Info label="Status" value={statusUi?.label ?? registration.status} />
                   <Info label="Jenjang" value={registration.education_level} />
-                  <Info label="Kategori" value={registration.edition} />
+                  <Info label="Kategori" value={getEditionLabel(registration.edition)} />
                   {districtLabel ? <Info label="Kecamatan" value={districtLabel} /> : null}
                   {batchLabel ? <Info label="Gelombang / Jilid" value={batchLabel} /> : null}
                   {pageLabel ? <Info label="Nomor Halaman" value={pageLabel} /> : null}
@@ -175,7 +176,7 @@ export function BookingFinishedPage() {
                   {statusUi?.bodyText}
                 </p>
                 <div className="mt-6 grid gap-3">
-                  <PaymentMeta label="Kategori" value={registration.edition.toUpperCase()} />
+                  <PaymentMeta label="Kategori" value={getEditionLabel(registration.edition).toUpperCase()} />
                   <PaymentMeta label="Nomor Halaman" value={pageLabel ?? '-'} />
                 </div>
                 <div className="mt-6 border-t border-white/15 pt-6">
