@@ -60,6 +60,7 @@ class BatchesTable
                         'MASJID' => 'success',
                         'KOMUNITAS' => 'info',
                         'UMUM' => 'danger',
+                        'KAMPUNG' => 'warning',
                         default => 'gray',
                     }),
                 TextColumn::make('education_level')
@@ -141,6 +142,7 @@ class BatchesTable
                         'MASJID' => 'Masjid',
                         'KOMUNITAS' => 'Komunitas',
                         'UMUM' => 'Umum / Lembaga',
+                        'KAMPUNG' => 'Mushaf Kampung',
                     ]),
                 TernaryFilter::make('is_full')
                     ->label('Status Kuota')

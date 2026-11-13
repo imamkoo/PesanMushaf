@@ -252,7 +252,8 @@ it('returns active price categories from the public api', function () {
     $this->getJson('/api/price-categories')
         ->assertSuccessful()
         ->assertJsonPath('success', true)
-        ->assertJsonCount(2, 'data')
+        ->assertJsonCount(3, 'data')
+        ->assertJsonFragment(['slug' => 'kampung'])
         ->assertJsonFragment(['slug' => 'reguler'])
         ->assertJsonFragment(['slug' => 'vip']);
 });
@@ -1030,4 +1031,28 @@ it('rejects a mosque_id for a non-mosque institution', function () {
     ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['mosque_id']);
+});
+
+it('registers a Mushaf Kampung participant through the public api at Rp20.000', function () {
+    $district = District::query()->create([
+        'name' => 'Gambir',
+        'code' => '310003',
+    ]);
+
+    $this->postJson('/api/register', [
+        'district_id' => $district->id,
+        'education_level' => 'SMP',
+        'edition' => 'kampung',
+        'name' => 'Warga Gambir',
+        'phone_number' => '6281234500111',
+        'school_name' => 'SMPN 2 Jakarta',
+    ])
+        ->assertCreated()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data.edition', 'kampung');
+
+    $registration = Registration::query()->where('edition', 'kampung')->firstOrFail();
+
+    expect((int) $registration->base_price)->toBe(20000)
+        ->and($registration->batch->name)->toBe('Mushaf Kampung Gambir 1');
 });

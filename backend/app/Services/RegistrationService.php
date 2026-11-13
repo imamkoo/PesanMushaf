@@ -17,6 +17,15 @@ class RegistrationService
 {
     public const BATCH_CAPACITY = 603;
 
+    public const KAMPUNG_EDITION = 'kampung';
+
+    /**
+     * Penanda institution_type khusus batch Mushaf Kampung. Membuat batch Kampung
+     * tidak pernah cocok dengan filter batch Reguler (yang mencocokkan
+     * institution_type pendaftar) maupun hitungan nomor batch numerik Reguler.
+     */
+    public const KAMPUNG_BATCH_TYPE = 'KAMPUNG';
+
     public static function register(array $data)
     {
         return DB::transaction(function () use ($data) {
@@ -32,9 +41,11 @@ class RegistrationService
             $registrantDistrict = District::findOrFail($data['district_id']);
 
             // 1. Tentukan / buat batch sesuai edisi
-            $batch = $edition === 'vip'
-                ? self::resolveVipGlobalBatch()
-                : self::resolveRegulerBatch($level, $institutionType, $schoolNameNormalized, $registrantDistrict);
+            $batch = match ($edition) {
+                'vip' => self::resolveVipGlobalBatch(),
+                self::KAMPUNG_EDITION => self::resolveKampungBatch($registrantDistrict),
+                default => self::resolveRegulerBatch($level, $institutionType, $schoolNameNormalized, $registrantDistrict),
+            };
 
             // 2. Kalkulasi halaman dalam batch tsb. Tidak butuh lockForUpdate() karena
             //    baris batches sudah dikunci di resolve*Batch() dan Postgres melarang
@@ -138,6 +149,47 @@ class RegistrationService
             'education_level' => null,
             'batch_number' => 'V'.$nextNumber,
             'name' => "Mushaf VIP Jakarta {$nextNumber} (GOR)",
+            'max_capacity' => self::BATCH_CAPACITY,
+            'is_full' => false,
+        ]);
+    }
+
+    /**
+     * Cari atau buat batch Mushaf Kampung per kecamatan (mencampur semua jenjang
+     * dan jenis institusi). Format cetak A3 berwarna berbeda dari Reguler A4,
+     * sehingga batch-nya tidak boleh tercampur dengan batch Reguler/VIP.
+     */
+    private static function resolveKampungBatch(District $registrantDistrict): Batch
+    {
+        // Kunci baris kecamatan agar dua pendaftar Kampung pertama yang datang
+        // bersamaan tidak sama-sama membuat batch baru (bentrok slug unik).
+        District::query()->whereKey($registrantDistrict->id)->lockForUpdate()->first();
+
+        $batch = Batch::query()
+            ->whereFullByOccupancy(false)
+            ->where('institution_type', self::KAMPUNG_BATCH_TYPE)
+            ->where('district_id', $registrantDistrict->id)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->first();
+
+        if ($batch) {
+            return $batch;
+        }
+
+        // withTrashed: slug batch unik termasuk baris soft-deleted, jadi nomor
+        // berikutnya harus melewati batch yang pernah dihapus.
+        $nextNumber = Batch::withTrashed()
+            ->where('institution_type', self::KAMPUNG_BATCH_TYPE)
+            ->where('district_id', $registrantDistrict->id)
+            ->count() + 1;
+
+        return Batch::create([
+            'district_id' => $registrantDistrict->id,
+            'education_level' => 'UMUM',
+            'institution_type' => self::KAMPUNG_BATCH_TYPE,
+            'batch_number' => 'K'.$nextNumber,
+            'name' => "Mushaf Kampung {$registrantDistrict->name} {$nextNumber}",
             'max_capacity' => self::BATCH_CAPACITY,
             'is_full' => false,
         ]);
