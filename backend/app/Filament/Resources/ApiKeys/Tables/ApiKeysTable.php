@@ -11,8 +11,21 @@ class ApiKeysTable
     {
         return $table->columns([
             TextColumn::make('name')->searchable(),
-            TextColumn::make('key')->copyable()->label('API Key'),
+            TextColumn::make('key')
+                ->label('API Key')
+                ->formatStateUsing(fn (?string $state): string => self::mask($state)),
             TextColumn::make('created_at')->dateTime(),
         ]);
+    }
+
+    public static function mask(?string $key): string
+    {
+        if ($key === null || $key === '') {
+            return '—';
+        }
+
+        $visible = min(10, intdiv(mb_strlen($key), 3));
+
+        return mb_substr($key, 0, $visible).str_repeat('•', 8).mb_substr($key, -4);
     }
 }

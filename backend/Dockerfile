@@ -59,6 +59,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/zz-hardening.conf /etc/apache2/conf-available/zz-hardening.conf
+RUN a2enconf zz-hardening
 
 WORKDIR /var/www/html
 
