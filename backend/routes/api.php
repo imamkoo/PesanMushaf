@@ -11,14 +11,14 @@ use App\Http\Controllers\Api\SchoolOptionController;
 use App\Http\Controllers\Api\UniversityController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('throttle:20,1')->post('/register', [RegistrationController::class, 'store']);
-Route::middleware('throttle:30,1')->post('/midtrans/snap-token', [MidtransController::class, 'createSnapToken']);
-Route::middleware('throttle:30,1')->post('/midtrans/sync-status', [MidtransController::class, 'syncStatus']);
+Route::middleware('throttle:20,1,register')->post('/register', [RegistrationController::class, 'store']);
+Route::middleware('throttle:30,1,midtrans-snap')->post('/midtrans/snap-token', [MidtransController::class, 'createSnapToken']);
+Route::middleware('throttle:30,1,midtrans-sync')->post('/midtrans/sync-status', [MidtransController::class, 'syncStatus']);
 Route::post('/midtrans/notification', [MidtransController::class, 'notification']);
-Route::middleware('throttle:120,1')->get('/price-categories', [PriceCategoryController::class, 'index']);
-Route::middleware('throttle:60,1')->get('/registrations/status', [RegistrationController::class, 'statusLookup']);
-Route::middleware('throttle:60,1')->get('/registrations/{registrationCode}/status', [RegistrationController::class, 'status']);
-Route::middleware('throttle:120,1')->group(function () {
+Route::middleware('throttle:120,1,price-categories')->get('/price-categories', [PriceCategoryController::class, 'index']);
+Route::middleware('throttle:60,1,status-lookup')->get('/registrations/status', [RegistrationController::class, 'statusLookup']);
+Route::middleware('throttle:60,1,status-code')->get('/registrations/{registrationCode}/status', [RegistrationController::class, 'status']);
+Route::middleware('throttle:120,1,public-read')->group(function () {
     Route::apiResource('districts', DistrictController::class)->only(['index', 'show']);
     Route::apiResource('universities', UniversityController::class)->only(['index', 'show']);
     Route::apiResource('batches', BatchController::class)->only(['index', 'show']);

@@ -127,3 +127,19 @@ test('without the edge header the request ip falls back to the proxy chain', fun
 
     $response->assertStatus(422)->assertHeader('X-RateLimit-Remaining', '19');
 });
+
+test('browsing read endpoints does not consume the registration throttle budget', function () {
+    foreach (range(1, 25) as $i) {
+        $this->getJson('/api/price-categories')->assertOk();
+    }
+
+    $this->postJson('/api/register', [])->assertStatus(422);
+});
+
+test('registration throttle still limits to 20 per minute on its own bucket', function () {
+    foreach (range(1, 20) as $i) {
+        $this->postJson('/api/register', [])->assertStatus(422);
+    }
+
+    $this->postJson('/api/register', [])->assertStatus(429);
+});
