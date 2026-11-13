@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResolvesSafeRouteBinding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,9 @@ use Illuminate\Support\Str;
 
 class Batch extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, ResolvesSafeRouteBinding, SoftDeletes;
+
+    protected string $routeSlugColumn = 'slug';
 
     protected $fillable = [
         'district_id', 'name', 'slug', 'batch_number',

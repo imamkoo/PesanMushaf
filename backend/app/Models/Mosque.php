@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResolvesSafeRouteBinding;
 use App\Support\SchoolNameNormalizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Mosque extends Model
 {
-    use SoftDeletes;
+    use ResolvesSafeRouteBinding, SoftDeletes;
 
     protected $fillable = [
         'dmi_code',
