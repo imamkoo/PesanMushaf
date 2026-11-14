@@ -121,11 +121,26 @@ test('rate limit keys on the cloudflare client ip, not a spoofed forwarded-for',
     $second->assertStatus(422)->assertHeader('X-RateLimit-Remaining', '18');
 });
 
-test('without the edge header the request ip falls back to the proxy chain', function () {
-    $response = $this->withHeaders(['Accept' => 'application/json', 'X-Forwarded-For' => '198.51.100.3'])
+test('spoofed forwarded-for is ignored when the edge header is absent', function () {
+    $first = $this->withHeaders(['Accept' => 'application/json', 'X-Forwarded-For' => '198.51.100.3'])
+        ->postJson('/api/register', []);
+    $second = $this->withHeaders(['Accept' => 'application/json', 'X-Forwarded-For' => '198.51.100.4'])
         ->postJson('/api/register', []);
 
-    $response->assertStatus(422)->assertHeader('X-RateLimit-Remaining', '19');
+    $first->assertStatus(422)->assertHeader('X-RateLimit-Remaining', '19');
+    $second->assertStatus(422)->assertHeader('X-RateLimit-Remaining', '18');
+});
+
+test('cf-connecting-ip is ignored when the origin is not behind cloudflare', function () {
+    config(['app.trust_cf_connecting_ip' => false]);
+
+    $first = $this->withHeaders(['Accept' => 'application/json', 'CF-Connecting-IP' => '203.0.113.20'])
+        ->postJson('/api/register', []);
+    $second = $this->withHeaders(['Accept' => 'application/json', 'CF-Connecting-IP' => '203.0.113.21'])
+        ->postJson('/api/register', []);
+
+    $first->assertStatus(422)->assertHeader('X-RateLimit-Remaining', '19');
+    $second->assertStatus(422)->assertHeader('X-RateLimit-Remaining', '18');
 });
 
 test('browsing read endpoints does not consume the registration throttle budget', function () {

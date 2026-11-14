@@ -1,0 +1,190 @@
+name: Release (artefak cPanel)
+
+# Membangun dua ZIP siap-upload untuk hosting cPanel/LiteSpeed:
+#   1. jejaka500-backend-*.zip  -> Laravel + vendor/ + public/build (tanpa Node/PHP di host)
+#   2. jejaka500-frontend-*.zip -> dist SPA + .htaccess (SPA fallback & cache header)
+#
+# Dipicu oleh tag v* (mis. v1.0.0) atau manual dari tab Actions.
+# Tag dipakai karena workflow_dispatch mensyaratkan file ini ada di default branch.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 'URL API yang ditanam ke build SPA'
+        required: false
+        default: 'https://api.jejaka500.id/api'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '22'
+  API_BASE_URL: ${{ github.event.inputs.api_base_url || 'https://api.jejaka500.id/api' }}
+
+jobs:
+  backend:
+    name: Build backend (Laravel + vendor)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, bcmath, exif, gd, zip, opcache
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Composer dependencies (production)
+        run: composer install --no-dev --no-interaction --no-scripts --prefer-dist --optimize-autoloader
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Dump optimized autoloader
+        run: composer dump-autoload --no-dev --optimize --no-scripts
+
+      - name: Generate Wayfinder routes + Vite build
+        env:
+          APP_KEY: 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+        run: |
+          mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+          php artisan wayfinder:generate --with-form
+          npm run build
+
+      - name: Stage artifact
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/staging"
+          rsync -a \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude 'tests' \
+            --exclude 'docker' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude 'phpunit.xml' \
+            --exclude 'storage/logs/*' \
+            --exclude 'storage/framework/cache/data/*' \
+            --exclude 'storage/framework/sessions/*' \
+            --exclude 'storage/framework/views/*.php' \
+            --exclude 'bootstrap/cache/*.php' \
+            --exclude '.phpunit.result.cache' \
+            ./ "$GITHUB_WORKSPACE/staging/jejaka500/"
+
+      - name: Verify artifact contains no secrets
+        run: |
+          cd "$GITHUB_WORKSPACE/staging/jejaka500"
+          test -f vendor/autoload.php || { echo "vendor/ hilang"; exit 1; }
+          test -f public/build/manifest.json || { echo "public/build hilang"; exit 1; }
+          if find . -maxdepth 2 -name '.env' -print -quit | grep -q .; then
+            echo "Artefak berisi .env — dibatalkan"; exit 1
+          fi
+
+      - name: Create ZIP
+        run: |
+          cd "$GITHUB_WORKSPACE/staging"
+          zip -qry "$GITHUB_WORKSPACE/jejaka500-backend-${GITHUB_REF_NAME}.zip" jejaka500
+          ls -lh "$GITHUB_WORKSPACE"/jejaka500-backend-*.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jejaka500-backend
+          path: jejaka500-backend-*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  frontend:
+    name: Build frontend (SPA statis)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build SPA
+        env:
+          VITE_API_URL: ${{ env.API_BASE_URL }}
+        run: pnpm run build
+
+      - name: Attach .htaccess + verify build
+        run: |
+          cp deploy/cpanel/spa.htaccess dist/.htaccess
+          test -f dist/index.html || { echo "dist/index.html hilang"; exit 1; }
+          test -f dist/.htaccess || { echo "dist/.htaccess hilang"; exit 1; }
+          EXPECTED_HOST=$(printf '%s' "$API_BASE_URL" | sed -E 's#^https?://##; s#/.*$##')
+          if ! grep -rqF "$EXPECTED_HOST" dist/assets/*.js; then
+            echo "Build tidak memuat host API $EXPECTED_HOST — VITE_API_URL tidak terpakai"; exit 1
+          fi
+
+      - name: Create ZIP
+        run: |
+          cd dist
+          zip -qry "$GITHUB_WORKSPACE/jejaka500-frontend-${GITHUB_REF_NAME}.zip" .
+          ls -lh "$GITHUB_WORKSPACE"/jejaka500-frontend-*.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jejaka500-frontend
+          path: jejaka500-frontend-*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Lampirkan ke GitHub Release
+    needs: [backend, frontend]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: assets/*.zip
+          generate_release_notes: true
