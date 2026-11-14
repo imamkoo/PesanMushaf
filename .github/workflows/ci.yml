@@ -65,6 +65,70 @@ jobs:
       - name: Run Backend Tests
         run: ./vendor/bin/pest
 
+  backend-mysql:
+    name: Backend Tests (MySQL portability)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: jejaka500_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: jejaka500_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      EXPECT_DB_DRIVER: mysql
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, bcmath, exif, gd, zip
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Install Composer Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy Environment File
+        run: cp .env.example .env
+
+      - name: Generate App Key
+        run: php artisan key:generate
+
+      - name: Install Node Dependencies & Build Assets
+        run: |
+          npm ci || npm install
+          npm run build
+
+      - name: Run Backend Tests on MySQL
+        run: ./vendor/bin/pest
+
   frontend:
     name: Frontend Quality (React SPA)
     runs-on: ubuntu-latest

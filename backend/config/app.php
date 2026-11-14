@@ -56,6 +56,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trust Cloudflare Client IP
+    |--------------------------------------------------------------------------
+    |
+    | Bila true, header CF-Connecting-IP dipakai sebagai IP klien (aman selama
+    | trafik selalu lewat Cloudflare, seperti di Render). Set false pada hosting
+    | yang diakses langsung (cPanel/LiteSpeed tanpa Cloudflare) supaya header
+    | itu tidak bisa dipalsukan untuk melewati rate limit.
+    |
+    */
+
+    'trust_cf_connecting_ip' => env('TRUST_CF_CONNECTING_IP', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

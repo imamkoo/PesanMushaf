@@ -8,14 +8,16 @@ use App\Models\University;
 use App\Services\RegistrationService;
 
 test('master stress test command runs and prints scenario report', function () {
-    District::create([
+    $district = District::create([
         'name' => 'Kecamatan Uji',
         'code' => 'KC001',
     ]);
 
     foreach (['SD', 'SMP', 'SMA'] as $level) {
         SchoolSuggestion::create([
-            'district_id' => 1,
+            // MySQL tidak me-reset AUTO_INCREMENT saat rollback, jadi ID baris
+            // tidak selalu 1. Pakai ID district yang baru dibuat.
+            'district_id' => $district->id,
             'education_level' => $level,
             'name' => "{$level} Uji 1",
         ]);

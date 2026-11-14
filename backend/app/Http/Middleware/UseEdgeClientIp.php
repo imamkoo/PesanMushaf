@@ -7,20 +7,27 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Render berjalan di belakang Cloudflare, yang selalu menimpa CF-Connecting-IP
- * dengan IP klien asli. X-Forwarded-For bisa diisi bebas oleh klien, sehingga
- * rate limit per-IP dapat dilewati. Bila header edge valid, jadikan itu IP klien.
+ * Menentukan IP klien asli untuk rate limit.
+ *
+ * X-Forwarded-For bisa diisi bebas oleh klien, jadi header itu SELALU dibuang.
+ * CF-Connecting-IP hanya dipercaya bila TRUST_CF_CONNECTING_IP aktif (default),
+ * karena Cloudflare menimpanya di edge. Di hosting langsung (cPanel/LiteSpeed
+ * tanpa Cloudflare) set TRUST_CF_CONNECTING_IP=false agar header itu tidak bisa
+ * dipalsukan untuk melewati throttle per-IP.
  */
 class UseEdgeClientIp
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $edgeIp = trim((string) $request->headers->get('CF-Connecting-IP', ''));
+        $request->headers->remove('X-Forwarded-For');
+        $request->server->remove('HTTP_X_FORWARDED_FOR');
 
-        if ($edgeIp !== '' && filter_var($edgeIp, FILTER_VALIDATE_IP) !== false) {
-            $request->server->set('REMOTE_ADDR', $edgeIp);
-            $request->server->remove('HTTP_X_FORWARDED_FOR');
-            $request->headers->remove('X-Forwarded-For');
+        if (config('app.trust_cf_connecting_ip')) {
+            $edgeIp = trim((string) $request->headers->get('CF-Connecting-IP', ''));
+
+            if ($edgeIp !== '' && filter_var($edgeIp, FILTER_VALIDATE_IP) !== false) {
+                $request->server->set('REMOTE_ADDR', $edgeIp);
+            }
         }
 
         return $next($request);

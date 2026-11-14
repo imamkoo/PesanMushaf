@@ -285,8 +285,15 @@ class RegistrationService
         }
 
         // Priority 5: new batch anchored to registrant district
-        // Cast eksplisit ke integer agar Postgres tidak melakukan lex-sort
+        // Cast eksplisit ke integer agar tidak lex-sort
         // (mis. "9" > "10") setelah 10+ batch sejenis tercipta.
+        // Nama tipe cast berbeda per driver: PostgreSQL/SQLite memakai INTEGER,
+        // MySQL/MariaDB menolak INTEGER dan memakai UNSIGNED.
+        $castType = match (DB::connection()->getDriverName()) {
+            'mysql', 'mariadb' => 'UNSIGNED',
+            default => 'INTEGER',
+        };
+
         $lastNumberQuery = Batch::query()
             ->where($filterInstitutionType)
             ->where('name', 'not like', '%(GOR)%');
@@ -295,7 +302,7 @@ class RegistrationService
             $lastNumberQuery->where('education_level', $level);
         }
 
-        $lastNumber = (int) $lastNumberQuery->max(DB::raw('CAST(batch_number AS INTEGER)'));
+        $lastNumber = (int) $lastNumberQuery->max(DB::raw("CAST(batch_number AS {$castType})"));
 
         $nextNumber = $lastNumber + 1;
         $label = $isSchool ? $level : $institutionType;
