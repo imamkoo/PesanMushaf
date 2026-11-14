@@ -117,17 +117,42 @@ curl -s https://api.jejaka500.id/api/price-categories | head -c 150           # 
 
 Login admin di `https://api.jejaka500.id/admin` dengan `ADMIN_EMAIL`/`ADMIN_PASSWORD`.
 
-## 8. Update versi berikutnya (penting!)
+## 8. Update versi berikutnya
 
-**Selama ini** (belum otomatis): pemilik proyek memberi ZIP baru dari Release
-terbaru; admin hosting mengulang: upload + extract di atas folder lama →
-`php artisan migrate --force` → `php artisan config:cache` → hapus cache
-frontend bila perlu. Tidak perlu mengulang `db:seed`/`storage:link`.
+### 8a. Cara otomatis (setelah SSH aktif) — direkomendasikan
 
-**Rencana (setelah konfirmasi kapabilitas):** bila hosting memiliki **SSH/SFTP**,
-deploy akan otomatis dari GitHub (push `main` → build → rsync → migrasi), tanpa
-campur tangan manual. Admin hosting cukup menyediakan: user SFTP + password/key,
-dan jalur folder deploy.
+Repo sudah punya workflow **`Deploy (cPanel via SSH)`** yang berjalan otomatis
+setiap CI di `main` sukses: build backend + frontend → `rsync` ke server →
+`php artisan migrate --force` + cache. Push ke `main` = website ter-update.
+
+**Yang admin hosting perlu berikan ke pemilik proyek:**
+
+| Data | Contoh |
+|---|---|
+| Host SSH | `103.63.24.171` atau `api.jejaka500.id` |
+| Port SSH | `22` (kadang `2222`) |
+| User cPanel | `imamkoo` |
+| Path dokumen backend | `/home/imamkoo/jejaka500` |
+| Path dokumen frontend | `/home/imamkoo/jejaka500-web` |
+| Path PHP CLI | `/opt/cpanel/ea-php84/root/usr/bin/php` |
+| Public key deploy | (dikirim pemilik proyek, admin menempelkannya di `~/.ssh/authorized_keys`) |
+| Output `ssh-keyscan` | `ssh-keyscan -p 22 HOST` (untuk memverifikasi identitas server) |
+
+Pemilik proyek lalu mengisi **Settings → Secrets and variables → Actions**:
+variabel `CPANEL_HOST`, `CPANEL_USER`, `CPANEL_BACKEND_PATH`,
+`CPANEL_FRONTEND_PATH`, `CPANEL_PHP_BIN`, dan secret `CPANEL_SSH_KEY`.
+
+Sebelum dipakai, jalankan sekali secara **dry-run** (Actions → Deploy (cPanel via
+SSH) → Run workflow → centang `dry_run`) untuk melihat file mana yang berubah
+tanpa menyentuh server.
+
+Setelah cut-over, workflow `deploy.yml` (Render/Vercel) bisa dimatikan/dihapus.
+
+### 8b. Cara manual (selama SSH belum siap)
+
+Pemilik proyek memberi ZIP baru dari Release terbaru; admin hosting mengulang:
+upload + extract **di atas** folder lama → `php artisan migrate --force` →
+`php artisan config:cache`. Tidak perlu mengulang `db:seed`/`storage:link`.
 
 ---
 
