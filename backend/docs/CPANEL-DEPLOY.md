@@ -42,6 +42,16 @@ CloudHost:
 > saya bisa menjalankan `php artisan`. Aplikasi Laravel perlu mengakses
 > `vendor/`, `storage/`, dan `.env` di luar `public/`.
 
+### Prasyarat repo: default branch harus `main`
+
+`deploy-cpanel.yml` dan `release.yml` memakai `workflow_run` dan
+`workflow_dispatch`. Keduanya **hanya terdeteksi bila berkas workflow ada di
+default branch repo**. Default branch repo ini sebelumnya `develop` (stale),
+sehingga kedua workflow 404 / tidak pernah terpicu dan PR Dependabot terbuka di
+`develop` yang tidak lagi di-update.
+
+Cek **Settings → Default branch** = `main`. Bila belum, ubah ke `main`.
+
 ---
 
 ## 1. Beli domain + siapkan host
